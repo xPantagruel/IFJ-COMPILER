@@ -1,6 +1,7 @@
 enum type {
-    firstType,
-    secondType
+    zatvorka,
+    string,
+    err
 };
 
 typedef struct token {
@@ -9,4 +10,16 @@ typedef struct token {
     enum type t; 
 } Token;
 
-Token getToken();
+/** global variable -> so we know if we passed prolog */
+int prologFound = 0;
+
+/**
+ * @brief Function which validates prolog.
+ *        If proglog isn't valid -> exit(2).
+ */
+void getProlog();
+
+Token *getToken(); 
+
+
+
