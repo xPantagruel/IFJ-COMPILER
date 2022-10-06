@@ -1,9 +1,8 @@
 enum type {
-    zatvorka,
-    string,
-    err
+    START,
+    NOT_DEFINED,
+    VAR_ID
 };
-
 typedef struct token {
     char *val;
     int row;
@@ -20,6 +19,16 @@ int prologFound = 0;
 void getProlog();
 
 Token *getToken(); 
+
+Token *tokenInit();
+
+void addCharToToken(int c, Token *token);
+
+void addRowToToken(int row, Token *token);
+
+void addTypeToToken(enum type t, Token *token);
+
+int checkIdVar(int c);
 
 
 
