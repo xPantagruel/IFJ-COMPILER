@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 
-void getProlog() {
+void getProlog() { //TODO mozno musi byt medzera medzi php a declare
     char prologValidString[] = "<?phpdeclare(strict_types=1);";
     char prologString[strlen(prologValidString) + 1];
     
@@ -12,6 +12,10 @@ void getProlog() {
     int c;
     while (strlen(prologString) != strlen(prologValidString)) {
         c = getchar();
+        if (c == '\n') {
+            row++;
+        }
+
         if (!isspace(c)) { //ignoring spaces
             prologString[pos] = c;
             ++pos;
@@ -78,9 +82,13 @@ void addTypeToToken(enum type t, Token *token) {
 
 int skipLineComment() {
     int c = getchar();
-    while (c != '\n' || c != EOF) {
+    while (c != '\n' && c != EOF) {
         c = getchar();
     }
+    if (c == '\n') {
+        row++;
+    }
+
     if (c == EOF) { //comment like: //this is my commentEOF
         return 0;
     }
@@ -90,7 +98,7 @@ int skipLineComment() {
 void skipBlockComment() {
     int prevC = 0;
     int actualC = getchar();
-    while ((prevC != '*' && actualC != '/') || actualC != EOF) {
+    while ((prevC != '*' && actualC != '/') && actualC != EOF) {
         prevC = actualC;
         actualC = getchar();
     }
@@ -112,10 +120,9 @@ Token *getToken() {
     enum state actualState = START;
     enum type t = NOT_DEFINED;
     int c;
-    int row = 0;
+
     while (!tokenFound){
         c = getchar();
-
         if (c == '\n') {
             row++;
         }
@@ -141,7 +148,6 @@ Token *getToken() {
                         tokenFound = 1;
                         //TODO check char after EOF
                         break;
-
                     default:
                         break;
                     //end of switch by char in START state
@@ -168,9 +174,11 @@ Token *getToken() {
                         if (!skipLineComment()) {
                             ungetc(EOF, stdin);
                         }
+                        actualState = START;
                         break;
                     case '*':
                         skipBlockComment();
+                        actualState = START;
                         break;
                     
                     default:
@@ -183,6 +191,7 @@ Token *getToken() {
                         break;
                     //end of switch by char in SLASH_S state
                 }
+                break;
             
             default:
                 break;
@@ -196,8 +205,13 @@ Token *getToken() {
 
 int main() {
     Token *token = getToken();
-    printf("%s\n", token->val);
-    free(token);
+    while (strcmp(token->val, "EOF")) {
+        printf("%s %d\n", token->val, token->row);
+        free(token);
+        token = getToken();
+    }
+    printf("%s %d\n", token->val, token->row);
+
 }
 
 //pridat do KA -> ; + EOF + konecny prolog

@@ -19,6 +19,8 @@ typedef struct token {
 /** global variable -> so we know if we passed prolog */
 int prologFound = 0;
 
+int row = 1;
+
 /**
  * @brief Function which validates prolog.
  *        If proglog isn't valid -> exit(2).
