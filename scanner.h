@@ -1,7 +1,8 @@
 enum type {
     NOT_DEFINED, // initial type
     VAR_ID, // $variable
-    SLASH // / (divide)
+    SLASH, // / (divide)
+    EOF_T
 };
 
 enum state {

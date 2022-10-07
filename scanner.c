@@ -130,6 +130,17 @@ Token *getToken() {
                     case '/':
                         actualState = SLASH_S;
                         break;
+                    case EOF:
+                        t = EOF_T;
+                        char eof_s[] = "EOF";
+                        for (int i = 0; (unsigned long)i < strlen(eof_s); i++) {
+                            addCharToToken(eof_s[i], token);
+                        }
+                        addTypeToToken(t, token);
+                        addRowToToken(row, token);
+                        tokenFound = 1;
+                        //TODO check char after EOF
+                        break;
 
                     default:
                         break;
@@ -183,10 +194,12 @@ Token *getToken() {
     return token;
 }
 
-//pridat do KA ; + EOF + konecny prolog
-//myslet aj na to ze napr za var nemusi byt medzera
 int main() {
     Token *token = getToken();
     printf("%s\n", token->val);
     free(token);
 }
+
+//pridat do KA -> ; + EOF + konecny prolog
+//myslet aj na to ze napr za var nemusi byt medzera
+//pozret todo + okomentovat
