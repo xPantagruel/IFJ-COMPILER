@@ -59,10 +59,9 @@ int checkId(int c) {
     } else {
         if (isspace(c)) {
             return 0;
-        else if ((')' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!') {
+        } else if ((')' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!') {
             ungetc(c, stdin);
             return 0;
-        }
         } else {
             exit(1);
         }
