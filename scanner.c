@@ -95,7 +95,7 @@ void skipBlockComment() {
         actualC = getchar();
     }
 
-    if (actualC == EOF) {
+    if (actualC == EOF) { //comment like: /* this is my commentEOF
         exit(1);
     }
 }
@@ -147,7 +147,7 @@ Token *getToken() {
                         addRowToToken(row, token);
                         tokenFound = 1;
                         break; 
-                    //end of switch by char in VAR_ID state
+                    //end of switch by char in VAR_ID_S state
                 }
                 break;
             
@@ -161,8 +161,16 @@ Token *getToken() {
                     case '*':
                         skipBlockComment();
                         break;
-
-                    //TODO add more cases
+                    
+                    default:
+                        t = SLASH;
+                        ungetc(c, stdin);
+                        addCharToToken('/', token);
+                        addTypeToToken(t, token);
+                        addRowToToken(row, token);
+                        tokenFound = 1;
+                        break;
+                    //end of switch by char in SLASH_S state
                 }
             
             default:
