@@ -1,7 +1,12 @@
 enum type {
-    START,
     NOT_DEFINED,
     VAR_ID
+};
+
+enum state {
+    START,
+    SLASH_S,
+    VAR_ID_S
 };
 typedef struct token {
     char *val;
@@ -29,6 +34,10 @@ void addRowToToken(int row, Token *token);
 void addTypeToToken(enum type t, Token *token);
 
 int checkIdVar(int c);
+
+int skipLineComment();
+
+void skipBlockComment();
 
 
 

@@ -76,6 +76,30 @@ void addTypeToToken(enum type t, Token *token) {
     token->t = t;
 }
 
+int skipLineComment() {
+    int c = getchar();
+    while (c != '\n' || c != EOF) {
+        c = getchar();
+    }
+    if (c == EOF) { //comment like: //this is my commentEOF
+        return 0;
+    }
+    return 1;
+}
+
+void skipBlockComment() {
+    int prevC = 0;
+    int actualC = getchar();
+    while ((prevC != '*' && actualC != '/') || actualC != EOF) {
+        prevC = actualC;
+        actualC = getchar();
+    }
+
+    if (actualC == EOF) {
+        exit(1);
+    }
+}
+
 Token *getToken() {
     if (!prologFound) {
         getProlog();
@@ -85,7 +109,8 @@ Token *getToken() {
     Token *token = tokenInit();
 
     int tokenFound = 0;
-    enum type actualState = START;
+    enum state actualState = START;
+    enum type t = NOT_DEFINED;
     int c;
     int row = 0;
     while (!tokenFound){
@@ -99,29 +124,50 @@ Token *getToken() {
             case START:
                 switch (c) {
                     case '$':
-                        actualState = VAR_ID;
+                        actualState = VAR_ID_S;
+                        t = VAR_ID;
+                        break;
+                    case '/':
+                        actualState = SLASH_S;
                         break;
 
                     default:
                         break;
+                    //end of switch by char in START state
                 }
                 break;
 
-            case VAR_ID:
+            case VAR_ID_S:
                 switch(checkId(c)) {
                     case 1:
                         addCharToToken(c, token);
                         break;
                     case 0:
-                        addTypeToToken(actualState, token);
+                        addTypeToToken(t, token);
                         addRowToToken(row, token);
                         tokenFound = 1;
-                        break;
+                        break; 
+                    //end of switch by char in VAR_ID state
                 }
                 break;
             
+            case SLASH_S:
+                switch(c) {
+                    case '/':
+                        if (!skipLineComment()) {
+                            ungetc(EOF, stdin);
+                        }
+                        break;
+                    case '*':
+                        skipBlockComment();
+                        break;
+
+                    //TODO add more cases
+                }
+            
             default:
                 break;
+            //end of switch by actualState
         }
 
     }
@@ -129,8 +175,8 @@ Token *getToken() {
     return token;
 }
 
-//remove me
-//todo case atd + konecny prolog + ; + EOF
+//pridat do KA ; + EOF + konecny prolog
+//myslet aj na to ze napr za var nemusi byt medzera
 int main() {
     Token *token = getToken();
     printf("%s\n", token->val);
