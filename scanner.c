@@ -18,7 +18,7 @@ void getProlog() { //TODO mozno musi byt medzera medzi php a declare
 
         if (!isspace(c)) { //ignoring spaces
             prologString[pos] = c;
-            ++pos;
+            pos++;
             prologString[pos] = '\0';
         }
     }
@@ -108,6 +108,12 @@ void skipBlockComment() {
     }
 }
 
+void setOneCharToken(Token *token, char c, int row, enum type t) {
+    addCharToToken(c, token);
+    addTypeToToken(t, token);
+    addRowToToken(row, token);
+}
+
 Token *getToken() {
     if (!prologFound) {
         getProlog();
@@ -129,69 +135,95 @@ Token *getToken() {
 
         switch(actualState) {
             case START:
-                switch (c) {
-                    case '$':
-                        actualState = VAR_ID_S;
-                        t = VAR_ID;
-                        break;
-                    case '/':
-                        actualState = SLASH_S;
-                        break;
-                    case EOF:
-                        t = EOF_T;
-                        char eof_s[] = "EOF";
-                        for (int i = 0; (unsigned long)i < strlen(eof_s); i++) {
-                            addCharToToken(eof_s[i], token);
-                        }
-                        addTypeToToken(t, token);
-                        addRowToToken(row, token);
-                        tokenFound = 1;
-                        //TODO check char after EOF
-                        break;
-                    default:
-                        break;
-                    //end of switch by char in START state
-                }
+                    switch (c) {
+                            case '$':
+                                actualState = VAR_ID_S;
+                                t = VAR_ID;
+                                break;
+                            case '/':
+                                actualState = SLASH_S;
+                                break;
+                            case '(':
+                                setOneCharToken(token, '(', row, L_PAR);
+                                tokenFound = 1;
+                            case ')':
+                                setOneCharToken(token, ')', row, R_PAR);
+                                tokenFound = 1;
+                            case '{':
+                                setOneCharToken(token, '{', row, L_CPAR);
+                                tokenFound = 1;
+                            case '}':
+                                setOneCharToken(token, '}', row, R_CPAR);
+                                tokenFound = 1;
+                            case ';':
+                                setOneCharToken(token, ';', row, SEMICOL);
+                                tokenFound = 1;
+                            case ',':
+                                setOneCharToken(token, ',', row, COMMA);
+                                tokenFound = 1;
+                            case '+':
+                                setOneCharToken(token, '+', row, PLUS);
+                                tokenFound = 1;
+                            case '-':
+                                setOneCharToken(token, '-', row, MINUS);
+                                tokenFound = 1;
+                            case '.':
+                                setOneCharToken(token, '.', row, DOT);
+                                tokenFound = 1;
+                            case EOF:
+                                t = EOF_T;
+                                char eof_s[] = "EOF";
+                                for (int i = 0; (unsigned long)i < strlen(eof_s); i++) {
+                                    addCharToToken(eof_s[i], token);
+                                }
+                                addTypeToToken(t, token);
+                                addRowToToken(row, token);
+                                tokenFound = 1;
+                                //TODO check char after EOF
+                                break;
+                            default:
+                                break;
+                            //end of switch by char in START state
+                    }
                 break;
 
             case VAR_ID_S:
-                switch(checkId(c)) {
-                    case 1:
-                        addCharToToken(c, token);
-                        break;
-                    case 0:
-                        addTypeToToken(t, token);
-                        addRowToToken(row, token);
-                        tokenFound = 1;
-                        break; 
-                    //end of switch by char in VAR_ID_S state
-                }
+                    switch(checkId(c)) {
+                            case 1:
+                                addCharToToken(c, token);
+                                break;
+                            case 0:
+                                addTypeToToken(t, token);
+                                addRowToToken(row, token);
+                                tokenFound = 1;
+                                break; 
+                            //end of switch by char in VAR_ID_S state
+                    }
                 break;
             
             case SLASH_S:
-                switch(c) {
-                    case '/':
-                        if (!skipLineComment()) {
-                            ungetc(EOF, stdin);
-                        }
-                        actualState = START;
-                        break;
-                    case '*':
-                        skipBlockComment();
-                        actualState = START;
-                        break;
-                    
-                    default:
-                        t = SLASH;
-                        ungetc(c, stdin);
-                        addCharToToken('/', token);
-                        addTypeToToken(t, token);
-                        addRowToToken(row, token);
-                        tokenFound = 1;
-                        break;
-                    //end of switch by char in SLASH_S state
-                }
-                break;
+                    switch(c) {
+                            case '/':
+                                if (!skipLineComment()) {
+                                    ungetc(EOF, stdin);
+                                }
+                                actualState = START;
+                                break;
+                            case '*':
+                                skipBlockComment();
+                                actualState = START;
+                                break;
+                            default:
+                                t = SLASH;
+                                ungetc(c, stdin);
+                                addCharToToken('/', token);
+                                addTypeToToken(t, token);
+                                addRowToToken(row, token);
+                                tokenFound = 1;
+                                break;
+                            //end of switch by char in SLASH_S state
+                    }
+                    break;
             
             default:
                 break;
@@ -217,3 +249,4 @@ int main() {
 //pridat do KA -> ; + EOF + konecny prolog
 //myslet aj na to ze napr za var nemusi byt medzera + EOF nezabudnut
 //pozret todo + okomentovat
+//not found osetrit

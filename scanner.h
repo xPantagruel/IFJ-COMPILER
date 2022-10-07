@@ -2,7 +2,24 @@ enum type {
     NOT_DEFINED, // initial type
     VAR_ID, // $variable
     SLASH, // / (divide)
-    EOF_T
+    EOF_T, // EOF
+    L_PAR, // (
+    R_PAR, // )
+    L_CPAR, // {
+    R_CPAR, // }
+    SEMICOL, // ;
+    COMMA, // ,
+    PLUS, // +
+    MINUS, // -
+    DOT, // .
+    
+    LESS, // <
+    MORE, // >
+    LESS_EQ, // <= 
+    MORE_EQ, // >=
+    EQ, // =
+    THREE_EQ, // ===
+    NOT_EQ // !==
 };
 
 enum state {
@@ -42,6 +59,8 @@ int checkIdVar(int c);
 int skipLineComment();
 
 void skipBlockComment();
+
+void setOneCharToken(Token *token, char c, int row, enum type t);
 
 
 
