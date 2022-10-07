@@ -63,7 +63,7 @@ int checkId(int c) {
     } else {
         if (isspace(c)) {
             return 0;
-        } else if ((')' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!') {
+        } else if ((')' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!' || c == EOF) {
             ungetc(c, stdin);
             return 0;
         } else {
@@ -215,5 +215,5 @@ int main() {
 }
 
 //pridat do KA -> ; + EOF + konecny prolog
-//myslet aj na to ze napr za var nemusi byt medzera
+//myslet aj na to ze napr za var nemusi byt medzera + EOF nezabudnut
 //pozret todo + okomentovat
