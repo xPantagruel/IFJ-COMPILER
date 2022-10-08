@@ -57,6 +57,12 @@ Token *tokenInit() {
     return token;
 }
 
+void unGetC(int c) {
+    if (c != '\n') {
+        ungetc(c, stdin);
+    }
+}
+
 int checkId(int c) {
     if (('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || ('_' == c) || ('0' <= c && c <= '9')) {
         return 1;
@@ -64,10 +70,10 @@ int checkId(int c) {
         if (isspace(c)) {
             return 0;
         } else if (('(' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!' || c == EOF) { //TODO nema byt aj {} atd..
-            ungetc(c, stdin);
+            unGetC(c);
             return 0;
         } else {
-            exit(1);
+            exit(2);
         }
     }
 }
@@ -132,7 +138,7 @@ int checkClosingProlog() {
             exit(2);
         }
     }
-    ungetc(c, stdin);
+    unGetC(c);
     return 0;
 }
 
@@ -266,7 +272,7 @@ Token *getToken() {
                                     } else {
                                         actualState = ID_S;
                                     }
-                                    ungetc(c, stdin);
+                                    unGetC(c);
                                 }
                                 break;
                             //end of switch by char in START state
@@ -284,11 +290,11 @@ Token *getToken() {
                                 if (token->val[strlen(token->val)-1] == 'x' && token->val[strlen(token->val)-2] == '\\') {
                                     hexEscCount = 0;
                                     actualState = GET_HEX_S;
-                                    ungetc(c, stdin);
+                                    unGetC(c);
                                 } else if (token->val[strlen(token->val)-1] == '\\') {
                                     oktEscCount = 0;
                                     actualState = GET_OKT_S;
-                                    ungetc(c, stdin);
+                                    unGetC(c);
                                 } else {
                                     addCharToToken(c, token);
                                 }
@@ -427,7 +433,7 @@ Token *getToken() {
                             }
                             break;
                         default:
-                            ungetc(c, stdin);
+                            unGetC(c);
                             switch(token->val[0]) {
                                     case '<':
                                         switch(token->val[1]) {
@@ -471,14 +477,14 @@ Token *getToken() {
                         default:
                             switch (strlen(token->val)) {
                                 case 1: // =
-                                    ungetc(c, stdin);
+                                    unGetC(c);
                                     addRowToToken(row, token);
                                     addTypeToToken(EQ, token);
                                     actualState = START;
                                     tokenFound = 1;
                                     break;
                                 case 3: // ===
-                                    ungetc(c, stdin);
+                                    unGetC(c);
                                     addRowToToken(row, token);
                                     addTypeToToken(THREE_EQ, token);
                                     actualState = START;
@@ -533,7 +539,7 @@ Token *getToken() {
                                         addRowToToken(row, token);
                                         addTypeToToken(t, token);
                                         tokenFound = 1;
-                                        ungetc(c, stdin);
+                                        unGetC(c);
                                     } else {
                                         exit(2);
                                     }
@@ -623,7 +629,7 @@ Token *getToken() {
                     switch(c) {
                             case '/':
                                 if (!skipLineComment()) {
-                                    ungetc(EOF, stdin);
+                                    unGetC(c);
                                 }
                                 actualState = START;
                                 break;
@@ -633,7 +639,7 @@ Token *getToken() {
                                 break;
                             default:
                                 t = SLASH;
-                                ungetc(c, stdin);
+                                unGetC(c);
                                 addCharToToken('/', token);
                                 addTypeToToken(t, token);
                                 addRowToToken(row, token);
@@ -667,7 +673,3 @@ int main() { //TODO REMOVE ME
 //TODO
 //pozret todo
 //okomentovat
-//not found osetrit
-//prejst exity - ci vobec tam maju byt a nie az v syntax
-//zle rata row lebo ak dam ungetc \n tak to da row++
-//printf vymazat

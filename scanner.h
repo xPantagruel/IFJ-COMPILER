@@ -91,3 +91,5 @@ int isOkAfterNum(int c);
 
 int checkClosingProlog();
 
+void unGetC(int c);
+
