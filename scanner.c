@@ -40,7 +40,7 @@ void addCharToToken(int c, Token *token) {
     if (token->val == NULL) {
         exit(99);
     } 
-
+    
     token->val = strncat(token->val, tmp, 1);
 }
 
@@ -136,6 +136,7 @@ Token *getToken() {
         switch(actualState) {
             case START:
                     switch (c) {
+                            //TODO quote to NOT
                             case '$':
                                 actualState = VAR_ID_S;
                                 t = VAR_ID;
@@ -146,30 +147,50 @@ Token *getToken() {
                             case '(':
                                 setOneCharToken(token, '(', row, L_PAR);
                                 tokenFound = 1;
+                                break;
                             case ')':
                                 setOneCharToken(token, ')', row, R_PAR);
                                 tokenFound = 1;
+                                break;
                             case '{':
                                 setOneCharToken(token, '{', row, L_CPAR);
                                 tokenFound = 1;
+                                break;
                             case '}':
                                 setOneCharToken(token, '}', row, R_CPAR);
                                 tokenFound = 1;
+                                break;
                             case ';':
                                 setOneCharToken(token, ';', row, SEMICOL);
                                 tokenFound = 1;
+                                break;
                             case ',':
                                 setOneCharToken(token, ',', row, COMMA);
                                 tokenFound = 1;
+                                break;
                             case '+':
                                 setOneCharToken(token, '+', row, PLUS);
                                 tokenFound = 1;
+                                break;
                             case '-':
                                 setOneCharToken(token, '-', row, MINUS);
                                 tokenFound = 1;
+                                break;
                             case '.':
                                 setOneCharToken(token, '.', row, DOT);
                                 tokenFound = 1;
+                                break;
+                            case '*':
+                                setOneCharToken(token, '*', row, MUL);
+                                tokenFound = 1;
+                                break;
+                            // case '\n': //TODO
+                            //     setOneCharToken(token, '\n', row, EOL_T);
+                            //     tokenFound = 1;
+                            //     break;
+                            case '?':
+                                actualState = ID_S;
+                                break;
                             case EOF:
                                 t = EOF_T;
                                 char eof_s[] = "EOF";
@@ -182,11 +203,57 @@ Token *getToken() {
                                 //TODO check char after EOF
                                 break;
                             default:
+                                if (checkId(c)) {
+                                    ungetc(c, stdin);
+                                    actualState = ID_S;
+                                }
                                 break;
                             //end of switch by char in START state
                     }
                 break;
+                
+            case ID_S:
+                    switch(checkId(c)) {
+                            case 1:
+                                addCharToToken(c, token);
+                                break;
+                            case 0: {
+                                if (!strcmp(token->val, "else")) {
+                                    t = ELSE;
+                                } else if (!strcmp(token->val, "float")) {
+                                    t = FLOAT;
+                                } else if (!strcmp(token->val, "function")) {
+                                    t = FUNCTION;
+                                } else if (!strcmp(token->val, "if")) {
+                                    t = IF;
+                                } else if (!strcmp(token->val, "int")) {
+                                    t = INT;
+                                } else if (!strcmp(token->val, "null")) {
+                                    t = NULL_T;
+                                } else if (!strcmp(token->val, "return")) {
+                                    t = RETURN;
+                                } else if (!strcmp(token->val, "string")) {
+                                    t = STRING;
+                                } else if (!strcmp(token->val, "void")) {
+                                    t = VOID;
+                                } else if (!strcmp(token->val, "while")) {
+                                    t = WHILE;
+                                } else {
+                                    t = ID;
+                                }
 
+                                //end of switch by token value
+                                
+                                addTypeToToken(t, token);
+                                addRowToToken(row, token);
+                                tokenFound = 1;
+                                break;
+                            } //end of case 0
+
+                            //end of switch by char in ID_S state
+                    }
+                    break;
+                
             case VAR_ID_S:
                     switch(checkId(c)) {
                             case 1:
@@ -238,7 +305,7 @@ Token *getToken() {
 int main() {
     Token *token = getToken();
     while (strcmp(token->val, "EOF")) {
-        printf("%s %d\n", token->val, token->row);
+        printf("%s %d %d\n", token->val, token->row, token->t);
         free(token);
         token = getToken();
     }
@@ -246,7 +313,7 @@ int main() {
 
 }
 
-//pridat do KA -> ; + EOF + konecny prolog
-//myslet aj na to ze napr za var nemusi byt medzera + EOF nezabudnut
+//konecny prolog
+//myslet aj na to ze napr za var nemusi byt medzera + EOF nezabudnut (ASCII table)
 //pozret todo + okomentovat
 //not found osetrit
