@@ -77,7 +77,7 @@ int checkId(int c) {
     } else {
         if (isspace(c)) {
             return 0;
-        } else if (('(' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!' || c == EOF) { //TODO nema byt aj {} atd..
+        } else if (('(' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!' || c == EOF || c == '{' || c == '}') {
             unGetC(c);
             return 0;
         } else {
@@ -129,8 +129,7 @@ void setOneCharToken(Token *token, int c, int row, enum type t) {
 }
 
 int isOkAfterNum(int c) {
-    //TODO toto kuknut este ci tam je vsetko
-    if (c == EOF || isspace(c) || c == '!' || ('(' <= c && c <= '-') || c == '/' || ('<' <= c && c <= '>') || c == ';') {
+    if (c == EOF || isspace(c) || c == '!' || ('(' <= c && c <= '-') || c == '/' || (';' <= c && c <= '>')) {
         return 1;
     } else {
         return 0;
@@ -270,7 +269,6 @@ Token *getToken() {
                                 addTypeToToken(t, token);
                                 addRowToToken(row, token);
                                 tokenFound = 1;
-                                //TODO check char after EOF
                                 break;
                             default:
                                 if (checkId(c)) {
@@ -666,18 +664,3 @@ Token *getToken() {
 
     return token;
 }
-
-int main() { //TODO REMOVE ME
-    Token *token = getToken();
-    while (strcmp(token->val, "EOF")) {
-        printf("%s %d %d\n", token->val, token->row, token->t);
-        free(token);
-        token = getToken();
-    }
-    printf("%s %d %d\n", token->val, token->row, token->t);
-
-}
-
-//TODO
-//pozret todo
-//okomentovat
