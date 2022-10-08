@@ -4,16 +4,24 @@
 #include <string.h>
 #include <ctype.h>
 
-void getProlog() { //TODO mozno musi byt medzera medzi php a declare
-    char prologValidString[] = "<?phpdeclare(strict_types=1);";
+void getProlog() {
+    char prologValidString[] = "<?php declare(strict_types=1);";
     char prologString[strlen(prologValidString) + 1];
     
     int pos = 0; //actual position in new string
     int c;
+    int spaceCounter = 0;
     while (strlen(prologString) != strlen(prologValidString)) {
         c = getchar();
         if (c == '\n') {
             row++;
+        }
+
+        if (isspace(c) && spaceCounter == 0) { //adding space to prolog
+            prologString[pos] = ' ';
+            pos++;
+            prologString[pos] = '\0';
+            spaceCounter++;
         }
 
         if (!isspace(c)) { //ignoring spaces
