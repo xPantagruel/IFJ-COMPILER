@@ -13,18 +13,23 @@ enum type {
     MINUS, // -
     DOT, // .
     MUL, // *
-    EOL_T, // \n
     ID,
     ELSE,
-    FLOAT, // type
+    FLOAT_TYPE, // type
     FUNCTION,
     IF,
-    INT, // type
-    NULL_T,
+    INT_TYPE, // type
+    NULL_KEYWORD,
     RETURN,
-    STRING, // type
+    STRING_TYPE, // type
     VOID,
     WHILE,
+    INT,
+    FLOAT,
+
+    STRING,
+    ESC_SEQ,
+
     LESS, // <
     MORE, // >
     LESS_EQ, // <= 
@@ -38,7 +43,10 @@ enum state {
     START,
     SLASH_S,
     VAR_ID_S,
-    ID_S
+    ID_S,
+    NUM_S,
+    NUM_NEEDED_S,
+    NUM_OR_PLUSMIN_NEEDED_S
 };
 typedef struct token {
     char *val;
@@ -73,4 +81,7 @@ int skipLineComment();
 
 void skipBlockComment();
 
-void setOneCharToken(Token *token, char c, int row, enum type t);
+void setOneCharToken(Token *token, int c, int row, enum type t);
+
+int isOkAfterNum(int c);
+

@@ -108,10 +108,18 @@ void skipBlockComment() {
     }
 }
 
-void setOneCharToken(Token *token, char c, int row, enum type t) {
+void setOneCharToken(Token *token, int c, int row, enum type t) {
     addCharToToken(c, token);
     addTypeToToken(t, token);
     addRowToToken(row, token);
+}
+
+int isOkAfterNum(int c) {
+    if (c == EOF || isspace(c) || c == '!' || c == '*' || c == '+' || c == '-' || c == '/' || ('<' <= c && c <= '>') || c == ';') {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 Token *getToken() {
@@ -136,7 +144,6 @@ Token *getToken() {
         switch(actualState) {
             case START:
                     switch (c) {
-                            //TODO quote to NOT
                             case '$':
                                 actualState = VAR_ID_S;
                                 t = VAR_ID;
@@ -184,10 +191,6 @@ Token *getToken() {
                                 setOneCharToken(token, '*', row, MUL);
                                 tokenFound = 1;
                                 break;
-                            // case '\n': //TODO
-                            //     setOneCharToken(token, '\n', row, EOL_T);
-                            //     tokenFound = 1;
-                            //     break;
                             case '?':
                                 actualState = ID_S;
                                 break;
@@ -204,12 +207,89 @@ Token *getToken() {
                                 break;
                             default:
                                 if (checkId(c)) {
+                                    if (isdigit(c)) {
+                                        actualState = NUM_S;
+                                        t = INT;
+                                    } else {
+                                        actualState = ID_S;
+                                    }
                                     ungetc(c, stdin);
-                                    actualState = ID_S;
                                 }
                                 break;
                             //end of switch by char in START state
                     }
+                break;
+            
+            case NUM_S:
+                switch (isdigit(c)) { //first will be for sure digit (default case above)
+                        case 1:
+                            addCharToToken(c, token);
+                            break;
+                        case 0:
+                            switch(tolower(c)) {
+                                case  '.': //ocakavaj num + nemozu byt 2x . v num
+                                    if (strchr(token->val, '.') != NULL) {
+                                        exit(1);
+                                    }
+                                    t = FLOAT;
+                                    actualState = NUM_NEEDED_S;
+                                    addCharToToken(c, token);
+                                    break;
+                                case 'e':
+                                    if (token->val[strlen(token->val)-1] == '.' || strchr(token->val, 'e') != NULL) {
+                                        exit(1);
+                                    }
+                                    actualState = NUM_OR_PLUSMIN_NEEDED_S;
+                                    addCharToToken(c, token);
+                                    break;
+                                case '+':
+                                    printf("%c- last char\n", token->val[strlen(token->val)]); 
+                                    if (token->val[strlen(token->val)] != 'e') {
+                                        exit(1);
+                                    }
+                                    actualState = NUM_NEEDED_S;
+                                    addCharToToken(c, token);
+                                    break;
+                                case '-':
+                                    if (token->val[strlen(token->val)] != 'e') {
+                                        exit(1);
+                                    }
+                                    actualState = NUM_NEEDED_S;
+                                    addCharToToken(c, token);
+                                    break;
+                                default:
+                                    if (isOkAfterNum(c)) {
+                                        actualState = START;
+                                        addRowToToken(row, token);
+                                        addTypeToToken(t, token);
+                                        tokenFound = 1;
+                                        ungetc(c, stdin);
+                                    } else {
+                                        exit(2);
+                                    }
+                                    break;
+                            }
+                            break;
+                }
+                break;
+
+            case NUM_NEEDED_S:
+                if (isnumber(c)) {
+                    addCharToToken(c, token);
+                    actualState = NUM_S;
+                } else {
+                    exit(1);
+                }
+
+                break;
+                
+            case NUM_OR_PLUSMIN_NEEDED_S:
+                if (isnumber(c) || c == '+' || c == '-') {
+                    addCharToToken(c, token);
+                    actualState = NUM_S;
+                } else {
+                    exit(1);
+                }
                 break;
                 
             case ID_S:
@@ -221,19 +301,19 @@ Token *getToken() {
                                 if (!strcmp(token->val, "else")) {
                                     t = ELSE;
                                 } else if (!strcmp(token->val, "float")) {
-                                    t = FLOAT;
+                                    t = FLOAT_TYPE;
                                 } else if (!strcmp(token->val, "function")) {
                                     t = FUNCTION;
                                 } else if (!strcmp(token->val, "if")) {
                                     t = IF;
                                 } else if (!strcmp(token->val, "int")) {
-                                    t = INT;
+                                    t = INT_TYPE;
                                 } else if (!strcmp(token->val, "null")) {
-                                    t = NULL_T;
+                                    t = NULL_KEYWORD;
                                 } else if (!strcmp(token->val, "return")) {
                                     t = RETURN;
                                 } else if (!strcmp(token->val, "string")) {
-                                    t = STRING;
+                                    t = STRING_TYPE;
                                 } else if (!strcmp(token->val, "void")) {
                                     t = VOID;
                                 } else if (!strcmp(token->val, "while")) {
@@ -302,7 +382,7 @@ Token *getToken() {
     return token;
 }
 
-int main() {
+int main() { //TODO REMOVE ME
     Token *token = getToken();
     while (strcmp(token->val, "EOF")) {
         printf("%s %d %d\n", token->val, token->row, token->t);
@@ -313,7 +393,10 @@ int main() {
 
 }
 
+//TODO
 //konecny prolog
 //myslet aj na to ze napr za var nemusi byt medzera + EOF nezabudnut (ASCII table)
-//pozret todo + okomentovat
+//pozret todo
+//okomentovat
 //not found osetrit
+//prejst exity
