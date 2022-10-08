@@ -89,3 +89,5 @@ void setOneCharToken(Token *token, int c, int row, enum type t);
 
 int isOkAfterNum(int c);
 
+int checkClosingProlog();
+

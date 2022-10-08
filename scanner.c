@@ -123,6 +123,19 @@ int isOkAfterNum(int c) {
     }
 }
 
+int checkClosingProlog() {
+    int c = getchar();
+    if (c == '>') {
+        if (getchar() == EOF) {
+            return 1;
+        } else {
+            exit(2);
+        }
+    }
+    ungetc(c, stdin);
+    return 0;
+}
+
 Token *getToken() {
     if (!prologFound) {
         getProlog();
@@ -200,6 +213,19 @@ Token *getToken() {
                                 tokenFound = 1;
                                 break;
                             case '?':
+                                if (checkClosingProlog()) {
+
+                                    t = EOF_T;
+                                    char eof_s[] = "EOF";
+                                    for (int i = 0; (unsigned long)i < strlen(eof_s); i++) {
+                                        addCharToToken(eof_s[i], token);
+                                    }
+                                    addTypeToToken(t, token);
+                                    addRowToToken(row, token);
+                                    tokenFound = 1;
+                                    break;
+                                }
+                                        
                                 actualState = ID_S;
                                 break;
                             case '=':
@@ -542,38 +568,39 @@ Token *getToken() {
                                 addCharToToken(c, token);
                                 break;
                             case 0: {
-                                if (!strcmp(token->val, "else")) {
-                                    t = ELSE;
-                                } else if (!strcmp(token->val, "float")) {
-                                    t = FLOAT_TYPE;
-                                } else if (!strcmp(token->val, "function")) {
-                                    t = FUNCTION;
-                                } else if (!strcmp(token->val, "if")) {
-                                    t = IF;
-                                } else if (!strcmp(token->val, "int")) {
-                                    t = INT_TYPE;
-                                } else if (!strcmp(token->val, "null")) {
-                                    t = NULL_KEYWORD;
-                                } else if (!strcmp(token->val, "return")) {
-                                    t = RETURN;
-                                } else if (!strcmp(token->val, "string")) {
-                                    t = STRING_TYPE;
-                                } else if (!strcmp(token->val, "void")) {
-                                    t = VOID;
-                                } else if (!strcmp(token->val, "while")) {
-                                    t = WHILE;
-                                } else {
-                                    t = ID;
-                                }
+                                    if (!strcmp(token->val, "else")) {
+                                        t = ELSE;
+                                    } else if (!strcmp(token->val, "float")) {
+                                        t = FLOAT_TYPE;
+                                    } else if (!strcmp(token->val, "function")) {
+                                        t = FUNCTION;
+                                    } else if (!strcmp(token->val, "if")) {
+                                        t = IF;
+                                    } else if (!strcmp(token->val, "int")) {
+                                        t = INT_TYPE;
+                                    } else if (!strcmp(token->val, "null")) {
+                                        t = NULL_KEYWORD;
+                                    } else if (!strcmp(token->val, "return")) {
+                                        t = RETURN;
+                                    } else if (!strcmp(token->val, "string")) {
+                                        t = STRING_TYPE;
+                                    } else if (!strcmp(token->val, "void")) {
+                                        t = VOID;
+                                    } else if (!strcmp(token->val, "while")) {
+                                        t = WHILE;
+                                    } else {
+                                        t = ID;
+                                    }
+                                
 
-                                //end of switch by token value
+                                    //end of switch by token value
                                 
                                 addTypeToToken(t, token);
                                 addRowToToken(row, token);
                                 tokenFound = 1;
                                 break;
-                            } //end of case 0
-
+                                //end of case 0
+                            }
                             //end of switch by char in ID_S state
                     }
                     break;
@@ -638,7 +665,6 @@ int main() { //TODO REMOVE ME
 }
 
 //TODO
-//konecny prolog
 //pozret todo
 //okomentovat
 //not found osetrit
