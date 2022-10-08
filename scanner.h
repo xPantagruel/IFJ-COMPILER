@@ -34,7 +34,6 @@ enum type {
     MORE_EQ, // >=
     NOT_EQ, // !==
     STRING // "string \x1F"
-
 };
 
 enum state {
@@ -48,7 +47,9 @@ enum state {
     EQ_S,
     LESS_MORE_S,
     NOT_EQ_S,
-    STRING_S
+    STRING_S,
+    GET_HEX_S,
+    GET_OKT_S
 };
 typedef struct token {
     char *val;

@@ -135,6 +135,9 @@ Token *getToken() {
     enum type t = NOT_DEFINED;
     int c;
 
+    int hexEscCount = 0;
+    int oktEscCount = 0;
+
     while (!tokenFound){
         c = getchar();
         if (c == '\n') {
@@ -210,6 +213,9 @@ Token *getToken() {
                                 actualState = NOT_EQ_S;
                                 addCharToToken('!', token);
                                 break;
+                            case '"':
+                                actualState = STRING_S;
+                                break;
                             case EOF:
                                 t = EOF_T;
                                 char eof_s[] = "EOF";
@@ -234,6 +240,129 @@ Token *getToken() {
                                 break;
                             //end of switch by char in START state
                     }
+                break;
+            case STRING_S:
+                switch (isalpha(c)) {
+                    case 1:
+                        addCharToToken(c, token);
+                        break;
+                    case 0:
+                        switch(isnumber(c)) {
+                            case 1:
+                                //ak je backslash predtym + ak je backslash a x predtym + ak nie je nic
+                                if (token->val[strlen(token->val)-1] == 'x' && token->val[strlen(token->val)-2] == '\\') {
+                                    hexEscCount = 0;
+                                    actualState = GET_HEX_S;
+                                    ungetc(c, stdin);
+                                } else if (token->val[strlen(token->val)-1] == '\\') {
+                                    oktEscCount = 0;
+                                    actualState = GET_OKT_S;
+                                    ungetc(c, stdin);
+                                } else {
+                                    addCharToToken(c, token);
+                                }
+                                break;
+                            case 0:
+                                switch (c) {
+                                    case '"':
+                                        if (token->val[strlen(token->val)-1] == '\\') {
+                                            addCharToToken(c, token);
+                                        } else {
+                                            addTypeToToken(STRING, token);
+                                            addRowToToken(row, token);
+                                            actualState = START;
+                                            tokenFound = 1;
+                                        }
+                                        break;
+                                    case '$':
+                                        if (token->val[strlen(token->val)-1] == '\\') {
+                                            addCharToToken(c, token);
+                                        } else {
+                                            exit(1);
+                                        }
+                                        break;
+                                    default:
+                                        addCharToToken(c, token);
+                                        break;
+                                }
+                                break;
+                        }
+                        break;
+                }
+                break;
+
+            case GET_HEX_S:
+                switch (hexEscCount) {
+                    case 0:
+                        if (('0' <= c && c <= '9') || ('a' <= tolower(c) && tolower(c) <= 'f')) {
+                            addCharToToken(tolower(c), token);
+                        } else {
+                            exit(1);
+                        }
+                        hexEscCount++;
+                        break;
+                    case 1:
+                        if (token->val[strlen(token->val)-1] == '0') {
+                            if (('1' <= c && c <= '9') || ('a' <= tolower(c) && tolower(c) <= 'f')) {
+                                addCharToToken(tolower(c), token);
+                            } else {
+                                exit(1);
+                            }
+                        } else {
+                            if (('0' <= c && c <= '9') || ('a' <= tolower(c) && tolower(c) <= 'f')) {
+                                addCharToToken(tolower(c), token);
+                            } else {
+                                exit(1);
+                            }
+                        }
+                        actualState = STRING_S;
+                        break;      
+                }
+                break;
+
+            case GET_OKT_S: 
+                switch(oktEscCount) {
+                    case 0:
+                            if ('0' <= c && c <= '3') {
+                                addCharToToken(c, token);
+                            } else {
+                                exit(1);
+                            }
+                        oktEscCount++;
+                        break;
+                    case 1:
+                        if (token->val[strlen(token->val)-1] == '3') {
+                            if ('1' <= c && c <= '7') {
+                                addCharToToken(c, token);
+                            } else {
+                                exit(1);
+                            }
+                        } else {
+                            if ('0' <= c && c <= '9') {
+                                addCharToToken(c, token);
+                            } else {
+                                exit(1);
+                            }
+                        }
+                        oktEscCount++;
+                        break;
+                    case 2:
+                        if ((token->val[strlen(token->val)-2] == '3') && (token->val[strlen(token->val)-1] == '7')) {
+                            if ('0' <= c && c <= '7') {
+                                addCharToToken(c, token);
+                            } else {
+                                exit(1);
+                            }
+                        } else {
+                            if ('0' <= c && c <= '9') {
+                                addCharToToken(c, token);
+                            } else {
+                                exit(1);
+                            }
+                        }
+                        actualState = STRING_S;
+                        break;
+                }
                 break;
             case NOT_EQ_S:
                 switch(c) {
@@ -354,15 +483,14 @@ Token *getToken() {
                                     addCharToToken(c, token);
                                     break;
                                 case '+':
-                                    printf("%c- last char\n", token->val[strlen(token->val)]); 
-                                    if (token->val[strlen(token->val)] != 'e') {
+                                    if (token->val[strlen(token->val)-1] != 'e') {
                                         exit(1);
                                     }
                                     actualState = NUM_NEEDED_S;
                                     addCharToToken(c, token);
                                     break;
                                 case '-':
-                                    if (token->val[strlen(token->val)] != 'e') {
+                                    if (token->val[strlen(token->val)-1] != 'e') {
                                         exit(1);
                                     }
                                     actualState = NUM_NEEDED_S;
@@ -512,3 +640,4 @@ int main() { //TODO REMOVE ME
 //not found osetrit
 //prejst exity - ci vobec tam maju byt a nie az v syntax
 //zle rata row lebo ak dam ungetc \n tak to da row++
+//printf vymazat
