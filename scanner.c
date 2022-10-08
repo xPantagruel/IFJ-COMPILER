@@ -63,7 +63,7 @@ int checkId(int c) {
     } else {
         if (isspace(c)) {
             return 0;
-        } else if ((')' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!' || c == EOF) {
+        } else if (('(' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!' || c == EOF) { //TODO nema byt aj {} atd..
             ungetc(c, stdin);
             return 0;
         } else {
@@ -115,7 +115,8 @@ void setOneCharToken(Token *token, int c, int row, enum type t) {
 }
 
 int isOkAfterNum(int c) {
-    if (c == EOF || isspace(c) || c == '!' || c == '*' || c == '+' || c == '-' || c == '/' || ('<' <= c && c <= '>') || c == ';') {
+    //TODO toto kuknut este ci tam je vsetko
+    if (c == EOF || isspace(c) || c == '!' || ('(' <= c && c <= '-') || c == '/' || ('<' <= c && c <= '>') || c == ';') {
         return 1;
     } else {
         return 0;
@@ -153,6 +154,10 @@ Token *getToken() {
                                 break;
                             case '/':
                                 actualState = SLASH_S;
+                                break;
+                            case ':':
+                                setOneCharToken(token, ':', row, COLON);
+                                tokenFound = 1;
                                 break;
                             case '(':
                                 setOneCharToken(token, '(', row, L_PAR);
@@ -628,13 +633,12 @@ int main() { //TODO REMOVE ME
         free(token);
         token = getToken();
     }
-    printf("%s %d\n", token->val, token->row);
+    printf("%s %d %d\n", token->val, token->row, token->t);
 
 }
 
 //TODO
 //konecny prolog
-//myslet aj na to ze napr za var nemusi byt medzera + EOF nezabudnut (ASCII table)
 //pozret todo
 //okomentovat
 //not found osetrit

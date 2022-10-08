@@ -33,7 +33,8 @@ enum type {
     LESS_EQ, // <= 
     MORE_EQ, // >=
     NOT_EQ, // !==
-    STRING // "string \x1F"
+    STRING, // "string \x1F"
+    COLON // :
 };
 
 enum state {
