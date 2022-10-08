@@ -1,3 +1,17 @@
+/**
+ * @file scanner.h
+ * 
+ * @author Martin Kubička (xkubic45)
+ * @author Matěj Macek (xmacek27)
+ * @author Dominik Petřík (xpetri25)
+ * @author Lukáš Zítko (xzitko00)
+ * 
+ * @brief Declatarions of enums, functions and variables used in scanner.c.
+ * 
+ * @date 2022-10-08
+ */
+
+/** types that token->t can acquire */
 enum type {
     NOT_DEFINED, // initial type
     VAR_ID, // $variable
@@ -13,18 +27,18 @@ enum type {
     MINUS, // -
     DOT, // .
     MUL, // *
-    ID,
-    ELSE,
+    ID, // write, reads..
+    ELSE, // else
     FLOAT_TYPE, // float
-    FUNCTION,
-    IF,
-    INT_TYPE, // type
-    NULL_KEYWORD,
-    RETURN,
-    STRING_TYPE, // type
-    VOID,
-    WHILE,
-    INT,
+    FUNCTION, // function
+    IF, // if
+    INT_TYPE, // int
+    NULL_KEYWORD, // NULL
+    RETURN, // return
+    STRING_TYPE, // string
+    VOID, // void
+    WHILE, // while
+    INT, // 123e-1
     FLOAT, // 1.32e+32
     EQ, // =
     THREE_EQ, // ===
@@ -35,8 +49,9 @@ enum type {
     NOT_EQ, // !==
     STRING, // "string \x1F"
     COLON // :
-};
+}; // end of enum type
 
+/** states of FSM */
 enum state {
     START,
     SLASH_S,
@@ -52,15 +67,17 @@ enum state {
     GET_HEX_S,
     GET_OKT_S
 };
+/** token struct */
 typedef struct token {
-    char *val;
-    int row;
-    enum type t; 
+    char *val; // value from stdin
+    int row; // row from stdin
+    enum type t; // type of value
 } Token;
 
 /** global variable -> so we know if we passed prolog */
 int prologFound = 0;
 
+/** global variable for counting rows from stdin */
 int row = 1;
 
 /**
@@ -69,27 +86,101 @@ int row = 1;
  */
 void getProlog();
 
+/**
+ * @brief When parser wants next token, this function will be called.
+ * 
+ * @return Token* pointer to token 
+ */
 Token *getToken(); 
 
+/**
+ * @brief Function which initialize token.
+ * 
+ * @return Token* pointer to created token
+ */
 Token *tokenInit();
 
+/**
+ * @brief Function which adds char to token value.
+ * 
+ * @param c char which will be added to token value
+ * @param token pointer to token
+ */
 void addCharToToken(int c, Token *token);
 
+/**
+ * @brief Function which adds row to token->row.
+ * 
+ * @param row number of row where token is (stdin)
+ * @param token pointer to token
+ */
 void addRowToToken(int row, Token *token);
 
+/**
+ * @brief Function which adds type to token->type.
+ * 
+ * @param t type which will be added to token
+ * @param token pointer to token
+ */
 void addTypeToToken(enum type t, Token *token);
 
-int checkIdVar(int c);
-
-int skipLineComment();
-
-void skipBlockComment();
-
+/**
+ * @brief Function for creating token where token->value consists of one char.
+ * 
+ * @param token pointer to token
+ * @param c char which will be added to token value
+ * @param row number of row where token is (stdin)
+ * @param t type which will be added to token
+ */
 void setOneCharToken(Token *token, int c, int row, enum type t);
 
-int isOkAfterNum(int c);
-
-int checkClosingProlog();
-
+/**
+ * @brief Optimalized ungetc() function for this project.
+ *        Differences: There is if statement which checks
+ *                     if last char from stdin was '\n'.
+ *                     If yes -> we don't want to put this char back to stdin
+ *                               because there will be issue with row counting.
+ *                     If no -> put char back to stdin.
+ * 
+ * @param c char which will or won't be send back stdin
+ */
 void unGetC(int c);
 
+/**
+ * @brief If block comment is detected, this function will throw it away.
+ */
+void skipBlockComment();
+
+/**
+ * @brief If line comment is detected, this function will throw it away.
+ * 
+ * @return int 0 -> if comment is like this: //commentEOF otherwise 1
+ */
+int skipLineComment();
+
+/**
+ * @brief Function which validate if next char meets the conditions for ID.
+ * 
+ * @param c char which will be validated
+ *  
+ * @return int 1 if char meets the conditions for ID otherwise 0
+ */
+int checkId(int c);
+
+/**
+ * @brief Function which validate if next char meets the conditions for NUMBER.
+ * 
+ * @param c char which will be validated
+ *  
+ * @return int 1 if char meets the conditions for NUMBER otherwise 0
+ */
+int isOkAfterNum(int c);
+
+/**
+ * @brief Function that checks if there was a closing prolog.
+ * 
+ * @return int 1 if closing prolog was detected otherwise 0
+ */
+int checkClosingProlog();
+
+/*** End of scanner.h ***/
