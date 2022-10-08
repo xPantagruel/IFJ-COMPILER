@@ -15,7 +15,7 @@ enum type {
     MUL, // *
     ID,
     ELSE,
-    FLOAT_TYPE, // type
+    FLOAT_TYPE, // float
     FUNCTION,
     IF,
     INT_TYPE, // type
@@ -25,18 +25,16 @@ enum type {
     VOID,
     WHILE,
     INT,
-    FLOAT,
-
-    STRING,
-    ESC_SEQ,
-
+    FLOAT, // 1.32e+32
+    EQ, // =
+    THREE_EQ, // ===
     LESS, // <
     MORE, // >
     LESS_EQ, // <= 
     MORE_EQ, // >=
-    EQ, // =
-    THREE_EQ, // ===
-    NOT_EQ // !==
+    NOT_EQ, // !==
+    STRING // "string \x1F"
+
 };
 
 enum state {
@@ -46,7 +44,11 @@ enum state {
     ID_S,
     NUM_S,
     NUM_NEEDED_S,
-    NUM_OR_PLUSMIN_NEEDED_S
+    NUM_OR_PLUSMIN_NEEDED_S,
+    EQ_S,
+    LESS_MORE_S,
+    NOT_EQ_S,
+    STRING_S
 };
 typedef struct token {
     char *val;

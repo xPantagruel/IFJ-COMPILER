@@ -194,6 +194,22 @@ Token *getToken() {
                             case '?':
                                 actualState = ID_S;
                                 break;
+                            case '=':
+                                actualState = EQ_S;
+                                addCharToToken('=', token);
+                                break;
+                            case '<':
+                                actualState = LESS_MORE_S;
+                                addCharToToken('<', token);
+                                break;
+                            case '>':
+                                actualState = LESS_MORE_S;
+                                addCharToToken('>', token);
+                                break;
+                            case '!':
+                                actualState = NOT_EQ_S;
+                                addCharToToken('!', token);
+                                break;
                             case EOF:
                                 t = EOF_T;
                                 char eof_s[] = "EOF";
@@ -219,6 +235,101 @@ Token *getToken() {
                             //end of switch by char in START state
                     }
                 break;
+            case NOT_EQ_S:
+                switch(c) {
+                    case '=':
+                        if (strlen(token->val) < 3) {
+                            addCharToToken(c, token);
+                        } else {
+                            exit(1);
+                        }
+                        break;
+                    default:
+                        if (strlen(token->val) != 3) {
+                            exit(1);
+                        } else {
+                            addTypeToToken(NOT_EQ, token);
+                            addRowToToken(row, token);
+                            actualState = START;
+                            tokenFound = 1;
+                        }
+                        break;
+                }
+
+                break;
+            case LESS_MORE_S:
+                switch(c) {
+                        case '=':
+                            if (strlen(token->val) == 1) {
+                                addCharToToken(c, token);
+                            } else {
+                                exit(1);
+                            }
+                            break;
+                        default:
+                            ungetc(c, stdin);
+                            switch(token->val[0]) {
+                                    case '<':
+                                        switch(token->val[1]) {
+                                            case '=': // <=
+                                                t = LESS_EQ;
+                                                break;
+                                            default: // <
+                                                t = LESS;
+                                                break;
+                                        }
+                                        break;
+                                    case '>':
+                                        switch(token->val[1]) {
+                                            case '=': // >=
+                                                t = MORE_EQ;
+                                                break;
+                                            default: // >
+                                                t = MORE;
+                                                break;
+                                        }
+                                    break;
+                            }
+                            
+                            addTypeToToken(t, token);
+                            addRowToToken(row, token);
+                            actualState = START;
+                            tokenFound = 1;
+                            break;
+
+                }
+                break;
+            case EQ_S:
+                switch(c) {
+                        case '=':
+                            if (strlen(token->val) < 3) {
+                                addCharToToken(c, token);
+                            } else {
+                                exit(1); // ==== and more
+                            }
+                            break;
+                        default:
+                            switch (strlen(token->val)) {
+                                case 1: // =
+                                    ungetc(c, stdin);
+                                    addRowToToken(row, token);
+                                    addTypeToToken(EQ, token);
+                                    actualState = START;
+                                    tokenFound = 1;
+                                    break;
+                                case 3: // ===
+                                    ungetc(c, stdin);
+                                    addRowToToken(row, token);
+                                    addTypeToToken(THREE_EQ, token);
+                                    actualState = START;
+                                    tokenFound = 1;
+                                    break;
+                                default: // ==
+                                    exit(1);
+                            }
+                            break;
+                }
+                break;
             
             case NUM_S:
                 switch (isdigit(c)) { //first will be for sure digit (default case above)
@@ -227,7 +338,7 @@ Token *getToken() {
                             break;
                         case 0:
                             switch(tolower(c)) {
-                                case  '.': //ocakavaj num + nemozu byt 2x . v num
+                                case  '.':
                                     if (strchr(token->val, '.') != NULL) {
                                         exit(1);
                                     }
@@ -282,7 +393,7 @@ Token *getToken() {
                 }
 
                 break;
-                
+
             case NUM_OR_PLUSMIN_NEEDED_S:
                 if (isnumber(c) || c == '+' || c == '-') {
                     addCharToToken(c, token);
@@ -399,4 +510,5 @@ int main() { //TODO REMOVE ME
 //pozret todo
 //okomentovat
 //not found osetrit
-//prejst exity
+//prejst exity - ci vobec tam maju byt a nie az v syntax
+//zle rata row lebo ak dam ungetc \n tak to da row++
