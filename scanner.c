@@ -45,6 +45,11 @@ void getProlog() {
     }
 }
 
+void dtorToken(Token *token) {
+    free(token->val);
+    free(token);
+}
+
 void addCharToToken(int c, Token *token) {
     char tmp[] = {c, '\0'}; //creating "string" so we can use strncat
 
@@ -165,8 +170,7 @@ void addQuestionMark(Token *token) {
 }
 
 void error(int errID, Token *token) {
-    free(token->val);
-    free(token);
+    dtorToken(token);
     exit(errID);
 }
 

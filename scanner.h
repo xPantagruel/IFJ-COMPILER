@@ -204,4 +204,11 @@ void addQuestionMark(Token *token);
  */
 void error(int errID, Token *token);
 
+/**
+ * @brief Token destructor.
+ * 
+ * @param token pointer to token
+ */
+void dtorToken(Token *token);
+
 /*** End of scanner.h ***/
