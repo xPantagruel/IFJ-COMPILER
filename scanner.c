@@ -159,6 +159,11 @@ int checkClosingProlog() {
     return 0;
 }
 
+void addQuestionMark(Token *token) {
+    memmove(token->val + 1, token->val, strlen(token->val)+1);
+    *token->val = '?';
+}
+
 Token *getToken() {
     if (!prologFound) { // we need to skip and validate prolog
         getProlog();
@@ -254,6 +259,7 @@ Token *getToken() {
                                 }
                                         
                                 actualState = ID_S;
+                                questionMark = 1;
                                 break;
                             case '=':
                                 actualState = EQ_S;
@@ -626,34 +632,48 @@ Token *getToken() {
                                 break;
                             case 0: {
                                     //checking keywords match
-                                    if (!strcmp(token->val, "else")) {
-                                        t = ELSE;
-                                    } else if (!strcmp(token->val, "float")) {
+                                    if (!strcmp(token->val, "float")) {
+                                        if (questionMark) {
+                                            addQuestionMark(token);
+                                        }
                                         t = FLOAT_TYPE;
-                                    } else if (!strcmp(token->val, "function")) {
-                                        t = FUNCTION;
-                                    } else if (!strcmp(token->val, "if")) {
-                                        t = IF;
                                     } else if (!strcmp(token->val, "int")) {
+                                        if (questionMark) {
+                                            addQuestionMark(token);
+                                        }
                                         t = INT_TYPE;
-                                    } else if (!strcmp(token->val, "null")) {
-                                        t = NULL_KEYWORD;
-                                    } else if (!strcmp(token->val, "return")) {
-                                        t = RETURN;
                                     } else if (!strcmp(token->val, "string")) {
+                                        if (questionMark) {
+                                            addQuestionMark(token);
+                                        }
                                         t = STRING_TYPE;
-                                    } else if (!strcmp(token->val, "void")) {
-                                        t = VOID;
-                                    } else if (!strcmp(token->val, "while")) {
-                                        t = WHILE;
+                                    } else if (questionMark) { //question mark can be only before float, int or string
+                                        exit(2);
                                     } else {
-                                        t = ID;
+                                        if (!strcmp(token->val, "else")) {
+                                            t = ELSE;
+                                        } else if (!strcmp(token->val, "function")) {
+                                            t = FUNCTION;
+                                        } else if (!strcmp(token->val, "if")) {
+                                            t = IF;
+                                        } else if (!strcmp(token->val, "null")) {
+                                            t = NULL_KEYWORD;
+                                        } else if (!strcmp(token->val, "return")) {
+                                            t = RETURN;
+                                        } else if (!strcmp(token->val, "void")) {
+                                            t = VOID;
+                                        } else if (!strcmp(token->val, "while")) {
+                                            t = WHILE;
+                                        } else {
+                                            t = ID;
+                                        }
                                     }
                                     //end of switch by token value
                                 
                                 addTypeToToken(t, token);
                                 addRowToToken(row, token);
                                 tokenFound = 1;
+                                questionMark = 0;
                                 break;
                                 //end of case 0
                             }

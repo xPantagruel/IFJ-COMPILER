@@ -85,6 +85,9 @@ static int prologFound = 0;
 /** global variable for counting rows from stdin */
 static int row = 0;
 
+/** global variable which helps us to know if question mark will be added */
+static int questionMark = 0;
+
 /**
  * @brief Function which validates prolog.
  *        If proglog isn't valid -> exit(2).
@@ -187,5 +190,12 @@ int isOkAfterNum(int c);
  * @return int 1 if closing prolog was detected otherwise 0
  */
 int checkClosingProlog();
+
+/**
+ * @brief Function that adds question mark to the beginning of token->val.
+ * 
+ * @param token pointer to token
+ */
+void addQuestionMark(Token *token);
 
 /*** End of scanner.h ***/
