@@ -55,13 +55,7 @@ void addCharToToken(int c, Token *token) {
 
     if (token->val == NULL) {
         token->val = malloc(sizeof(char)*2);
-    } //else {
-    //     token->val = realloc(token->val, sizeof(char)*(strlen(token->val) + 1));
-    // }
-
-    // if (token->val == NULL) { //malloc failed
-    //     error(99, token);
-    // } 
+    }
     
     token->val = strncat(token->val, tmp, 1);
 }
@@ -86,7 +80,7 @@ void unGetC(int c) {
     }
 }
 
-int checkId(int c) {
+int checkId(int c, Token *token) {
     if (('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || ('_' == c) || ('0' <= c && c <= '9')) { //chars from which ID consists
         return 1;
     } else {
@@ -96,7 +90,8 @@ int checkId(int c) {
             unGetC(c);
             return 0;
         } else { //invalid char after ID
-            exit(2);
+            error(2, token);
+            return -1;
         }
     }
 }
@@ -124,7 +119,7 @@ int skipLineComment() {
     return 1;
 }
 
-void skipBlockComment() {
+void skipBlockComment(Token *token) {
     int prevC = 0; //storing previous char
     int actualC = getchar();
     while ((prevC != '*' && actualC != '/') && actualC != EOF) {
@@ -133,7 +128,7 @@ void skipBlockComment() {
     }
 
     if (actualC == EOF) { //comment like: /* this is my commentEOF
-        exit(1);
+        error(1, token);
     }
 }
 
@@ -298,7 +293,7 @@ Token *getToken() {
                                     tokenFound = 1;
                                     break;
                             default:
-                                    if (checkId(c)) { // updating state to ID or NUM
+                                    if (checkId(c, token)) { // updating state to ID or NUM
                                         if (isdigit(c)) {
                                             actualState = NUM_S;
                                             t = INT;
@@ -339,7 +334,7 @@ Token *getToken() {
                                                             if (token->val[strlen(token->val)-1] == '\\') { // $ in string must be like "\$"
                                                                 addCharToToken(c, token);
                                                             } else {
-                                                                exit(1);
+                                                                error(1, token);
                                                             }
                                                             break;
                                                     default: //other chars
@@ -363,12 +358,12 @@ Token *getToken() {
                             if (strlen(token->val) < 3) { // != or !
                                 addCharToToken(c, token);
                             } else { // !=== -> want to add more =
-                                exit(1);
+                                error(1, token);
                             }
                             break;
                     default: // not =
                             if (strlen(token->val) != 3) { // !==
-                                exit(1);
+                                error(1, token);
                             } else {
                                 addTypeToToken(NOT_EQ, token);
                                 addRowToToken(row, token);
@@ -387,7 +382,7 @@ Token *getToken() {
                             if (strlen(token->val) == 1) { // < or >
                                 addCharToToken(c, token);
                             } else { // <= or >= -> want to add more =
-                                exit(1); 
+                                error(1, token);
                             }
                             break;
                         default:
@@ -434,7 +429,7 @@ Token *getToken() {
                                 if (strlen(token->val) < 3) { // = or == 
                                     addCharToToken(c, token);
                                 } else {
-                                    exit(1); // ==== and more
+                                    error(1, token);; // ==== and more
                                 }
                                 break;
                         default:
@@ -454,7 +449,7 @@ Token *getToken() {
                                         tokenFound = 1;
                                         break;
                                     default: // ==
-                                        exit(1);
+                                        error(1, token);;
                             }
                             // end of switch strlen(token->val)
                             break;
@@ -472,7 +467,7 @@ Token *getToken() {
                             switch(tolower(c)) {
                                     case  '.': // float
                                             if (strchr(token->val, '.') != NULL) { // 144.4.2
-                                                exit(1);
+                                                error(1, token);
                                             }
                                             t = FLOAT;
                                             actualState = NUM_NEEDED_S;
@@ -480,21 +475,21 @@ Token *getToken() {
                                             break;
                                     case 'e':
                                             if (token->val[strlen(token->val)-1] == '.' || strchr(token->val, 'e') != NULL) { // 142e23e or 142.e
-                                                exit(1);
+                                                error(1, token);
                                             }
                                             actualState = NUM_OR_PLUSMIN_NEEDED_S;
                                             addCharToToken(c, token);
                                             break;
                                     case '+':
                                             if (token->val[strlen(token->val)-1] != 'e') { // must be e before +
-                                                exit(1);
+                                                error(1, token);
                                             }
                                             actualState = NUM_NEEDED_S;
                                             addCharToToken(c, token);
                                             break;
                                     case '-':
                                             if (token->val[strlen(token->val)-1] != 'e') { // must be e before -
-                                                exit(1);
+                                                error(1, token);
                                             }
                                             actualState = NUM_NEEDED_S;
                                             addCharToToken(c, token);
@@ -507,7 +502,7 @@ Token *getToken() {
                                                 tokenFound = 1;
                                                 unGetC(c);
                                             } else {
-                                                exit(2);
+                                                error(2, token);
                                             }
                                             break;
                             }
@@ -522,7 +517,7 @@ Token *getToken() {
                     addCharToToken(c, token);
                     actualState = NUM_S;
                 } else {
-                    exit(1);
+                    error(1, token);
                 }
 
                 break;
@@ -533,13 +528,13 @@ Token *getToken() {
                     addCharToToken(c, token);
                     actualState = NUM_S;
                 } else {
-                    exit(1);
+                    error(1, token);
                 }
                 break;
                 //end of case NUM_OR_PLUSMIN_NEEDED_S
                 
             case ID_S:
-                    switch(checkId(c)) {
+                    switch(checkId(c, token)) {
                             case 1: //char which can be added to id
                                 addCharToToken(c, token);
                                 break;
@@ -561,7 +556,7 @@ Token *getToken() {
                                         }
                                         t = STRING_TYPE;
                                     } else if (questionMark) { //question mark can be only before float, int or string
-                                        exit(2);
+                                        error(2, token);
                                     } else {
                                         if (!strcmp(token->val, "else")) {
                                             t = ELSE;
@@ -596,7 +591,7 @@ Token *getToken() {
                     //end of ID_S
                 
             case VAR_ID_S:
-                    switch(checkId(c)) {
+                    switch(checkId(c, token)) {
                             case 1:
                                 addCharToToken(c, token);
                                 break;
@@ -619,7 +614,7 @@ Token *getToken() {
                                 actualState = START;
                                 break;
                             case '*': // /*
-                                skipBlockComment();
+                                skipBlockComment(token);
                                 actualState = START;
                                 break;
                             default: // "/"

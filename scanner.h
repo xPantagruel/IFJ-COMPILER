@@ -154,8 +154,10 @@ void unGetC(int c);
 
 /**
  * @brief If block comment is detected, this function will throw it away.
+ * 
+ * @param token pointer to token -> error function
  */
-void skipBlockComment();
+void skipBlockComment(Token *token);
 
 /**
  * @brief If line comment is detected, this function will throw it away.
@@ -168,10 +170,11 @@ int skipLineComment();
  * @brief Function which validate if next char meets the conditions for ID.
  * 
  * @param c char which will be validated
+ * @param token pointer to token -> error function
  *  
  * @return int 1 if char meets the conditions for ID otherwise 0
  */
-int checkId(int c);
+int checkId(int c, Token *token);
 
 /**
  * @brief Function which validate if next char meets the conditions for NUMBER.
