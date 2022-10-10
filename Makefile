@@ -4,9 +4,9 @@ CFLAGS= -g -std=c11 -pedantic -Wall -Wextra
 all: parser
 
 run: parser
-	./parser <test.txt
+	./parser
 
-parser: parser.o scanner.o 
+parser: parser.o scanner.o
 	$(CC) $(CFLAGS) parser.o scanner.o -o parser
 
 parser.o: parser.c

@@ -11,6 +11,11 @@
  * @date 2022-10-08
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
 /** types that token->t can acquire */
 enum type {
     NOT_DEFINED, // initial type
@@ -75,10 +80,10 @@ typedef struct token {
 } Token;
 
 /** global variable -> so we know if we passed prolog */
-int prologFound = 0;
+static int prologFound = 0;
 
 /** global variable for counting rows from stdin */
-int row = 1;
+static int row = 0;
 
 /**
  * @brief Function which validates prolog.

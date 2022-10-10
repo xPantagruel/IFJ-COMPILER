@@ -12,10 +12,6 @@
  */
 
 #include "scanner.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 
 void getProlog() {
     char prologValidString[] = "<?php declare(strict_types=1);"; //prolog string
