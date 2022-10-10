@@ -68,9 +68,7 @@ enum state {
     EQ_S,
     LESS_MORE_S,
     NOT_EQ_S,
-    STRING_S,
-    GET_HEX_S,
-    GET_OKT_S
+    STRING_S
 };
 /** token struct */
 typedef struct token {
@@ -197,5 +195,13 @@ int checkClosingProlog();
  * @param token pointer to token
  */
 void addQuestionMark(Token *token);
+
+/**
+ * @brief Function which frees a memory and calls exit(errID)
+ * 
+ * @param errID int of exit number
+ * @param token pointer to token which will be freed
+ */
+void error(int errID, Token *token);
 
 /*** End of scanner.h ***/

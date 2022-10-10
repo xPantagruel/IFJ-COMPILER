@@ -50,13 +50,13 @@ void addCharToToken(int c, Token *token) {
 
     if (token->val == NULL) {
         token->val = malloc(sizeof(char)*2);
-    } else {
-        token->val = realloc(token->val, sizeof(char)*(strlen(token->val) + 1));
-    }
+    } //else {
+    //     token->val = realloc(token->val, sizeof(char)*(strlen(token->val) + 1));
+    // }
 
-    if (token->val == NULL) { //malloc failed
-        exit(99);
-    } 
+    // if (token->val == NULL) { //malloc failed
+    //     error(99, token);
+    // } 
     
     token->val = strncat(token->val, tmp, 1);
 }
@@ -164,6 +164,12 @@ void addQuestionMark(Token *token) {
     *token->val = '?';
 }
 
+void error(int errID, Token *token) {
+    free(token->val);
+    free(token);
+    exit(errID);
+}
+
 Token *getToken() {
     if (!prologFound) { // we need to skip and validate prolog
         getProlog();
@@ -176,9 +182,6 @@ Token *getToken() {
     enum state actualState = START;
     enum type t = NOT_DEFINED;
     int c; // char -> getchar()
-
-    int hexEscCount = 0; // auxiliary variable, so we know on which position in hex. escape seq. we are
-    int oktEscCount = 0; // auxiliary variable, so we know on which position in okt. escape seq. we are
 
     while (!tokenFound){
         c = getchar();
@@ -314,20 +317,7 @@ Token *getToken() {
                         case 0: //not alpha
                                 switch(isnumber(c)) {
                                         case 1: //is number
-                                                //check hex. escape seq.
-                                                if (token->val[strlen(token->val)-1] == 'x' && token->val[strlen(token->val)-2] == '\\') { // "\xNN"
-                                                    hexEscCount = 0;
-                                                    actualState = GET_HEX_S;
-                                                    unGetC(c);
-                                                //check okt. escape seq.
-                                                } else if (token->val[strlen(token->val)-1] == '\\') { // "\NNN"
-                                                    oktEscCount = 0;
-                                                    actualState = GET_OKT_S;
-                                                    unGetC(c);
-                                                //just number in string
-                                                } else {
-                                                    addCharToToken(c, token);
-                                                }
+                                                addCharToToken(c, token);
                                                 break;
                                         case 0: //not number
                                             switch (c) {
@@ -362,87 +352,6 @@ Token *getToken() {
                 // end of switch by isalpha()
                 break;
                 //end of case STRING_S
-
-            case GET_HEX_S:
-                switch (hexEscCount) { // switch index in hex. esc. seq.
-                    case 0:
-                            // avoiding unwatned chars
-                            if (('0' <= c && c <= '9') || ('a' <= tolower(c) && tolower(c) <= 'f')) {
-                                addCharToToken(tolower(c), token);
-                            } else {
-                                exit(1);
-                            }
-                            hexEscCount++;
-                            break;
-                    case 1:
-                            // avoiding unwanted chars
-                            if (token->val[strlen(token->val)-1] == '0') {
-                                if (('1' <= c && c <= '9') || ('a' <= tolower(c) && tolower(c) <= 'f')) {
-                                    addCharToToken(tolower(c), token);
-                                } else {
-                                    exit(1);
-                                }
-                            } else {
-                                if (('0' <= c && c <= '9') || ('a' <= tolower(c) && tolower(c) <= 'f')) {
-                                    addCharToToken(tolower(c), token);
-                                } else {
-                                    exit(1);
-                                }
-                            }
-                            actualState = STRING_S; // sequence read -> go back to string state
-                            break;      
-                }
-                break;
-                // end of GET_HEX_S case
-
-            case GET_OKT_S: 
-                switch(oktEscCount) { // switch to index of okt. esc. seq.
-                    case 0:
-                            if ('0' <= c && c <= '3') { // avoiding unwatned chars
-                                addCharToToken(c, token);
-                            } else {
-                                exit(1);
-                            }
-                            oktEscCount++;
-                            break;
-                    case 1:
-                            // avoiding unwanted chars
-                            if (token->val[strlen(token->val)-1] == '3') {
-                                if ('1' <= c && c <= '7') {
-                                    addCharToToken(c, token);
-                                } else {
-                                    exit(1);
-                                }
-                            } else {
-                                // avoiding unwatned chars
-                                if ('0' <= c && c <= '9') {
-                                    addCharToToken(c, token);
-                                } else {
-                                    exit(1);
-                                }
-                            }
-                            oktEscCount++;
-                            break;
-                    case 2:
-                            // avoiding unwated chars
-                            if ((token->val[strlen(token->val)-2] == '3') && (token->val[strlen(token->val)-1] == '7')) {
-                                if ('0' <= c && c <= '7') {
-                                    addCharToToken(c, token);
-                                } else {
-                                    exit(1);
-                                }
-                            } else {
-                                if ('0' <= c && c <= '9') {
-                                    addCharToToken(c, token);
-                                } else {
-                                    exit(1);
-                                }
-                            }
-                            actualState = STRING_S; // sequence read -> go back to string state
-                            break;
-                }
-                break;
-                // end of GET_OKT_S
 
             case NOT_EQ_S:
                 switch(c) {
