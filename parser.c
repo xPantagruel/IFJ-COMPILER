@@ -31,15 +31,39 @@ bool addTokenToExpression(Expression *exp, Token *token)
     return true;
 }
 
+static char rule[] = "start"; //daj do .h
+
+//start rule
+void start(Token *token) {
+    if (token->t == FUNCTION) {
+        // ok
+        // dalsi token musi byt ID
+        rule = "ID";
+    } else {
+        //nevyhovuje
+    }
+}
+
+void chcemId() {
+    //if token == ID
+        //ok -> chcem (
+}
+
 int main()
 {
+
     Token *token = getToken();
     while (strcmp(token->val, "EOF"))
     {
-        printf("%s %d\n", token->val, token->t);
+        if (strcmp(rule, "start")) {
+            start(token);
+        }
+
+
+        // printf("%s %d\n", token->val, token->t);
         dtorToken(token);
         token = getToken();
     }
-    printf("%s\n", token->val);
+    // printf("%s\n", token->val);
     // print EOF
 }
