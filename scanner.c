@@ -314,7 +314,7 @@ Token *getToken() {
                                 addCharToToken(c, token);
                                 break;
                         case 0: //not alpha
-                                switch(isnumber(c)) {
+                                switch(isdigit(c)) {
                                         case 1: //is number
                                                 addCharToToken(c, token);
                                                 break;
@@ -344,7 +344,7 @@ Token *getToken() {
                                             break;
                                             //end of case 0
                                 }
-                                //end of switch by isnumber()
+                                //end of switch by isdigit()
                             break;
                             //end of case 0
                 }
@@ -513,7 +513,7 @@ Token *getToken() {
                 // end of case NUM_S
 
             case NUM_NEEDED_S: 
-                if (isnumber(c)) {
+                if (isdigit(c)) {
                     addCharToToken(c, token);
                     actualState = NUM_S;
                 } else {
@@ -524,7 +524,7 @@ Token *getToken() {
                 //end of case NUM_NEEDED_S
 
             case NUM_OR_PLUSMIN_NEEDED_S:
-                if (isnumber(c) || c == '+' || c == '-') {
+                if (isdigit(c) || c == '+' || c == '-') {
                     addCharToToken(c, token);
                     actualState = NUM_S;
                 } else {
