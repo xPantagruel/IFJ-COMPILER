@@ -15,14 +15,21 @@
 
 Expression *initExpression()
 {
-    Expression *expression = malloc(sizeof(Expression));
-    if (expression == NULL) { //malloc failed
+    Expression *exp = malloc(sizeof(Expression));
+    if (exp == NULL) { //malloc failed
         exit(99);
     }
     exp->arrayLen = 0;
     exp->tokenArray = NULL;
 
-    return expression
+    return exp;
+}
+
+void dtorExpression(Expression *exp) {
+    for (int i = 0; i < exp->arrayLen; i++) {
+        free(exp->tokenArray[i]);
+    }
+    free(exp);
 }
 
 bool addTokenToExpression(Expression *exp, Token *token)
@@ -38,30 +45,26 @@ bool addTokenToExpression(Expression *exp, Token *token)
 }
 
 
-enum pos {
-    PROG,
-    PARAMS,
-    PARAMS_N
-}
-static char rule[] = "start"; //daj do .h -> bude enum nie string
+// enum pos {
+//     PROG,
+//     PARAMS,
+//     PARAMS_N
+// }
+// static char rule[] = "start"; //daj do .h -> bude enum nie string
 
 //start rule
-void start(Token *token) {
-    if (token->t == "statement") {
-        // ok
-        // dalsi token musi byt ID
-        rule = "ID";
-    } else  if (FUNCTION){
-        //nevyhovuje
-    } else {
-        //err
-    }
-}
+// void start(Token *token) {
+//     if (token->t == "statement") {
+//         // ok
+//         // dalsi token musi byt ID
+//         rule = "ID";
+//     } else  if (FUNCTION){
+//         //nevyhovuje
+//     } else {
+//         //err
+//     }
+// }
 
-void chcemId() {
-    //if token == ID
-        //ok -> chcem (
-}
 
 int main()
 {
@@ -69,11 +72,13 @@ int main()
     Token *token = getToken();
     while (strcmp(token->val, "EOF"))
     {
-        if (strcmp(rule, "start")) {
-            start(token);
-        }
 
 
+
+
+        // if (strcmp(rule, "start")) {
+        //     start(token);
+        // }
         // printf("%s %d\n", token->val, token->t);
         dtorToken(token);
         token = getToken();

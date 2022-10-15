@@ -24,4 +24,6 @@ bool topDown(Expression *exp);
 
 Expression *initExpression();
 
+void dtorExpression(Expression *exp);
+
 bool addTokenToExpression(Expression *exp, Token *token);
