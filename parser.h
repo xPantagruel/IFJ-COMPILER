@@ -41,3 +41,9 @@ int statement(Token *t);
 int var_rule(Token *t);
 
 int expression(Token *t);
+
+int condition(Token *t);
+
+int while_rule(Token *t);
+
+int function_call(Token *t);

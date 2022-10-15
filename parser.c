@@ -44,26 +44,10 @@ bool addTokenToExpression(Expression *exp, Token *token)
     return true;
 }
 
-
-//start rule - example -> remove me later
-// void start(Token *token) {
-//     if (token->t == "statement") {
-//         // ok
-//         // dalsi token musi byt ID
-//         rule = "ID";
-//     } else  if (FUNCTION){
-//         //nevyhovuje
-//     } else {
-//         //err
-//     }
-// }
-
 bool prog(Token *t) {
     (void)t;
     return true;
 }
-
-//TODO
 int var_rule(Token *t) {
     (void)t;
     return 1;
@@ -87,11 +71,27 @@ int var_rule(Token *t) {
     // }
 }
 
-//TODO
 int expression(Token *t) {
     (void)t;
     return 1;
 }
+
+int condition(Token *t) {
+    (void)t;
+    return 1;
+}
+
+int while_rule(Token *t) {
+    (void)t;
+    return 1;
+}
+
+int function_call(Token *t) {
+    (void)t;
+    return 1;
+}
+
+
 
 // MATEJ READ ME
 // return 1 - vsetko je ok
@@ -143,18 +143,79 @@ int statement(Token *t) {
                 return 0;
             }
         } else {
-            return 2;
+            return 0;
+        }
+    } else if (t->t == RETURN) { // RETURN
+        t = getToken();
+        if (var_rule(t) == 1) { // RETURN <var_rule>
+            t = getToken();
+            if (t->t == SEMICOL) { // RETURN <var_rule>;
+                return 1;
+            } else {
+                return 0;
+            }
+        } else if (var_rule(t) == 2) {
+            t = getToken();
+            if (expression(t) == 1) { // RETURN <expression>
+                t = getToken();
+                if (t->t == SEMICOL) { // RETURN <expression>;
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    } else if (t->t == IF){ // <condtion> (IF)
+        if (condition(t) == 1) { // <condition>
+            t = getToken();
+            if (statement(t) == 1) { // <condition> <statement>
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
         }
 
-    //TODO doplnit else if RETURN/CONDITION/WHILE/FUNCTION CALL/EPSILON
-    } else {
+    } else if (t->t == WHILE) { //<while> (WHILE)
+        if (while_rule(t) == 1) { // <while>
+            t = getToken();
+            if (statement(t) == 1) { // <while> <statement>
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    } else if (t->t == ID){ // <function_call> (ID)
+        if (function_call(t) == 1) { // <function_call>
+            t = getToken();
+            if (t->t == SEMICOL) { // <function_call> ;
+                t = getToken();
+                if (statement(t) == 1) { // <function_call> ; <statement>
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    } else { // epsilon
         return 2;
     }
 }
 
 int main()
 {   
-    // TODO ako rozoznam epsilon?
+    // TODO ako rozoznam epsilon -> ze napr nebude statement ale rovno }
     // TODO FREE TOKENS when calling getToken again
     if (prog(getToken())) { //STACI TO IBA TAKTO BEZ ENUM RULE A BEZ GLOBALNEJ PREMENNEJ
         return 1;
