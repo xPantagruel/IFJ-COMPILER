@@ -45,7 +45,7 @@ bool addTokenToExpression(Expression *exp, Token *token)
 }
 
 
-//start rule
+//start rule - example -> remove me later
 // void start(Token *token) {
 //     if (token->t == "statement") {
 //         // ok
@@ -58,44 +58,107 @@ bool addTokenToExpression(Expression *exp, Token *token)
 //     }
 // }
 
-void prog(Token *t) {
-    //todo example above
+bool prog(Token *t) {
     (void)t;
+    return true;
 }
 
+//TODO
+int var_rule(Token *t) {
+    (void)t;
+    return 1;
+    // if (t->t == STRING || t->t == STRING || t->t == INT || t->t == FLOAT || t->t == NULL) { // VAR_ID = <var_rule> (VAR_ID/STRING/INT/FLOAT/NULL) 
+    //     t = getToken();
+    //     if (t->t == SEMICOL) { // VAR_ID = <var_rule>;
+    //         r = STATEMENT; // VAR_ID = <var_rule>; <statement>
+    //         return true;
+    //     } else {
+    //         return false; //TODO Exit
+    //     }
+    // } else if (t->t == ID) { // VAR_ID = <var_rule> (<function_call>)
+    //     t = getToken();
+    //     if (t->t == L_PAR) { // VAR_ID = ID (
+    //         //chcem param  a potom ) 
+    //     } else {
+    //         return false; //TODO EXIT
+    //     }
+    // } else {
+    //     return false; //TODO EXIT
+    // }
+}
 
-int main()
-{
-    Token *token = getToken();
-    while (strcmp(token->val, "EOF"))
-    {
-        switch(r) {
-            case PROG:
-                prog(token);
-                break;
-            case PARAMS:
-                break;
-            case PARAMS_N:
-                break;
-            case TYPE_RULE:
-                break;
-            case STATEMENT:
-                break;
-            case VAR_RULE:
-                break;
-            case WHILE_RULE:
-                break;
-            case FUNCTION_CALL:
-                break;
-            case CONDITION:
-                break;
-            case EXPRESSION:
-                break;
+//TODO
+int expression(Token *t) {
+    (void)t;
+    return 1;
+}
+
+// MATEJ READ ME
+// return 1 - vsetko je ok
+// return 2 - ok ale nebudem statement -> mozno ine pravidlo
+// return 0 - vypis error
+int statement(Token *t) { 
+    if (t->t == VAR_ID) { //VAR_ID
+        t = getToken();
+        if (t->t == EQ) { //VAR_ID = 
+            t = getToken();
+            if (t->t == VAR_ID) { // VAR_ID = VAR_ID
+                t = getToken();
+                if (t->t == SEMICOL) { // VAR_ID = VAR_ID;
+                    if (statement(getToken()) == 1) { // VAR_ID = VAR_ID; <statement>
+                        return 1;
+                    } else {
+                        return 0; 
+                    }
+                } else {
+                    return 0;
+                }
+            } else if (var_rule(t) == 1) { // VAR_ID = <var_rule>
+                t = getToken();
+                if (t->t == SEMICOL) { // VAR_ID = <var_rule>;
+                    if (statement(getToken()) == 1) { // VAR_ID = <var_rule>; <statement>
+                        return 1;
+                    } else {
+                        return 0; 
+                    }
+                } else {
+                    return 0;
+                }
+            } else if (var_rule(t) == 2) {
+                if (expression(t) == 1) { // VAR_ID = <expression>
+                    t = getToken();
+                    if (t->t == SEMICOL) { // VAR_ID = <expression>;
+                        if (statement(getToken()) == 1) { // VAR_ID = <expression>; <statement>
+                            return 1;
+                        } else {
+                            return 0; 
+                        }
+                    } else {
+                        return 0;
+                    }
+                } else { // no more options -> error
+                    return 0; 
+                }
+            } else { 
+                return 0;
+            }
+        } else {
+            return 2;
         }
 
-        // printf("%s %d\n", token->val, token->t);
-        dtorToken(token);
-        token = getToken();
+    //TODO doplnit else if RETURN/CONDITION/WHILE/FUNCTION CALL/EPSILON
+    } else {
+        return 2;
     }
-    // printf("%s\n", token->val); // print EOF
+}
+
+int main()
+{   
+    // TODO ako rozoznam epsilon?
+    // TODO FREE TOKENS when calling getToken again
+    if (prog(getToken())) { //STACI TO IBA TAKTO BEZ ENUM RULE A BEZ GLOBALNEJ PREMENNEJ
+        return 1;
+    } else {
+        exit(2);
+    }
 }

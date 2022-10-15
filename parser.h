@@ -20,22 +20,7 @@ typedef struct Expression
     int arrayLen;
 } Expression;
 
-enum rule {
-    PROG,
-    PARAMS,
-    PARAMS_N,
-    TYPE_RULE,
-    STATEMENT,
-    VAR_RULE,
-    WHILE_RULE,
-    FUNCTION_CALL,
-    CONDITION,
-    EXPRESSION
-};
-
-static enum rule r = PROG;
-
-bool topDown(Expression *exp);
+bool bottomUp(Expression *exp);
 
 Expression *initExpression();
 
@@ -43,4 +28,16 @@ void dtorExpression(Expression *exp);
 
 bool addTokenToExpression(Expression *exp, Token *token);
 
-void prog(Token *t);
+bool prog(Token *t);
+
+// return 1 - vsetko je ok
+// return 2 - ok ale nebudem statement -> mozno ine pravidlo
+// return 0 - vypis error
+int statement(Token *t);
+
+// return 1 - vsetko je ok
+// return 2 - ok ale nebudem var_rule -> mozno ine pravidlo
+// return 0 - vypis error
+int var_rule(Token *t);
+
+int expression(Token *t);
