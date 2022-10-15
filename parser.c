@@ -58,24 +58,44 @@ bool addTokenToExpression(Expression *exp, Token *token)
 //     }
 // }
 
+void prog(Token *t) {
+    //todo example above
+    (void)t;
+}
+
 
 int main()
 {
-
     Token *token = getToken();
     while (strcmp(token->val, "EOF"))
     {
+        switch(r) {
+            case PROG:
+                prog(token);
+                break;
+            case PARAMS:
+                break;
+            case PARAMS_N:
+                break;
+            case TYPE_RULE:
+                break;
+            case STATEMENT:
+                break;
+            case VAR_RULE:
+                break;
+            case WHILE_RULE:
+                break;
+            case FUNCTION_CALL:
+                break;
+            case CONDITION:
+                break;
+            case EXPRESSION:
+                break;
+        }
 
-
-
-
-        // if (strcmp(rule, "start")) {
-        //     start(token);
-        // }
         // printf("%s %d\n", token->val, token->t);
         dtorToken(token);
         token = getToken();
     }
-    // printf("%s\n", token->val);
-    // print EOF
+    // printf("%s\n", token->val); // print EOF
 }

@@ -42,3 +42,5 @@ Expression *initExpression();
 void dtorExpression(Expression *exp);
 
 bool addTokenToExpression(Expression *exp, Token *token);
+
+void prog(Token *t);
