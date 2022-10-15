@@ -20,6 +20,21 @@ typedef struct Expression
     int arrayLen;
 } Expression;
 
+enum rule {
+    PROG,
+    PARAMS,
+    PARAMS_N,
+    TYPE_RULE,
+    STATEMENT,
+    VAR_RULE,
+    WHILE_RULE,
+    FUNCTION_CALL,
+    CONDITION,
+    EXPRESSION
+};
+
+static enum rule r = PROG;
+
 bool topDown(Expression *exp);
 
 Expression *initExpression();

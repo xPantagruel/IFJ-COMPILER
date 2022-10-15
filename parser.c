@@ -45,13 +45,6 @@ bool addTokenToExpression(Expression *exp, Token *token)
 }
 
 
-// enum pos {
-//     PROG,
-//     PARAMS,
-//     PARAMS_N
-// }
-// static char rule[] = "start"; //daj do .h -> bude enum nie string
-
 //start rule
 // void start(Token *token) {
 //     if (token->t == "statement") {
