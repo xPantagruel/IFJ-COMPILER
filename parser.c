@@ -31,16 +31,24 @@ bool addTokenToExpression(Expression *exp, Token *token)
     return true;
 }
 
-static char rule[] = "start"; //daj do .h
+
+enum pos {
+    PROG,
+    PARAMS,
+    PARAMS_N
+}
+static char rule[] = "start"; //daj do .h -> bude enum nie string
 
 //start rule
 void start(Token *token) {
-    if (token->t == FUNCTION) {
+    if (token->t == "statement") {
         // ok
         // dalsi token musi byt ID
         rule = "ID";
-    } else {
+    } else  if (FUNCTION){
         //nevyhovuje
+    } else {
+        //err
     }
 }
 
