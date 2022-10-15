@@ -13,10 +13,16 @@
 
 #include "parser.h"
 
-void initExpression(Expression *exp)
+Expression *initExpression()
 {
+    Expression *expression = malloc(sizeof(Expression));
+    if (expression == NULL) { //malloc failed
+        exit(99);
+    }
     exp->arrayLen = 0;
     exp->tokenArray = NULL;
+
+    return expression
 }
 
 bool addTokenToExpression(Expression *exp, Token *token)

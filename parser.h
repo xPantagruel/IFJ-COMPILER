@@ -22,6 +22,6 @@ typedef struct Expression
 
 bool topDown(Expression *exp);
 
-void initExpression(Expression *exp);
+Expression *initExpression();
 
 bool addTokenToExpression(Expression *exp, Token *token);
