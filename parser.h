@@ -20,8 +20,6 @@ typedef struct Expression
     int arrayLen;
 } Expression;
 
-bool bottomUp(Expression *exp);
-
 Expression *initExpression();
 
 void dtorExpression(Expression *exp);
