@@ -43,9 +43,6 @@ void addTokenToExpression(Expression *exp, Token *token)
     exp->arrayLen++;
 }
 
-//<prog> -> FUNCTION <function_call> : <type> { <statement> } <prog>
-//todo return 2 - ok ale nebudem statement -> mozno ine pravidlo
-//todo funkce kontroluju tam i nazev nebo volam jen functionCall jakmile zjistim, ze se jedna o funkci?(zjistit zda nekontroluju neco i zbytecne a pak neprejdu na jiny token diky tomu
 bool prog(Token* token) {
     if (token->t != EOF_T) {//<prog> -> EOF
         if (token->t == FUNCTION) {//FUNCTION 
