@@ -27,21 +27,20 @@ Expression *initExpression()
 
 void dtorExpression(Expression *exp) {
     for (int i = 0; i < exp->arrayLen; i++) {
-        free(exp->tokenArray[i]);
+        dtorToken(exp->tokenArray[i]);
     }
     free(exp);
 }
 
-bool addTokenToExpression(Expression *exp, Token *token)
+void addTokenToExpression(Expression *exp, Token *token)
 {
     exp->tokenArray = realloc(exp->tokenArray, sizeof((exp->arrayLen + 1) * sizeof(Token *)));
     if (exp->tokenArray == NULL)
     {
-        return false;
+        exit(99);
     }
     exp->tokenArray[exp->arrayLen] = token;
     exp->arrayLen++;
-    return true;
 }
 
 bool prog(Token * token) {
@@ -64,9 +63,27 @@ int params_n(Token * token) {
     return 1;
 }
 
-int expression(Token * token) {
-    (void)token;
-    return 1;
+int expression(Token *token) { //tu nema byt nikde free token !!
+    Expression *exp = initExpression();
+
+    while (token->t != SEMICOL && token->t != R_PAR) {
+        addTokenToExpression(exp, token);
+        token = getToken();
+    }
+
+    if (token->t == SEMICOL) {
+        ungetc(';', stdin);
+    } else {
+        ungetc(')', stdin);
+    }
+
+    if (bottomUp(exp)) {
+        dtorExpression(exp);
+        return 1;
+    } else {
+        dtorExpression(exp);
+        return 0;
+    }
 }
 
 int condition(Token * token) {
@@ -322,11 +339,16 @@ int statement(Token *token) {
     }
 }
 
+//TODO REMOVE ME
+bool bottomUp(Expression *exp) {
+    (void)exp;
+    return true;
+}
+
 int main()
 {   
-    // TODO ako rozoznam epsilon -> ze napr nebude statement ale rovno }
-    // TODO FREE TOKENS when calling getToken again
-    if (prog(getToken())) { //STACI TO IBA TAKTO BEZ ENUM RULE A BEZ GLOBALNEJ PREMENNEJ
+    // TODO FREE TOKENS (dtorToken function) when calling getToken again
+    if (prog(getToken())) {
         return 1;
     } else {
         exit(2);

@@ -26,7 +26,7 @@ Expression *initExpression();
 
 void dtorExpression(Expression *exp);
 
-bool addTokenToExpression(Expression *exp, Token *token);
+void addTokenToExpression(Expression *exp, Token *token);
 
 bool prog(Token *token);
 
