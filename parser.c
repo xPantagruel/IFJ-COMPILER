@@ -93,8 +93,17 @@ bool prog(Token* token) {
 }
 
 int type(Token * token) {
-    (void)token;
-    return 1;
+    if (token->t == FLOAT_TYPE) {
+        return 1;
+    }else if (token->t == INT_TYPE ) {
+        return 1;
+    }
+    else if (token->t == STRING_TYPE) {
+        return 1;
+    }
+    else {
+        exit(2);
+    }
 }
 
 int params(Token * token) {
