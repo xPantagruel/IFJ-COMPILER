@@ -74,14 +74,32 @@ int condition(Token *t) {
     return 1;
 }
 
-int while_rule(Token *t) {
+int function_call(Token *t) {
     (void)t;
     return 1;
 }
 
-int function_call(Token *t) {
-    (void)t;
-    return 1;
+int while_rule(Token *t) {
+    if (t->t == WHILE) { // while
+        t = getToken();
+        if (t->t == L_PAR) { //while (
+            t = getToken();
+            if (expression(t) == 1) { // while ( <expression>
+                t = getToken();
+                if (t->t == R_PAR) { // while ( <expression> )
+                    void; //TODO
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    } else {
+        return 2;
+    }
 }
 
 int var_rule(Token *t) {
