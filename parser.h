@@ -28,28 +28,28 @@ void dtorExpression(Expression *exp);
 
 bool addTokenToExpression(Expression *exp, Token *token);
 
-bool prog(Token *t);
+bool prog(Token *token);
 
 // return 1 - vsetko je ok
 // return 2 - ok ale nebudem statement -> mozno ine pravidlo
 // return 0 - vypis error
-int statement(Token *t);
+int statement(Token *token);
 
 // return 1 - vsetko je ok
 // return 2 - ok ale nebudem var_rule -> mozno ine pravidlo
 // return 0 - vypis error
-int var_rule(Token *t);
+int var_rule(Token *token);
 
-int expression(Token *t);
+int expression(Token *token);
 
-int condition(Token *t);
+int condition(Token *token);
 
-int while_rule(Token *t);
+int while_rule(Token *token);
 
-int function_call(Token *t);
+int function_call(Token *token);
 
-int type(Token *t);
+int type(Token *token);
 
-int params(Token *t);
+int params(Token *token);
 
-int params_n(Token *t);
+int params_n(Token *token);

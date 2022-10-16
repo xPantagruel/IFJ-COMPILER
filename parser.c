@@ -50,7 +50,7 @@ bool prog(Token * token) {
 }
 
 int type(Token * token) {
-    (void)t;
+    (void)token;
     return 1;
 }
 
@@ -75,7 +75,7 @@ int condition(Token * token) {
 }
 
 int function_call(Token * token) {
-    (void)t;
+    (void)token;
     return 1;
 }
 
