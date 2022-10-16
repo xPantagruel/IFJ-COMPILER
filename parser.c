@@ -75,8 +75,26 @@ int condition(Token * token) {
 }
 
 int function_call(Token * token) {
-    (void)token;
-    return 1;
+    if (token->t == ID) { // ID
+        token = getToken();
+        if (token->t == L_PAR) { // ID (
+            token = getToken();
+            if (params(token) == 1 || params(token) == 2) { // ID ( <params>
+                token = getToken();
+                if (token->t == R_PAR) { // ID ( <params> )
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    } else {
+        return 2;
+    }
 }
 
 int while_rule(Token *token) {
