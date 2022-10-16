@@ -109,7 +109,7 @@ int type(Token * token) {
         return 1;
     }
     else {
-        exit(2);
+        return 0;
     }
 }
 
