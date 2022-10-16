@@ -70,8 +70,61 @@ int expression(Token * token) {
 }
 
 int condition(Token * token) {
-    (void)token;
-    return 1;
+    if (token->t == IF) { // IF 
+        token = getToken();
+        if (token->t == L_PAR) { // IF (
+            token = getToken();
+            if (expression(token) == 1) { // IF ( <expression>
+                token = getToken();
+                if (token->t == R_PAR) { // IF ( <expression> )
+                    token = getToken();
+                    if (token->t == L_CPAR) { // IF ( <expression> ) {
+                        token = getToken();
+                        if (statement(token) == 1 || statement(token) == 2) { // IF ( <expression> ) { <statement>
+                            token = getToken();
+                            if (token->t == R_CPAR) {  // IF ( <expression> ) { <statement> }
+                                token = getToken();
+                                if (token->t == ELSE) { // IF ( <expression> ) { <statement> } ELSE
+                                    token = getToken();
+                                    if (token->t == L_CPAR) { // IF ( <expression> ) { <statement> } ELSE {
+                                        token = getToken();
+                                        if (statement(token) == 1 || statement(token) == 2) { // IF ( <expression> ) { <statement> } ELSE { <statement>
+                                            token = getToken();
+                                            if (token->t == R_CPAR) { // IF ( <expression> ) { <statement> } ELSE { <statement> }
+                                                return 1;
+                                            } else {
+                                                return 0;
+                                            }
+                                        } else {
+                                            return 0;
+                                        }
+                                    } else {
+                                        return 0;
+                                    }
+                                } else {
+                                    return 0;
+                                }
+                            } else {
+                                return 0;
+                            }
+                        } else {
+                            return 0;
+                        }
+                    } else {
+                        return 0;
+                    }
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    } else {
+        return 2;
+    }
 }
 
 int function_call(Token * token) {
