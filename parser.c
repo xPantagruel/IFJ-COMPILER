@@ -43,52 +43,54 @@ void addTokenToExpression(Expression *exp, Token *token)
     exp->arrayLen++;
 }
 
+//<prog> -> FUNCTION <function_call> : <type> { <statement> } <prog>
 //todo return 2 - ok ale nebudem statement -> mozno ine pravidlo
 //todo funkce kontroluju tam i nazev nebo volam jen functionCall jakmile zjistim, ze se jedna o funkci?(zjistit zda nekontroluju neco i zbytecne a pak neprejdu na jiny token diky tomu
 bool prog(Token* token) {
     if (token->t != EOF_T) {//<prog> -> EOF
-        if (token->t == FUNCTION) {//<prog> -> FUNCTION <function_call> : <type> { <statement> } 
+        if (token->t == FUNCTION) {//FUNCTION 
             token = getToken();
             if (token->t != STRING) {//function name check
                 exit(2);//missing function name
             }
 
             token = getToken();
-            if (!(function_call(token))) {
+            if (function_call(token)==0) {//FUNCTION <function_call>
                 exit(2);//missing function name
             }
 
             token = getToken();
-            if (token->t != COLON) {
+            if (token->t != COLON) {//FUNCTION <function_call> :
                 exit(2);//missing COLON
             }
 
             token = getToken();
-            if (!(type(token))) {
+            if (type(token)==0) {//FUNCTION <function_call> : <type>
                 exit(2);//wrong type
             }
 
             token = getToken();
-            if (token->t != L_CPAR) {
+            if (token->t != L_CPAR) {//FUNCTION <function_call> : <type> {
                 exit(2);//missing L_CPAR
             }
 
             token = getToken();
-            if (!(statement(token))) {
+            if (statement(token)==0) {//FUNCTION <function_call> : <type> { <statement> 
                 exit(2);//invalid statement
             }
 
             token = getToken();
-            if (token->t != R_CPAR) {
+            if (token->t != R_CPAR) {//FUNCTION <function_call> : <type> { <statement> }
                 exit(2);//missing R_CPAR
             }
 
         }
-        else if (!(statement(token))) {//<prog> -> <statement> 
+        else if (statement(token)==0) {//<prog> -> <statement> 
             exit(2);//invalid statement
         }
 
-        if (prog(token)) {
+        token = getToken();
+        if (prog(token)) {//RECURSION
             return true;
         }
         else {
@@ -96,7 +98,7 @@ bool prog(Token* token) {
         }
     }
     else {
-        return false;
+        return true;//EOF
     }
 }
 
