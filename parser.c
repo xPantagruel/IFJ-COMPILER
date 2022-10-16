@@ -44,49 +44,49 @@ bool addTokenToExpression(Expression *exp, Token *token)
     return true;
 }
 
-bool prog(Token *t) {
-    (void)t;
+bool prog(Token * token) {
+    (void)token;
     return true;
 }
 
-int type(Token *t) {
+int type(Token * token) {
     (void)t;
     return 1;
 }
 
-int params(Token *t) {
+int params(Token * token) {
+    (void)token;
+    return 1;
+}
+
+int params_n(Token * token) {
+    (void)token;
+    return 1;
+}
+
+int expression(Token * token) {
+    (void)token;
+    return 1;
+}
+
+int condition(Token * token) {
+    (void)token;
+    return 1;
+}
+
+int function_call(Token * token) {
     (void)t;
     return 1;
 }
 
-int params_n(Token *t) {
-    (void)t;
-    return 1;
-}
-
-int expression(Token *t) {
-    (void)t;
-    return 1;
-}
-
-int condition(Token *t) {
-    (void)t;
-    return 1;
-}
-
-int function_call(Token *t) {
-    (void)t;
-    return 1;
-}
-
-int while_rule(Token *t) {
-    if (t->t == WHILE) { // while
-        t = getToken();
-        if (t->t == L_PAR) { //while (
-            t = getToken();
-            if (expression(t) == 1) { // while ( <expression>
-                t = getToken();
-                if (t->t == R_PAR) { // while ( <expression> )
+int while_rule(Token *token) {
+    if (token->t == WHILE) { // while
+        token = getToken();
+        if (token->t == L_PAR) { //while (
+            token = getToken();
+            if (expression(token) == 1) { // while ( <expression>
+                token = getToken();
+                if (token->t == R_PAR) { // while ( <expression> )
                     void; //TODO
                 } else {
                     return 0;
@@ -102,11 +102,11 @@ int while_rule(Token *t) {
     }
 }
 
-int var_rule(Token *t) {
-    if (t->t == VAR_ID || t->t == STRING || t->t == INT || t->t == FLOAT || t->t == NULL_KEYWORD) { // <var_rule> (VAR_ID/STRING/INT/FLOAT/NULL) 
+int var_rule(Token *token) {
+    if (token->t == VAR_ID || token->t == STRING || token->t == INT || token->t == FLOAT || token->t == NULL_KEYWORD) { // <var_rule> (VAR_ID/STRING/INT/FLOAT/NULL) 
         return 1;
-    } else if (t->t == ID) { // <var_rule> (<function_call> (ID))
-        if (function_call(t) == 1) { // <var_rule> (<function_call>)
+    } else if (token->t == ID) { // <var_rule> (<function_call> (ID))
+        if (function_call(token) == 1) { // <var_rule> (<function_call>)
             return 1;
         } else {
             return 0;
@@ -120,14 +120,14 @@ int var_rule(Token *t) {
 // return 1 - vsetko je ok
 // return 2 - ok ale nebudem statement -> mozno ine pravidlo
 // return 0 - vypis error
-int statement(Token *t) { 
-    if (t->t == VAR_ID) { //VAR_ID
-        t = getToken();
-        if (t->t == EQ) { //VAR_ID = 
-            t = getToken();
-            if (t->t == VAR_ID) { // VAR_ID = VAR_ID
-                t = getToken();
-                if (t->t == SEMICOL) { // VAR_ID = VAR_ID;
+int statement(Token *token) { 
+    if (token->t == VAR_ID) { //VAR_ID
+        token = getToken();
+        if (token->t == EQ) { //VAR_ID = 
+            token = getToken();
+            if (token->t == VAR_ID) { // VAR_ID = VAR_ID
+                token = getToken();
+                if (token->t == SEMICOL) { // VAR_ID = VAR_ID;
                     if (statement(getToken()) == 1) { // VAR_ID = VAR_ID; <statement>
                         return 1;
                     } else {
@@ -136,9 +136,9 @@ int statement(Token *t) {
                 } else {
                     return 0;
                 }
-            } else if (var_rule(t) == 1) { // VAR_ID = <var_rule>
-                t = getToken();
-                if (t->t == SEMICOL) { // VAR_ID = <var_rule>;
+            } else if (var_rule(token) == 1) { // VAR_ID = <var_rule>
+                token = getToken();
+                if (token->t == SEMICOL) { // VAR_ID = <var_rule>;
                     if (statement(getToken()) == 1) { // VAR_ID = <var_rule>; <statement>
                         return 1;
                     } else {
@@ -147,10 +147,10 @@ int statement(Token *t) {
                 } else {
                     return 0;
                 }
-            } else if (var_rule(t) == 2) {
-                if (expression(t) == 1) { // VAR_ID = <expression>
-                    t = getToken();
-                    if (t->t == SEMICOL) { // VAR_ID = <expression>;
+            } else if (var_rule(token) == 2) {
+                if (expression(token) == 1) { // VAR_ID = <expression>
+                    token = getToken();
+                    if (token->t == SEMICOL) { // VAR_ID = <expression>;
                         if (statement(getToken()) == 1) { // VAR_ID = <expression>; <statement>
                             return 1;
                         } else {
@@ -168,20 +168,20 @@ int statement(Token *t) {
         } else {
             return 0;
         }
-    } else if (t->t == RETURN) { // RETURN
-        t = getToken();
-        if (var_rule(t) == 1) { // RETURN <var_rule>
-            t = getToken();
-            if (t->t == SEMICOL) { // RETURN <var_rule>;
+    } else if (token->t == RETURN) { // RETURN
+        token = getToken();
+        if (var_rule(token) == 1) { // RETURN <var_rule>
+            token = getToken();
+            if (token->t == SEMICOL) { // RETURN <var_rule>;
                 return 1;
             } else {
                 return 0;
             }
-        } else if (var_rule(t) == 2) {
-            t = getToken();
-            if (expression(t) == 1) { // RETURN <expression>
-                t = getToken();
-                if (t->t == SEMICOL) { // RETURN <expression>;
+        } else if (var_rule(token) == 2) {
+            token = getToken();
+            if (expression(token) == 1) { // RETURN <expression>
+                token = getToken();
+                if (token->t == SEMICOL) { // RETURN <expression>;
                     return 1;
                 } else {
                     return 0;
@@ -192,10 +192,10 @@ int statement(Token *t) {
         } else {
             return 0;
         }
-    } else if (t->t == IF){ // <condtion> (IF)
-        if (condition(t) == 1) { // <condition>
-            t = getToken();
-            if (statement(t) == 1) { // <condition> <statement>
+    } else if (token->t == IF){ // <condtion> (IF)
+        if (condition(token) == 1) { // <condition>
+            token = getToken();
+            if (statement(token) == 1) { // <condition> <statement>
                 return 1;
             } else {
                 return 0;
@@ -204,10 +204,10 @@ int statement(Token *t) {
             return 0;
         }
 
-    } else if (t->t == WHILE) { //<while> (WHILE)
-        if (while_rule(t) == 1) { // <while>
-            t = getToken();
-            if (statement(t) == 1) { // <while> <statement>
+    } else if (token->t == WHILE) { //<while> (WHILE)
+        if (while_rule(token) == 1) { // <while>
+            token = getToken();
+            if (statement(token) == 1) { // <while> <statement>
                 return 1;
             } else {
                 return 0;
@@ -215,12 +215,12 @@ int statement(Token *t) {
         } else {
             return 0;
         }
-    } else if (t->t == ID){ // <function_call> (ID)
-        if (function_call(t) == 1) { // <function_call>
-            t = getToken();
-            if (t->t == SEMICOL) { // <function_call> ;
-                t = getToken();
-                if (statement(t) == 1) { // <function_call> ; <statement>
+    } else if (token->t == ID){ // <function_call> (ID)
+        if (function_call(token) == 1) { // <function_call>
+            token = getToken();
+            if (token->t == SEMICOL) { // <function_call> ;
+                token = getToken();
+                if (statement(token) == 1) { // <function_call> ; <statement>
                     return 1;
                 } else {
                     return 0;
