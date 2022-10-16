@@ -44,9 +44,53 @@ bool addTokenToExpression(Expression *exp, Token *token)
     return true;
 }
 
+//todo funkce kontroluju tam i nazev nebo volam jen functionCall jakmile zjistim, ze se jedna o funkci?(zjistit zda nekontroluju neco i zbytecne a pak neprejdu na jiny token diky tomu
 bool prog(Token * token) {
-    (void)token;
-    return true;
+    if (token->t != EOF_T) {//<prog> -> EOF
+        if (token->t == FUNCTION) {//<prog> -> FUNCTION <function_call> : <type> { <statement> } 
+            token = getToken();
+            if (token->t != STRING) {//function name check
+                exit(2);//missing function name
+            }
+
+            token = getToken();
+            if (!(function_call(token))) {
+                exit(2);//missing function name
+            }
+
+            token = getToken();
+            if (token->t != COLON) {
+                exit(2);//missing COLON
+            }
+
+            token = getToken();
+            if ( !(type(token)) ) {
+                exit(2);//wrong type
+            }
+
+            token = getToken();
+            if (token->t != L_CPAR) {
+                exit(2);//missing L_CPAR
+            }
+
+            token = getToken();
+            if (!(statement(token))) {
+                exit(2);//invalid statement
+            }
+
+            token = getToken();
+            if (token->t != R_CPAR) {
+                exit(2);//missing R_CPAR
+            }
+            
+        }
+        else if ( !(statement(token)) ) {//<prog> -> <statement> 
+            exit(2);//invalid statement
+        }
+
+        prog(getToken());//RECURSION <prog>
+    }
+    return 1;
 }
 
 int type(Token * token) {
