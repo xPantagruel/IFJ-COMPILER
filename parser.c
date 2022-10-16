@@ -46,7 +46,7 @@ bool addTokenToExpression(Expression *exp, Token *token)
 
 bool prog(Token * token) {
     (void)token;
-    return true;
+    return true; 
 }
 
 int type(Token * token) {
@@ -87,7 +87,22 @@ int while_rule(Token *token) {
             if (expression(token) == 1) { // while ( <expression>
                 token = getToken();
                 if (token->t == R_PAR) { // while ( <expression> )
-                    void; //TODO
+                    token = getToken();
+                    if (token->t == L_CPAR) { // while ( <expression> ) {
+                        token = getToken();
+                        if (statement(token) == 1 || statement(token) == 2) { // while ( <expression> ) { <statement>
+                            token = getToken();
+                            if (token->t == R_CPAR) { // while ( <expression> ) { <statement> }
+                                return 1;
+                            } else {
+                                return 0;
+                            }
+                        } else {
+                            return 0;
+                        }
+                    } else {
+                        return 0;
+                    }
                 } else {
                     return 0;
                 }
