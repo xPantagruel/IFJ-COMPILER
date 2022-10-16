@@ -27,25 +27,24 @@ Expression *initExpression()
 
 void dtorExpression(Expression *exp) {
     for (int i = 0; i < exp->arrayLen; i++) {
-        free(exp->tokenArray[i]);
+        dtorToken(exp->tokenArray[i]);
     }
     free(exp);
 }
 
-bool addTokenToExpression(Expression *exp, Token *token)
+void addTokenToExpression(Expression *exp, Token *token)
 {
     exp->tokenArray = realloc(exp->tokenArray, sizeof((exp->arrayLen + 1) * sizeof(Token *)));
     if (exp->tokenArray == NULL)
     {
-        return false;
+        exit(99);
     }
     exp->tokenArray[exp->arrayLen] = token;
     exp->arrayLen++;
-    return true;
 }
 
 //todo funkce kontroluju tam i nazev nebo volam jen functionCall jakmile zjistim, ze se jedna o funkci?(zjistit zda nekontroluju neco i zbytecne a pak neprejdu na jiny token diky tomu
-bool prog(Token * token) {
+bool prog(Token* token) {
     if (token->t != EOF_T) {//<prog> -> EOF
         if (token->t == FUNCTION) {//<prog> -> FUNCTION <function_call> : <type> { <statement> } 
             token = getToken();
@@ -64,7 +63,7 @@ bool prog(Token * token) {
             }
 
             token = getToken();
-            if ( !(type(token)) ) {
+            if (!(type(token))) {
                 exit(2);//wrong type
             }
 
@@ -82,9 +81,9 @@ bool prog(Token * token) {
             if (token->t != R_CPAR) {
                 exit(2);//missing R_CPAR
             }
-            
+
         }
-        else if ( !(statement(token)) ) {//<prog> -> <statement> 
+        else if (!(statement(token))) {//<prog> -> <statement> 
             exit(2);//invalid statement
         }
 
@@ -108,19 +107,108 @@ int params_n(Token * token) {
     return 1;
 }
 
-int expression(Token * token) {
-    (void)token;
-    return 1;
+int expression(Token *token) { //tu nema byt nikde free token !!
+    Expression *exp = initExpression();
+
+    while (token->t != SEMICOL && token->t != R_PAR) {
+        addTokenToExpression(exp, token);
+        token = getToken();
+    }
+
+    if (token->t == SEMICOL) {
+        ungetc(';', stdin);
+    } else {
+        ungetc(')', stdin);
+    }
+
+    if (bottomUp(exp)) {
+        dtorExpression(exp);
+        return 1;
+    } else {
+        dtorExpression(exp);
+        return 0;
+    }
 }
 
 int condition(Token * token) {
-    (void)token;
-    return 1;
+    if (token->t == IF) { // IF 
+        token = getToken();
+        if (token->t == L_PAR) { // IF (
+            token = getToken();
+            if (expression(token) == 1) { // IF ( <expression>
+                token = getToken();
+                if (token->t == R_PAR) { // IF ( <expression> )
+                    token = getToken();
+                    if (token->t == L_CPAR) { // IF ( <expression> ) {
+                        token = getToken();
+                        if (statement(token) == 1 || statement(token) == 2) { // IF ( <expression> ) { <statement>
+                            token = getToken();
+                            if (token->t == R_CPAR) {  // IF ( <expression> ) { <statement> }
+                                token = getToken();
+                                if (token->t == ELSE) { // IF ( <expression> ) { <statement> } ELSE
+                                    token = getToken();
+                                    if (token->t == L_CPAR) { // IF ( <expression> ) { <statement> } ELSE {
+                                        token = getToken();
+                                        if (statement(token) == 1 || statement(token) == 2) { // IF ( <expression> ) { <statement> } ELSE { <statement>
+                                            token = getToken();
+                                            if (token->t == R_CPAR) { // IF ( <expression> ) { <statement> } ELSE { <statement> }
+                                                return 1;
+                                            } else {
+                                                return 0;
+                                            }
+                                        } else {
+                                            return 0;
+                                        }
+                                    } else {
+                                        return 0;
+                                    }
+                                } else {
+                                    return 0;
+                                }
+                            } else {
+                                return 0;
+                            }
+                        } else {
+                            return 0;
+                        }
+                    } else {
+                        return 0;
+                    }
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    } else {
+        return 2;
+    }
 }
 
 int function_call(Token * token) {
-    (void)token;
-    return 1;
+    if (token->t == ID) { // ID
+        token = getToken();
+        if (token->t == L_PAR) { // ID (
+            token = getToken();
+            if (params(token) == 1 || params(token) == 2) { // ID ( <params>
+                token = getToken();
+                if (token->t == R_PAR) { // ID ( <params> )
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    } else {
+        return 2;
+    }
 }
 
 int while_rule(Token *token) {
@@ -131,7 +219,22 @@ int while_rule(Token *token) {
             if (expression(token) == 1) { // while ( <expression>
                 token = getToken();
                 if (token->t == R_PAR) { // while ( <expression> )
-                    void; //TODO
+                    token = getToken();
+                    if (token->t == L_CPAR) { // while ( <expression> ) {
+                        token = getToken();
+                        if (statement(token) == 1 || statement(token) == 2) { // while ( <expression> ) { <statement>
+                            token = getToken();
+                            if (token->t == R_CPAR) { // while ( <expression> ) { <statement> }
+                                return 1;
+                            } else {
+                                return 0;
+                            }
+                        } else {
+                            return 0;
+                        }
+                    } else {
+                        return 0;
+                    }
                 } else {
                     return 0;
                 }
@@ -172,7 +275,7 @@ int statement(Token *token) {
             if (token->t == VAR_ID) { // VAR_ID = VAR_ID
                 token = getToken();
                 if (token->t == SEMICOL) { // VAR_ID = VAR_ID;
-                    if (statement(getToken()) == 1) { // VAR_ID = VAR_ID; <statement>
+                    if (statement(getToken()) == 1 || statement(getToken()) == 2) { // VAR_ID = VAR_ID; <statement>
                         return 1;
                     } else {
                         return 0; 
@@ -183,7 +286,7 @@ int statement(Token *token) {
             } else if (var_rule(token) == 1) { // VAR_ID = <var_rule>
                 token = getToken();
                 if (token->t == SEMICOL) { // VAR_ID = <var_rule>;
-                    if (statement(getToken()) == 1) { // VAR_ID = <var_rule>; <statement>
+                    if (statement(getToken()) == 1 || statement(getToken()) == 2) { // VAR_ID = <var_rule>; <statement>
                         return 1;
                     } else {
                         return 0; 
@@ -195,7 +298,7 @@ int statement(Token *token) {
                 if (expression(token) == 1) { // VAR_ID = <expression>
                     token = getToken();
                     if (token->t == SEMICOL) { // VAR_ID = <expression>;
-                        if (statement(getToken()) == 1) { // VAR_ID = <expression>; <statement>
+                        if (statement(getToken()) == 1 || statement(getToken()) == 2) { // VAR_ID = <expression>; <statement>
                             return 1;
                         } else {
                             return 0; 
@@ -239,7 +342,7 @@ int statement(Token *token) {
     } else if (token->t == IF){ // <condtion> (IF)
         if (condition(token) == 1) { // <condition>
             token = getToken();
-            if (statement(token) == 1) { // <condition> <statement>
+            if (statement(token) == 1 || statement(token) == 2) { // <condition> <statement>
                 return 1;
             } else {
                 return 0;
@@ -251,7 +354,7 @@ int statement(Token *token) {
     } else if (token->t == WHILE) { //<while> (WHILE)
         if (while_rule(token) == 1) { // <while>
             token = getToken();
-            if (statement(token) == 1) { // <while> <statement>
+            if (statement(token) == 1 || statement(token) == 2) { // <while> <statement>
                 return 1;
             } else {
                 return 0;
@@ -264,7 +367,7 @@ int statement(Token *token) {
             token = getToken();
             if (token->t == SEMICOL) { // <function_call> ;
                 token = getToken();
-                if (statement(token) == 1) { // <function_call> ; <statement>
+                if (statement(token) == 1 || statement(token) == 2) { // <function_call> ; <statement>
                     return 1;
                 } else {
                     return 0;
@@ -280,11 +383,16 @@ int statement(Token *token) {
     }
 }
 
+//TODO REMOVE ME
+bool bottomUp(Expression *exp) {
+    (void)exp;
+    return true;
+}
+
 int main()
 {   
-    // TODO ako rozoznam epsilon -> ze napr nebude statement ale rovno }
-    // TODO FREE TOKENS when calling getToken again
-    if (prog(getToken())) { //STACI TO IBA TAKTO BEZ ENUM RULE A BEZ GLOBALNEJ PREMENNEJ
+    // TODO FREE TOKENS (dtorToken function) when calling getToken again
+    if (prog(getToken())) {
         return 1;
     } else {
         exit(2);
