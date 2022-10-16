@@ -47,3 +47,9 @@ int condition(Token *t);
 int while_rule(Token *t);
 
 int function_call(Token *t);
+
+int type(Token *t);
+
+int params(Token *t);
+
+int params_n(Token *t);

@@ -38,7 +38,7 @@ enum type {
     FUNCTION, // function
     IF, // if
     INT_TYPE, // int
-    NULL_KEYWORD, // NULL
+    NULL_KEYWORD, // null
     RETURN, // return
     STRING_TYPE, // string
     VOID, // void

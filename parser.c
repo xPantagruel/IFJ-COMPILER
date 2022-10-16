@@ -48,27 +48,20 @@ bool prog(Token *t) {
     (void)t;
     return true;
 }
-int var_rule(Token *t) {
+
+int type(Token *t) {
     (void)t;
     return 1;
-    // if (t->t == STRING || t->t == STRING || t->t == INT || t->t == FLOAT || t->t == NULL) { // VAR_ID = <var_rule> (VAR_ID/STRING/INT/FLOAT/NULL) 
-    //     t = getToken();
-    //     if (t->t == SEMICOL) { // VAR_ID = <var_rule>;
-    //         r = STATEMENT; // VAR_ID = <var_rule>; <statement>
-    //         return true;
-    //     } else {
-    //         return false; //TODO Exit
-    //     }
-    // } else if (t->t == ID) { // VAR_ID = <var_rule> (<function_call>)
-    //     t = getToken();
-    //     if (t->t == L_PAR) { // VAR_ID = ID (
-    //         //chcem param  a potom ) 
-    //     } else {
-    //         return false; //TODO EXIT
-    //     }
-    // } else {
-    //     return false; //TODO EXIT
-    // }
+}
+
+int params(Token *t) {
+    (void)t;
+    return 1;
+}
+
+int params_n(Token *t) {
+    (void)t;
+    return 1;
 }
 
 int expression(Token *t) {
@@ -91,9 +84,21 @@ int function_call(Token *t) {
     return 1;
 }
 
+int var_rule(Token *t) {
+    if (t->t == VAR_ID || t->t == STRING || t->t == INT || t->t == FLOAT || t->t == NULL_KEYWORD) { // <var_rule> (VAR_ID/STRING/INT/FLOAT/NULL) 
+        return 1;
+    } else if (t->t == ID) { // <var_rule> (<function_call> (ID))
+        if (function_call(t) == 1) { // <var_rule> (<function_call>)
+            return 1;
+        } else {
+            return 0;
+        }
+    } else {
+        return 2; 
+    }
+}
 
 
-// MATEJ READ ME
 // return 1 - vsetko je ok
 // return 2 - ok ale nebudem statement -> mozno ine pravidlo
 // return 0 - vypis error
