@@ -214,7 +214,7 @@ int statement(Token *token) {
             if (token->t == VAR_ID) { // VAR_ID = VAR_ID
                 token = getToken();
                 if (token->t == SEMICOL) { // VAR_ID = VAR_ID;
-                    if (statement(getToken()) == 1) { // VAR_ID = VAR_ID; <statement>
+                    if (statement(getToken()) == 1 || statement(getToken()) == 2) { // VAR_ID = VAR_ID; <statement>
                         return 1;
                     } else {
                         return 0; 
@@ -225,7 +225,7 @@ int statement(Token *token) {
             } else if (var_rule(token) == 1) { // VAR_ID = <var_rule>
                 token = getToken();
                 if (token->t == SEMICOL) { // VAR_ID = <var_rule>;
-                    if (statement(getToken()) == 1) { // VAR_ID = <var_rule>; <statement>
+                    if (statement(getToken()) == 1 || statement(getToken()) == 2) { // VAR_ID = <var_rule>; <statement>
                         return 1;
                     } else {
                         return 0; 
@@ -237,7 +237,7 @@ int statement(Token *token) {
                 if (expression(token) == 1) { // VAR_ID = <expression>
                     token = getToken();
                     if (token->t == SEMICOL) { // VAR_ID = <expression>;
-                        if (statement(getToken()) == 1) { // VAR_ID = <expression>; <statement>
+                        if (statement(getToken()) == 1 || statement(getToken()) == 2) { // VAR_ID = <expression>; <statement>
                             return 1;
                         } else {
                             return 0; 
@@ -281,7 +281,7 @@ int statement(Token *token) {
     } else if (token->t == IF){ // <condtion> (IF)
         if (condition(token) == 1) { // <condition>
             token = getToken();
-            if (statement(token) == 1) { // <condition> <statement>
+            if (statement(token) == 1 || statement(token) == 2) { // <condition> <statement>
                 return 1;
             } else {
                 return 0;
@@ -293,7 +293,7 @@ int statement(Token *token) {
     } else if (token->t == WHILE) { //<while> (WHILE)
         if (while_rule(token) == 1) { // <while>
             token = getToken();
-            if (statement(token) == 1) { // <while> <statement>
+            if (statement(token) == 1 || statement(token) == 2) { // <while> <statement>
                 return 1;
             } else {
                 return 0;
@@ -306,7 +306,7 @@ int statement(Token *token) {
             token = getToken();
             if (token->t == SEMICOL) { // <function_call> ;
                 token = getToken();
-                if (statement(token) == 1) { // <function_call> ; <statement>
+                if (statement(token) == 1 || statement(token) == 2) { // <function_call> ; <statement>
                     return 1;
                 } else {
                     return 0;
