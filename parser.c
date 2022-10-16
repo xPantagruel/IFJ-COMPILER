@@ -43,6 +43,7 @@ void addTokenToExpression(Expression *exp, Token *token)
     exp->arrayLen++;
 }
 
+//todo return 2 - ok ale nebudem statement -> mozno ine pravidlo
 //todo funkce kontroluju tam i nazev nebo volam jen functionCall jakmile zjistim, ze se jedna o funkci?(zjistit zda nekontroluju neco i zbytecne a pak neprejdu na jiny token diky tomu
 bool prog(Token* token) {
     if (token->t != EOF_T) {//<prog> -> EOF
@@ -87,9 +88,16 @@ bool prog(Token* token) {
             exit(2);//invalid statement
         }
 
-        prog(getToken());//RECURSION <prog>
+        if (prog(token)) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
-    return 1;
+    else {
+        return false;
+    }
 }
 
 int type(Token * token) {
@@ -106,14 +114,54 @@ int type(Token * token) {
     }
 }
 
+//todo <params>->epsilon ----> mozna wasted kontrola staci dat return 2 pokud token co dostanu je ")"
+//todo <params> -> <type> VAR_ID , <params_n>
 int params(Token * token) {
-    (void)token;
-    return 1;
+    if (type(token)) {// <type>
+        token = getToken();
+        if (token->t == VAR_ID) {//<type> VAR_ID
+            if (params_n(token) == 1 || params_n(token) == 2) {
+                if (params(token) == 1 || params(token) == 2) {
+                    return 1;
+                }
+                else {
+                    return 0;
+                }
+            }
+            else {
+                return 0;
+            }
+        }
+        else {
+            return 0;
+        }
+    }
+    else {
+        return 2;
+    }
 }
 
+//<params_n> ->, <type> VAR_ID <params_n>
+//<params_n>->epsilon
 int params_n(Token * token) {
-    (void)token;
-    return 1;
+    Token* tokenTmp = malloc(sizeof(Token));
+    tokenTmp = token;
+    tokenTmp = getToken();
+
+    if (tokenTmp->t == R_PAR) {//next token is )
+        free(tokenTmp);
+        return 1;
+    }
+    else if (tokenTmp->t == COMMA) {//next token is ,
+        free(tokenTmp);
+        token = getToken();//token is set to ,
+        token = getToken();//token is set to the next one 
+        return 2;
+    }
+    else {
+        free(tokenTmp);
+        return 0;
+    }
 }
 
 int expression(Token *token) { //tu nema byt nikde free token !!
