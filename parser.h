@@ -15,11 +15,13 @@
 //#include "bottomUp.h"
 #include <stdbool.h>
 
-typedef struct Expression
+typedef struct Exp
 {
     Token **tokenArray;
     int arrayLen;
 } Expression;
+
+static int iAmInConditionWhileFunRule = 0;
 
 bool bottomUp(Expression *exp);
 
@@ -40,6 +42,8 @@ int statement(Token *token);
 // return 2 - ok ale nebudem var_rule -> mozno ine pravidlo
 // return 0 - vypis error
 int var_rule(Token *token);
+
+bool function_declaration(Token *token);
 
 int expression(Token *token);
 
