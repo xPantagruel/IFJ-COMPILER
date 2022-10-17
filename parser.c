@@ -12,7 +12,6 @@
  */
 
 #include "parser.h"
-#include "bottomUp.h"
 
 Expression *initExpression()
 {
@@ -26,14 +25,15 @@ Expression *initExpression()
     return exp;
 }
 
-void dtorExpression(Expression *exp) {
+void dtorExpression(Expression *exp) { //TODO TU Chyba free moc vela
     for (int i = 0; i < exp->arrayLen; i++) {
-        dtorToken(exp->tokenArray[i]);
+        printf("%s\n", exp->tokenArray[i]->val); //uz to bude free
+        //dtorToken(exp->tokenArray[i]);
     }
-    free(exp);
+    //free(exp);
 }
 
-void addTokenToExpression(Expression *exp, Token *token)
+void addTokenToExpression(Expression *exp, Token *token) //todo mozno tu najskor malloc
 {
     exp->tokenArray = realloc(exp->tokenArray, sizeof((exp->arrayLen + 1) * sizeof(Token *)));
     if (exp->tokenArray == NULL)
@@ -165,6 +165,7 @@ int expression(Token *token) {
         dtorToken(token);
         token = getToken();
     }
+    printf("TU\n");
 
     if (token->t == SEMICOL) {
         ungetc(';', stdin);
@@ -472,9 +473,17 @@ int statement(Token *token) {
     }
 }
 
+//TODO scanner.h -> remove aj v scanner.h
+//Todo error pri vkladani bottomup.h
+//todo komentare
+bool bottomUp(Expression *exp) {
+    (void)exp;
+    return true;
+}
+
 int main()
 {   
-    Token *token = getToken()
+    Token *token = getToken();
     if (prog(token)) {
         dtorToken(token);
         return 0; //exit code 0

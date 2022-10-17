@@ -12,6 +12,7 @@
  */
 
 #include "scanner.h"
+//#include "bottomUp.h"
 #include <stdbool.h>
 
 typedef struct Expression
@@ -19,6 +20,8 @@ typedef struct Expression
     Token **tokenArray;
     int arrayLen;
 } Expression;
+
+bool bottomUp(Expression *exp);
 
 Expression *initExpression();
 
