@@ -117,8 +117,9 @@ int type(Token * token) {
     }
     else if (token->t == STRING_TYPE) {
         return 1;
-    }
-    else {
+    } else if (token->t == VOID) {
+        return 1;
+    } else {
         return 2;
     }
 }
