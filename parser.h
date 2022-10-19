@@ -58,3 +58,5 @@ int type(Token *token);
 int params(Token *token);
 
 int params_n(Token *token);
+
+void pushTokenToStdin(Token *token);

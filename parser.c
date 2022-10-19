@@ -28,7 +28,6 @@ void dtorExpression(Expression *exp) {
     for (int i = 1; i < exp->arrayLen; i++) {
         dtorToken(exp->tokenArray[i]);
     }
-    //free(exp); //TODO hadzalo mi to chybu asi je memory leak
 }
 
 void addTokenToExpression(Expression *exp, Token *token)
@@ -190,6 +189,7 @@ int expression(Token *token) {
 
     while (token->t != SEMICOL && token->t != R_PAR) {
         addTokenToExpression(exp, token);
+        
         //dtorToken(token);
         token = getToken();
     }
@@ -207,6 +207,7 @@ int expression(Token *token) {
         dtorExpression(exp);
         return 0;
     }
+
 }
 
 int condition(Token * token) {
@@ -351,6 +352,14 @@ int while_rule(Token *token) {
     }
 }
 
+void pushTokenToStdin(Token *token) {
+    for (unsigned int i = 0; i < strlen(token->val); i++) {
+        ungetc(token->val[strlen(token->val)-i-1], stdin);
+    }
+
+    dtorToken(token);
+}
+
 int var_rule(Token *token) {
     if (token->t == VAR_ID || token->t == STRING || token->t == INT || token->t == FLOAT || token->t == NULL_KEYWORD) { // <var_rule> (VAR_ID/STRING/INT/FLOAT/NULL) 
         return 1;
@@ -409,6 +418,7 @@ int statement(Token *token) {
                         return 0; 
                     }
                 } else {
+                    pushTokenToStdin(token);
                     if (expression(tmp) == 1) { // VAR_ID = <expression>
                         token = getToken();
                         if (token->t == SEMICOL) { // VAR_ID = <expression> ;
@@ -467,17 +477,39 @@ int statement(Token *token) {
     } else if (token->t == RETURN) { // RETURN
         dtorToken(token);
         token = getToken();
-        if (var_rule(token) == 1) { // RETURN <var_rule>
+        if (token->t == SEMICOL) {
+            return 1;
+        } else if (var_rule(token) == 1) { // RETURN <var_rule>
+            //if token == var_id tak to moze byt expression aj
+            Token *tmp = tokenInit();
+            addRowToToken(token->row, tmp);
+            addTypeToToken(token->t, tmp);
+            for (unsigned long i = 0; i < strlen(token->val); i++) {
+                addCharToToken(token->val[i], tmp);
+            }
+
             dtorToken(token);
             token = getToken();
             if (token->t == SEMICOL) { // RETURN <var_rule>;
+                dtorToken(tmp);
                 return 1;
             } else {
-                return 0;
+                pushTokenToStdin(token);
+                if (expression(tmp) == 1) { // RETURN <expression> in case that first token of expression is VAR_ID
+                    token = getToken();
+                    if (token->t == SEMICOL) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                } else {
+                    return 0;
+                }
             }
         } else if (var_rule(token) == 2) {
             dtorToken(token);
             token = getToken();
+
             if (expression(token) == 1) { // RETURN <expression>
                 //dtorToken(token);
                 token = getToken();
@@ -543,10 +575,7 @@ int statement(Token *token) {
     }
 }
 
-//TODO scanner.h -> remove aj v scanner.h
-//Todo error pri vkladani bottomup.h
 //todo komentare
-//todo testy
 bool bottomUp(Expression *exp) {
     (void)exp;
     return true;
