@@ -22,6 +22,20 @@ void getProlog() {
     int spaceCounter = 0; // auxiliary counter which allow us to count if we passed space char
     while (strlen(prologString) != strlen(prologValidString)) {
         c = getchar();
+
+        if (c == '/') { //skip comment in prolog
+            c = getchar();
+            if (c == '/') {
+                skipLineComment();
+                continue;
+            } else if (c == '*') {
+                skipBlockComment(tokenInit());
+                continue;
+            } else {
+                exit(2);
+            }
+        }
+
         if (c == '\n') { //counting on which line from stdin we are
             row++;
         }
