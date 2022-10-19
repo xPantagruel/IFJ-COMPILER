@@ -16,7 +16,7 @@
 Expression *initExpression()
 {   
     Expression *exp = malloc(sizeof(Expression));
-    if (exp == NULL) { //malloc failed
+    if (exp == NULL) { // malloc failed
         exit(99);
     }
     exp->arrayLen = 0;
@@ -34,7 +34,7 @@ void addTokenToExpression(Expression *exp, Token *token)
 {
     exp->tokenArray = realloc(exp->tokenArray, (exp->arrayLen+1)*sizeof(Token*));
     
-    if (exp->tokenArray == NULL)
+    if (exp->tokenArray == NULL) // realloc failed
     {
         exit(99);
     }
@@ -43,11 +43,12 @@ void addTokenToExpression(Expression *exp, Token *token)
 }
 
 bool function_declaration(Token *token) {
-    if (iAmInConditionWhileFunRule) {
+    if (iAmInConditionWhileFunRule) { // function declaration can't be in IF, WHILE or in other function declaration
         return false;
     }
 
     iAmInConditionWhileFunRule = 1;
+
     dtorToken(token);
     token = getToken();
     if (function_call(token)==0) {//FUNCTION <function_call>
@@ -79,7 +80,7 @@ bool function_declaration(Token *token) {
         return false;//missing R_CPAR
     }
 
-    iAmInConditionWhileFunRule = 0;
+    iAmInConditionWhileFunRule = 0; // I am out of function declaration
     return true;
 }
 
@@ -127,14 +128,14 @@ int params(Token * token) {
     if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT) { // VAR_ID OR STRING OR INT/FLOAT
         dtorToken(token);
         token = getToken();
-        if (params_n(token) == 1) {
+        if (params_n(token) == 1) { // (VAR_ID OR STRING OR INT/FLOAT) <params_n>
             if (params(token)) {
                 return 1;
             }
             else {
                 return 0;
             }
-        } else if (params_n(token) == 2) {
+        } else if (params_n(token) == 2) { // epsilon
             ungetc(')', stdin);
             return 1;
         } else {
@@ -146,14 +147,14 @@ int params(Token * token) {
         if (token->t == VAR_ID || token->t == STRING || token->t == FLOAT || token->t == INT) {//<type> VAR_ID OR <type> STRING OR <type> INT/FLOAT
             dtorToken(token);
             token = getToken();
-            if (params_n(token) == 1) {
+            if (params_n(token) == 1) { // <type> VAR_ID OR <type> STRING OR <type> INT/FLOAT <params_n>
                 if (params(token)) {
                     return 1;
                 }
                 else {
                     return 0;
                 }
-            } else if (params_n(token) == 2) {
+            } else if (params_n(token) == 2) {  //epsilon
                 ungetc(')', stdin);
                 return 1;
             } else {
@@ -162,14 +163,12 @@ int params(Token * token) {
         } else { 
             return 0;
         }
-    } else {
+    } else { // epsilon
         ungetc(')', stdin);
         return 2;
     }
 }
 
-//<params_n> ->, <type> VAR_ID <params_n>
-//<params_n>->epsilon
 int params_n(Token * token) {
     if (token->t == R_PAR) {//next token is )
         return 2;
@@ -187,10 +186,8 @@ int params_n(Token * token) {
 int expression(Token *token) {
     Expression *exp = initExpression();
 
-    while (token->t != SEMICOL && token->t != R_PAR) {
+    while (token->t != SEMICOL && token->t != R_PAR) { // getting all tokens in expression
         addTokenToExpression(exp, token);
-        
-        //dtorToken(token);
         token = getToken();
     }
 
@@ -315,7 +312,6 @@ int while_rule(Token *token) {
             dtorToken(token);
             token = getToken();
             if (expression(token) == 1) { // while ( <expression>
-                //dtorToken(token);
                 token = getToken();
                 if (token->t == R_PAR) { // while ( <expression> )
                     dtorToken(token);
@@ -374,9 +370,6 @@ int var_rule(Token *token) {
     }
 }
 
-// return 1 - vsetko je ok
-// return 2 - ok ale nebudem statement -> mozno ine pravidlo
-// return 0 - vypis error
 int statement(Token *token) { 
     if (token->t == FUNCTION) {
         if (function_declaration(token)) {
@@ -398,7 +391,8 @@ int statement(Token *token) {
             token = getToken();
             if (token->t == VAR_ID) { // VAR_ID = VAR_ID
 
-                //if token == var_id tak to moze byt expression aj
+                //if token == var_id -> can be <expression>
+                //storing previous token
                 Token *tmp = tokenInit();
                 addRowToToken(token->row, tmp);
                 addTypeToToken(token->t, tmp);
@@ -477,10 +471,12 @@ int statement(Token *token) {
     } else if (token->t == RETURN) { // RETURN
         dtorToken(token);
         token = getToken();
-        if (token->t == SEMICOL) {
+        if (token->t == SEMICOL) { // RETURN ;
             return 1;
         } else if (var_rule(token) == 1) { // RETURN <var_rule>
-            //if token == var_id tak to moze byt expression aj
+            
+            //if token == var_id -> can be <expression>
+            //storing previous token
             Token *tmp = tokenInit();
             addRowToToken(token->row, tmp);
             addTypeToToken(token->t, tmp);
@@ -575,7 +571,7 @@ int statement(Token *token) {
     }
 }
 
-//todo komentare
+//TODO REMOVE ME
 bool bottomUp(Expression *exp) {
     (void)exp;
     return true;
@@ -583,12 +579,15 @@ bool bottomUp(Expression *exp) {
 
 int main()
 {   
+    // Example how parser can be called.
     Token *token = getToken();
     if (prog(token)) {
         dtorToken(token);
-        return 0; //exit code 0
+        return 0; // exit code 0
     } else {
         dtorToken(token);
         exit(2);
     }
 }
+
+/*** End of parser.c ***/
