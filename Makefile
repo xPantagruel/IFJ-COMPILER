@@ -6,14 +6,17 @@ all: parser
 run: parser
 	./parser
 
-parser: parser.o scanner.o
-	$(CC) $(CFLAGS) parser.o scanner.o -o parser
+parser: parser.o scanner.o symtable.o
+	$(CC) $(CFLAGS) parser.o scanner.o symtable.o -o parser
 
 parser.o: parser.c
 	$(CC) $(CFLAGS) -c parser.c -o parser.o
 
 scanner.o: scanner.c
 	$(CC) $(CFLAGS) -c scanner.c -o scanner.o
+
+symtable.o: symtable.c
+	$(CC) $(CFLAGS) -c symtable.c -o symtable.o
 
 clean:
 	rm *.o parser
