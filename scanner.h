@@ -92,7 +92,7 @@ static int questionMark = 0;
 
 /**
  * @brief Function which validates prolog.
- *        If proglog isn't valid -> exit(2).
+          If proglog isn't valid -> exit(2).
  */
 void getProlog();
 
@@ -146,11 +146,11 @@ void setOneCharToken(Token *token, int c, int row, enum type t);
 
 /**
  * @brief Optimalized ungetc() function for this project.
- *        Differences: There is if statement which checks
- *                     if last char from stdin was '\n'.
- *                     If yes -> we don't want to put this char back to stdin
- *                               because there will be issue with row counting.
- *                     If no -> put char back to stdin.
+          Differences: There is if statement which checks
+                       if last char from stdin was '\n'.
+                       If yes -> we don't want to put this char back to stdin
+                                 because there will be issue with row counting.
+                       If no -> put char back to stdin.
  *
  * @param c char which will or won't be send back stdin
  */
