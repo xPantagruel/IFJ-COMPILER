@@ -407,15 +407,9 @@ Token *getToken()
         case STRING_S:
             switch (isalpha(c))
             {
-            case 1: // alpha is ok
-                addCharToToken(c, token);
-                break;
             case 0: // not alpha
                 switch (isdigit(c))
                 {
-                case 1: // is number
-                    addCharToToken(c, token);
-                    break;
                 case 0: // not number
                     switch (c)
                     {
@@ -448,10 +442,16 @@ Token *getToken()
                     }
                     break;
                     // end of case 0
+                default: // is number
+                    addCharToToken(c, token);
+                    break;
                 }
                 // end of switch by isdigit()
                 break;
                 // end of case 0
+            default: // alpha is ok
+                addCharToToken(c, token);
+                break;
             }
             // end of switch by isalpha()
             break;
@@ -586,9 +586,6 @@ Token *getToken()
         case NUM_S:
             switch (isdigit(c))
             {       // first will be for sure digit (default case above)
-            case 1: // TRUE
-                addCharToToken(c, token);
-                break;
             case 0: // FALSE
                 switch (tolower(c))
                 {
@@ -640,6 +637,9 @@ Token *getToken()
                     }
                     break;
                 }
+                break;
+            default: //TRUE
+                addCharToToken(c, token);
                 break;
             }
             // end of switch(isdigit(c))
@@ -807,8 +807,7 @@ Token *getToken()
             // end of switch by actualState
         }
     }
-
+    
     return token;
 }
-
 /*** End of scanner.c ***/

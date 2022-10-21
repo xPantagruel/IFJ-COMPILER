@@ -26,9 +26,6 @@ typedef struct Exp
 /** Auxiliary variable to know if we are in <condtion> <while> <function_declaration> rule */
 static int iAmInConditionWhileFunRule = 0;
 
-// TODO REMOVE ME
-bool bottomUp(Expression *exp);
-
 /**
  * @brief Function for initializing expression struct.
  *
@@ -204,5 +201,6 @@ int params_n(Token *token);
  */
 void pushTokenToStdin(Token *token);
 
-/*** End of parser.h ***/
 #endif
+
+/*** End of parser.h ***/

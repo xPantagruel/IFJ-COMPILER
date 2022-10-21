@@ -218,5 +218,6 @@ void error(int errID, Token *token);
  */
 void dtorToken(Token *token);
 
-/*** End of scanner.h ***/
 #endif
+
+/*** End of scanner.h ***/
