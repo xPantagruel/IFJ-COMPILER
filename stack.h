@@ -1,8 +1,15 @@
+#ifndef STACK_H
+#define STACK_H
+
+#include "bottomUp.h"
+#include <stdbool.h>
+
+typedef struct term Term;
 
 typedef struct stackNode
 {
-    StackNode *next;
-    StackNode *previous;
+    struct stackNode *next;
+    struct stackNode *previous;
     Term *term;
 } StackNode;
 
@@ -11,10 +18,14 @@ typedef struct stack
     StackNode *top;
 } Stack;
 
-void initNode(StackNode *n, Term *term);
+StackNode *initNode(Term *term);
 
-void initStack(Stack *s, StackNode *startNode);
+Stack *initStack(StackNode *startNode);
 
 StackNode *pop(Stack *s);
 
-bool *push(Stack *s, StackNode *t);
+bool freeStack(Stack *s);
+
+bool push(Stack *s, StackNode *t);
+
+#endif

@@ -11,8 +11,11 @@
  * @date 2022-10-12
  */
 
+#ifndef PARSER_H
+#define PARSER_H
+
 #include "scanner.h"
-//#include "bottomUp.h"
+#include "bottomUp.h"
 #include <stdbool.h>
 
 typedef struct Expression
@@ -20,8 +23,6 @@ typedef struct Expression
     Token **tokenArray;
     int arrayLen;
 } Expression;
-
-bool bottomUp(Expression *exp);
 
 Expression *initExpression();
 
@@ -54,3 +55,4 @@ int type(Token *token);
 int params(Token *token);
 
 int params_n(Token *token);
+#endif

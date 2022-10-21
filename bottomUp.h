@@ -1,8 +1,13 @@
+#ifndef BOTTOM_UP_H
+#define BOTTOM_UP_H
+
 #include "parser.h"
 #include "scanner.h"
+#include "stack.h"
+#include "parser.h"
 #include <stdbool.h>
 #include <string.h>
-#include "stack.h"
+
 enum termType
 {
     MULT_DIV,
@@ -25,7 +30,7 @@ typedef struct term
     bool isStop;
 } Term;
 
-void initTerm(Term *t, char *value, int type);
+Term *initTerm(char *value, int type);
 
 int convertTokenToTermType(int type);
 
@@ -46,3 +51,5 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2);
 bool ruleEquals(Term *t1, Term *operator, Term * t2);
 
 bool bottomUp(Expression *exp);
+
+#endif
