@@ -821,13 +821,6 @@ int statement(Token *token)
     }
 }
 
-// TODO REMOVE ME
-bool bottomUp(Expression *exp)
-{
-    (void)exp;
-    return true;
-}
-
 int main()
 {
     // Example how parser can be called.

@@ -205,3 +205,4 @@ int params_n(Token *token);
 void pushTokenToStdin(Token *token);
 
 /*** End of parser.h ***/
+#endif
