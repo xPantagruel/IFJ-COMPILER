@@ -105,6 +105,7 @@ void addCharToToken(int c, Token *token)
         {
             exit(99);
         }
+        token->val = strncat(token->val, tmp, 1);
     }
 }
 
