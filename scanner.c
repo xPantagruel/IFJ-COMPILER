@@ -73,20 +73,39 @@ void getProlog()
 
 void dtorToken(Token *token)
 {
-    free(token->val);
-    free(token);
+
+    if (token && token->val != NULL)
+    {
+        free(token->val);
+    }
+
+    if (token)
+    {
+        free(token);
+    }
 }
 
 void addCharToToken(int c, Token *token)
 {
     char tmp[] = {c, '\0'}; // creating "string" so we can use strncat
 
-    if (token->val == NULL)
+    if (token && token->val == NULL)
     {
         token->val = calloc(2, sizeof(char));
+        if (!token->val)
+        {
+            exit(99);
+        }
+        strcpy(token->val, tmp);
     }
-
-    token->val = strncat(token->val, tmp, 1);
+    else
+    {
+        token->val = realloc(token->val, (strlen(token->val) + 1) * sizeof(char));
+        if (!token->val)
+        {
+            exit(99);
+        }
+    }
 }
 
 Token *tokenInit()
