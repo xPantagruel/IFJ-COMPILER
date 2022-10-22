@@ -826,12 +826,12 @@ int main()
     Token *token = getToken();
     if (prog(token))
     {
-        //dtorToken(token);
+        dtorToken(token);
         return 0; // exit code 0
     }
     else
     {
-        //dtorToken(token);
+        dtorToken(token);
         exit(2);
     }
 }

@@ -73,7 +73,6 @@ void getProlog()
 
 void dtorToken(Token *token)
 {
-
     if (token && token->val != NULL)
     {
         free(token->val);
@@ -100,7 +99,7 @@ void addCharToToken(int c, Token *token)
     }
     else
     {
-        token->val = realloc(token->val, (strlen(token->val) + 1) * sizeof(char));
+        token->val = realloc(token->val, (strlen(token->val) + 2) * sizeof(char));
         if (!token->val)
         {
             exit(99);
