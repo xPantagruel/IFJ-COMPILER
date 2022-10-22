@@ -28,16 +28,16 @@ Expression *initExpression()
 
 void dtorExpression(Expression *exp)
 {
-    for (int i = 1; i < exp->arrayLen; i++)
+    for (int i = 0; i < exp->arrayLen; i++)
     {
         dtorToken(exp->tokenArray[i]);
     }
-    // free(exp);
+    free(exp);
 }
 
 void addTokenToExpression(Expression *exp, Token *token)
 {
-    exp->tokenArray = realloc(exp->tokenArray, (exp->arrayLen + 1) * sizeof(Token *));
+    exp->tokenArray = realloc(exp->tokenArray, (exp->arrayLen + 1) * sizeof(Token*));
 
     if (exp->tokenArray == NULL) // realloc failed
     {
@@ -280,7 +280,6 @@ int condition(Token *token)
         token = getToken();
         if (token->t == L_PAR)
         { // IF (
-            dtorToken(token);
             token = getToken();
             if (expression(token))
             { // IF ( <expression>
@@ -427,7 +426,7 @@ int while_rule(Token *token)
             token = getToken();
             if (expression(token) == 1)
             { // while ( <expression>
-                dtorToken(token);
+                //dtorToken(token);
                 token = getToken();
                 if (token->t == R_PAR)
                 { // while ( <expression> )
@@ -827,12 +826,12 @@ int main()
     Token *token = getToken();
     if (prog(token))
     {
-        dtorToken(token);
+        //dtorToken(token);
         return 0; // exit code 0
     }
     else
     {
-        dtorToken(token);
+        //dtorToken(token);
         exit(2);
     }
 }
