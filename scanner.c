@@ -25,25 +25,6 @@ void getProlog()
     {
         c = getchar();
 
-        if (c == '/')
-        { // skip comment in prolog
-            c = getchar();
-            if (c == '/')
-            {
-                skipLineComment();
-                continue;
-            }
-            else if (c == '*')
-            {
-                skipBlockComment(tokenInit());
-                continue;
-            }
-            else
-            {
-                exit(2);
-            }
-        }
-
         if (c == '\n')
         { // counting on which line from stdin we are
             row++;
@@ -55,6 +36,8 @@ void getProlog()
             pos++;
             prologString[pos] = '\0';
             spaceCounter++;
+        } else { // after <?php can be only one space or  \n or tab
+            exit(1);
         }
 
         if (!isspace(c))
