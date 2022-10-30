@@ -93,6 +93,17 @@ static int row = 0;
 /** global variable which helps us to know if question mark will be added */
 static int questionMark = 0;
 
+/** global variable which helps us recognize this case: {\,\,\} -> {\,\}  */
+static int backslashset = 0;
+
+/**
+ * @brief Function which we use to make {\,\} to {\} or {\,n} to {\n} etc..
+ * 
+ * @param c char to which last char of string will be changed
+ * @param token pointer to token
+ */
+void changeLastChar(int c, Token *token);
+
 /**
  * @brief Function which validates prolog.
           If proglog isn't valid -> exit(2).

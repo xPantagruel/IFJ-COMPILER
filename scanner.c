@@ -67,6 +67,21 @@ void dtorToken(Token *token)
     }
 }
 
+void changeLastChar(int c, Token *token) {
+    char tmpStr[strlen(token->val)];
+    strcpy(tmpStr, token->val);
+    tmpStr[strlen(tmpStr)-1] = c;
+
+    free(token->val);
+    token->val = malloc((1 + strlen(tmpStr))*sizeof(char));
+    if (token->val == NULL) {
+        exit(99);
+    }
+    strcpy(token->val, tmpStr);
+
+    token->valLen = token->valLen - 1;
+}
+
 void addCharToToken(int c, Token *token)
 {
     char tmp[] = {c, '\0'}; // creating "string" so we can use strncat
@@ -87,7 +102,22 @@ void addCharToToken(int c, Token *token)
         {
             exit(99);
         }
-        token->val = strncat(token->val, tmp, 1);
+
+        if (c == 'n' && token->val[strlen(token->val)-1] == '\\') { // {\,n} -> {\n}
+            //todo add to .h + comments
+            //todo komment globvar
+            changeLastChar('\n', token);
+        } else if (c == '\\' && token->val[strlen(token->val)-1] == '\\' && backslashset == 0) { // {\,\} -> {\}
+            changeLastChar('\\', token);
+            backslashset = 1;
+        } else if (c == 't' && token->val[strlen(token->val)-1] == '\\') { // {\,t} -> {\t}
+            changeLastChar('\t', token);
+        } else if (c == '"' && token->val[strlen(token->val)-1] == '\\') { // {\,"} -> {"}
+            changeLastChar('"', token);
+        } else {
+            backslashset = 0;
+            token->val = strncat(token->val, tmp, 1);
+        }
     }
 
     token->valLen = token->valLen + 1;
@@ -410,7 +440,7 @@ Token *getToken()
                                     { // end of string
                                         addTypeToToken(STRING, token);
                                         addRowToToken(row, token);
-                                        
+
                                         actualState = START;
                                         tokenFound = 1;
                                     }
