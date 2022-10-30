@@ -71,12 +71,15 @@ enum state
     EQ_S,
     LESS_MORE_S,
     NOT_EQ_S,
-    STRING_S
+    STRING_S,
+    GET_HEX_S,
+    GET_OKT_S
 };
 /** token struct */
 typedef struct token
 {
     char *val;   // value from stdin
+    int valLen;  // lenght of val
     int row;     // row from stdin
     enum type t; // type of value
 } Token;

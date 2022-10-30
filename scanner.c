@@ -89,6 +89,8 @@ void addCharToToken(int c, Token *token)
         }
         token->val = strncat(token->val, tmp, 1);
     }
+
+    token->valLen = token->valLen + 1;
 }
 
 Token *tokenInit()
@@ -103,6 +105,7 @@ Token *tokenInit()
     token->row = -1;
     token->val = NULL;
     token->t = NOT_DEFINED;
+    token->valLen = 0;
 
     return token;
 }
@@ -249,6 +252,9 @@ Token *getToken()
     enum type t = NOT_DEFINED;
     int c; // char -> getchar()
 
+    int hexEscCount = 0; // auxiliary variable, so we know on which position in hex. escape seq. we are
+    int oktEscCount = 0; // auxiliary variable, so we know on which position in okt. escape seq. we are
+
     while (!tokenFound)
     {
         c = getchar();
@@ -389,55 +395,215 @@ Token *getToken()
         case STRING_S:
             switch (isalpha(c))
             {
-            case 0: // not alpha
-                switch (isdigit(c))
-                {
-                case 0: // not number
-                    switch (c)
+                case 0: // not alpha
+                    switch (isdigit(c))
                     {
-                    case '"':
-                        if (token->val[strlen(token->val) - 1] == '\\')
-                        { // char " in string
-                            addCharToToken(c, token);
-                        }
-                        else
-                        { // end of string
-                            addTypeToToken(STRING, token);
-                            addRowToToken(row, token);
-                            actualState = START;
-                            tokenFound = 1;
-                        }
-                        break;
-                    case '$':
-                        if (token->val[strlen(token->val) - 1] == '\\')
-                        { // $ in string must be like "\$"
-                            addCharToToken(c, token);
-                        }
-                        else
-                        {
-                            error(1, token);
-                        }
-                        break;
-                    default: // other chars
-                        addCharToToken(c, token);
-                        break;
+                        case 0: // not number
+                            switch (c)
+                            {
+                                case '"':
+                                    if (token->val[strlen(token->val) - 1] == '\\')
+                                    { // char " in string
+                                        addCharToToken(c, token);
+                                    }
+                                    else
+                                    { // end of string
+                                        addTypeToToken(STRING, token);
+                                        addRowToToken(row, token);
+                                        
+                                        actualState = START;
+                                        tokenFound = 1;
+                                    }
+                                    break;
+                                case '$':
+                                    if (token->val[strlen(token->val) - 1] == '\\')
+                                    { // $ in string must be like "\$"
+                                        addCharToToken(c, token);
+                                    }
+                                    else
+                                    {
+                                        error(1, token);
+                                    }
+                                    break;
+                                default: // other chars
+                                    addCharToToken(c, token);
+                                    break;
+                                }
+                                break;
+                        // end of case 0
+                        case 1: // is number
+                            //check hex. escape seq.
+                            if (token->val[strlen(token->val)-1] == 'x' && token->val[strlen(token->val)-2] == '\\') { // "\xNN"
+                                hexEscCount = 0;
+                                actualState = GET_HEX_S;
+                                unGetC(c);
+                            //check okt. escape seq.
+                            } else if (token->val[strlen(token->val)-1] == '\\') { // "\NNN"
+                                oktEscCount = 0;
+                                actualState = GET_OKT_S;
+                                unGetC(c);
+                            //just number in string
+                            } else {
+                                addCharToToken(c, token);
+                            }
+                            break;
                     }
-                    break;
-                    // end of case 0
-                default: // is number
-                    addCharToToken(c, token);
-                    break;
-                }
-                // end of switch by isdigit()
+                    // end of switch by isdigit()
                 break;
                 // end of case 0
-            default: // alpha is ok
-                addCharToToken(c, token);
-                break;
+                default: // alpha is ok
+                    //check hex. escape seq.
+                    if (token->valLen > 1 && token->val[strlen(token->val)-1] == 'x' && token->val[strlen(token->val)-2] == '\\') { // "\xNN"
+                        hexEscCount = 0;
+                        actualState = GET_HEX_S;
+                        unGetC(c);
+                    } else {
+                        addCharToToken(c, token);
+                    }
+                    break;
             }
             // end of switch by isalpha()
             break;
             // end of case STRING_S
+        case GET_HEX_S:
+                switch (hexEscCount) { // switch index in hex. esc. seq.
+                    case 0:
+                            // avoiding unwatned chars
+                            if (('0' <= c && c <= '9') || ('a' <= tolower(c) && tolower(c) <= 'f')) {
+                                addCharToToken(c, token);
+                            } else {
+                                addCharToToken(c, token);
+                                actualState = STRING_S;
+                                break;
+                            }
+                            hexEscCount++;
+                            break;
+                    case 1:
+                            // avoiding unwanted chars
+                            if (token->val[strlen(token->val)-1] == '0') {
+                                if (('1' <= c && c <= '9') || ('a' <= tolower(c) && tolower(c) <= 'f')) {
+                                    addCharToToken(c, token);
+                                } else {
+                                    addCharToToken(c, token);
+                                    actualState = STRING_S;
+                                    break;
+                                }
+                            } else {
+                                if (('0' <= c && c <= '9') || ('a' <= tolower(c) && tolower(c) <= 'f')) {
+                                    addCharToToken(c, token);
+                                } else {
+                                    addCharToToken(c, token);
+                                    actualState = STRING_S;
+                                    break;
+                                }
+                            }
+                            actualState = STRING_S; // sequence read -> go back to string state
+
+                            char newstr[100] = "0x";
+                            strcat(newstr, &token->val[strlen(token->val)-2]);
+                            int newchar = (int)strtol(newstr, NULL, 16);
+
+                            char tmpStr[strlen(token->val)];
+                            strcpy(tmpStr, token->val);
+                            tmpStr[strlen(tmpStr)-4] = newchar;
+                            tmpStr[strlen(tmpStr)-3] = '\0';
+
+                            free(token->val);
+                            token->val = malloc((1 + strlen(tmpStr))*sizeof(char));
+                            if (token->val == NULL) {
+                                exit(99);
+                            }
+                            strcpy(token->val, tmpStr);
+                            token->valLen = strlen(token->val);
+
+                            break;      
+                }
+                break;
+                // end of GET_HEX_S case
+        case GET_OKT_S: 
+                switch(oktEscCount) { // switch to index of okt. esc. seq.
+                    case 0:
+                            if ('0' <= c && c <= '3') { // avoiding unwatned chars
+                                addCharToToken(c, token);
+                            } else {
+                                addCharToToken(c, token);
+                                actualState = STRING_S;
+                                break;
+                            }
+                            oktEscCount++;
+                            break;
+                    case 1:
+                            // avoiding unwanted chars
+                            if (token->val[strlen(token->val)-1] == '3') {
+                                if ('1' <= c && c <= '7') {
+                                    addCharToToken(c, token);
+                                } else {
+                                    addCharToToken(c, token);
+                                    actualState = STRING_S;
+                                    break;
+                                }
+                            } else {
+                                // avoiding unwatned chars
+                                if ('0' <= c && c <= '9') {
+                                    addCharToToken(c, token);
+                                } else {
+                                    addCharToToken(c, token);
+                                    actualState = STRING_S;
+                                    break;
+                                }
+                            }
+                            oktEscCount++;
+                            break;
+                    case 2:
+                            // avoiding unwated chars
+                            if ((token->val[strlen(token->val)-2] == '3') && (token->val[strlen(token->val)-1] == '7')) {
+                                if ('0' <= c && c <= '7') {
+                                    addCharToToken(c, token);
+                                } else {
+                                    addCharToToken(c, token);
+                                    actualState = STRING_S;
+                                    break;
+                                }
+                            } else if ((token->val[strlen(token->val)-2] == '0') && (token->val[strlen(token->val)-1] == '0')) {
+                                if ('1' <= c && c <= '9') {
+                                    addCharToToken(c, token);
+                                } else {
+                                    addCharToToken(c, token);
+                                    actualState = STRING_S;
+                                    break;
+                                }
+                            } else {
+                                if ('0' <= c && c <= '9') {
+                                    addCharToToken(c, token);
+                                } else {
+                                    addCharToToken(c, token);
+                                    actualState = STRING_S;
+                                    break;
+                                }
+                            }
+                            actualState = STRING_S; // sequence read -> go back to string state
+
+                            char newstr[100] = "";
+                            strcat(newstr, &token->val[strlen(token->val)-3]);
+                            int newchar = (int)strtol(newstr, NULL, 8);
+
+                            char tmpStr[strlen(token->val)];
+                            strcpy(tmpStr, token->val);
+                            tmpStr[strlen(tmpStr)-4] = newchar;
+                            tmpStr[strlen(tmpStr)-3] = '\0';
+
+                            free(token->val);
+                            token->val = malloc((1 + strlen(tmpStr))*sizeof(char));
+                            if (token->val == NULL) {
+                                exit(99);
+                            }
+                            strcpy(token->val, tmpStr);
+                            token->valLen = strlen(token->val);
+
+                            break;
+                }
+                break;
+                // end of GET_OKT_S
 
         case NOT_EQ_S:
             switch (c)
