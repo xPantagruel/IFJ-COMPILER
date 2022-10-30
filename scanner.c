@@ -36,7 +36,7 @@ void getProlog()
             pos++;
             prologString[pos] = '\0';
             spaceCounter++;
-        } else { // after <?php can be only one space or  \n or tab
+        } else if (isspace(c) && spaceCounter == 1) { // after <?php can be only one space or  \n or tab
             exit(1);
         }
 
@@ -127,7 +127,7 @@ int checkId(int c, Token *token)
         {
             return 0;
         }
-        else if (('(' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!' || c == EOF || c == '{' || c == '}')
+        else if (('(' <= c && c <= '/') || (';' <= c && c <= '>') || c == '!' || c == EOF || c == '{' || c == '}' || c == '$')
         { // chars that can be after ID
             unGetC(c);
             return 0;
