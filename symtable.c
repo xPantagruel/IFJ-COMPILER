@@ -181,7 +181,6 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
         str[strlen(key)] = '\0';
 
         t->ptr_arr[index]->pair->key = str;
-        t->ptr_arr[index]->pair->value = 0;
         t->ptr_arr[index]->next = NULL;
         t->size = t->size + 1;
         return t->ptr_arr[index]->pair;
@@ -221,7 +220,6 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
                     str[strlen(key)] = '\0';
                     tmp->next->pair->key = str;
                     tmp->next->next = NULL;
-                    tmp->next->pair->value = 0;
                     t->size = t->size + 1;
                     return tmp->next->pair;
                 }
@@ -229,6 +227,113 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
         }
     }
     return NULL;
+}
+
+int htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount)
+{
+    htab_pair_t *pair = htab_lookup_add(t, name);
+    if (pair->function || pair->variable)
+    {
+        return 1;
+    }
+
+    pair->function = calloc(1, sizeof(htab_function_t));
+    if (!pair->function)
+    {
+        return 2;
+    }
+    pair->function->name = calloc(strlen(name), sizeof(char));
+    if (!pair->function->name)
+    {
+        return 2;
+    }
+    strcpy(pair->function->name, name);
+    pair->function->params = params;
+    pair->function->paramCount = paramCount;
+    pair->function->returnType = returnType;
+    return 0;
+}
+
+int htab_erase_function(htab_function_t *f, int paramCount)
+{
+    for (int i = 0; i < paramCount; i++)
+    {
+        free(f->params[i]->name);
+        free(f->params[i]);
+    }
+
+    free(f->name);
+    free(f->returnType->name);
+    return 0;
+}
+
+int htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum VarType type, bool canBeNull)
+{
+    htab_pair_t *pair = htab_lookup_add(t, name);
+    if (pair->function || pair->variable)
+    {
+        return 1;
+    }
+
+    pair->variable = calloc(1, sizeof(htab_variable_t));
+    if (!pair->variable)
+    {
+        return 2;
+    }
+
+    pair->variable->name = calloc(strlen(name), sizeof(char));
+    if (!pair->variable->name)
+    {
+        return 2;
+    }
+
+    pair->variable->frame = frame;
+    pair->variable->t = type;
+    pair->variable->canBeNull = canBeNull;
+    return 0;
+}
+
+int htab_erase_variable(htab_variable_t *v)
+{
+    free(v->name);
+    free(v);
+    return 1;
+}
+
+
+void htab_print(htab_t * t)
+{
+
+    for (int i = 0; i < SYMTABLE_SIZE; i++)
+    {
+     
+    htab_item_t *item = t->ptr_arr[i];
+    if (item)
+    {
+        printf("-----\n");  
+        while (item){
+            printf("key: %s\n", item->pair->key);
+            if (item->pair->function)
+            {
+                printf("function: %s\n", item->pair->function->name);
+            }
+            if (item->pair->variable)
+            {
+                printf("variable: %s\n", item->pair->variable);
+            }
+            item = item->next;
+        }
+        printf("-----\n"); 
+    {
+        /* code */
+    }
+    }
+    
+    
+    
+    
+    }
+    
 }
 
 // TODO ZMENIT htab_pair STRUKTURU ABY VYHOVOVALA

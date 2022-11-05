@@ -16,7 +16,7 @@
 void getProlog()
 {
     char prologValidString[] = "<?php declare(strict_types=1);"; // prolog string
-    char prologString[strlen(prologValidString) + 1];            // array of chars where chars from getchar() will be saved
+    char * prologString = calloc(strlen(prologValidString) + 1, sizeof(char));            // array of chars where chars from getchar() will be saved
 
     int pos = 0;          // actual position in new string
     int c;                // char
@@ -56,8 +56,10 @@ void getProlog()
 
 void dtorToken(Token *token)
 {
+    printf("\n%s\n", token->val);
     if (token && token->val != NULL)
     {
+        
         free(token->val);
     }
 

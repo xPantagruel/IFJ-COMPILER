@@ -6,8 +6,11 @@ all: parser
 run: parser
 	./parser
 
-parser: parser.o scanner.o bottomUp.o stack.o symtable.o
-	$(CC) $(CFLAGS) parser.o scanner.o bottomUp.o stack.o symtable.o -o parser
+memcheck: parser
+	valgrind --leak-check=full --track-origins=yes ./parser < testFile.txt
+
+parser: parser.o scanner.o bottomUp.o stack.o symtable.o frames.o
+	$(CC) $(CFLAGS) parser.o scanner.o bottomUp.o stack.o symtable.o frames.o -o parser
 
 parser.o: parser.c
 	$(CC) $(CFLAGS) -c parser.c -o parser.o
@@ -24,5 +27,7 @@ scanner.o: scanner.c
 symtable.o: symtable.c
 	$(CC) $(CFLAGS) -c symtable.c -o symtable.o
 
+frames.o: frames.c
+	$(CC) $(CFLAGS) -c frames.c -o frames.o
 clean:
 	rm *.o parser
