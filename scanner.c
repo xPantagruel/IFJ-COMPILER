@@ -56,10 +56,8 @@ void getProlog()
 
 void dtorToken(Token *token)
 {
-    printf("\n%s\n", token->val);
     if (token && token->val != NULL)
-    {
-        
+    {   
         free(token->val);
     }
 
