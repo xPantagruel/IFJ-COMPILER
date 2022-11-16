@@ -9,6 +9,7 @@
  * @brief  Code generation implementation
  * 
  */
+#include "code_generation.h"
 
 /** 
  * Built-in function READS
