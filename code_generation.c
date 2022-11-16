@@ -231,3 +231,21 @@
     // NOT_EQ,       // !==
     // STRING,       // "string \x1F"
     // COLON         // :
+
+    /**
+     * @brief 
+     * 
+     * @param str 
+     * @param add 
+     */
+    void add_to_string(string *str, char *add)
+    {
+        int len = strlen(add);
+        int new_len = str->length + len;
+        str->str = realloc(str->str, new_len + 1);
+        memcpy(str->str + str->length, add, len);
+        str->str[new_len] = '\0';
+        str->length = new_len;
+    }
+
+
