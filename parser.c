@@ -470,7 +470,6 @@ int while_rule(Token *token)
     if (token->t == WHILE)
     { // while
         iAmInConditionWhileFunRule = 1;
-        dtorToken(token);
         token = getToken();
         if (token->t == L_PAR)
         { // while (

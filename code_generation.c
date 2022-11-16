@@ -190,3 +190,44 @@
 "LABEL chr$return \n" \
 "POPFRRAME \n" \
 "RETURN\n" \
+
+
+    //MARTIN
+    // NOT_DEFINED,  // initial type
+    // VAR_ID,       // $variable
+    // SLASH,        // / (divide)
+    // EOF_T,        // EOF
+    // L_PAR,        // (
+    // R_PAR,        // )
+    // L_CPAR,       // {
+    // R_CPAR,       // }
+    // SEMICOL,      // ;
+    // COMMA,        // ,
+    // PLUS,         // +
+    // MINUS,        // -
+    // DOT,          // .
+    // MUL,          // *
+    // ID,           // write, reads..
+    // ELSE,         // else
+    // FLOAT_TYPE,   // float
+
+    //MATEJ
+    // FUNCTION,     // function
+    // IF,           // if
+    // INT_TYPE,     // int
+    // NULL_KEYWORD, // null
+    // RETURN,       // return
+    // STRING_TYPE,  // string
+    // VOID,         // void
+    // WHILE,        // while
+    // INT,          // 123e-1
+    // FLOAT,        // 1.32e+32
+    // EQ,           // =
+    // THREE_EQ,     // ===
+    // LESS,         // <
+    // MORE,         // >
+    // LESS_EQ,      // <=
+    // MORE_EQ,      // >=
+    // NOT_EQ,       // !==
+    // STRING,       // "string \x1F"
+    // COLON         // :
