@@ -122,7 +122,6 @@ bool ruleDecider(Term *terms[3], int termCount)
 
 bool ruleIdentifier(Term *t)
 {
-    printf("Using i rule\n");
     if (t->type != IDENTIFIER)
     {
         return false;
@@ -132,7 +131,6 @@ bool ruleIdentifier(Term *t)
 
 bool rulePlusMinus(Term *t1, Term *operator, Term * t2)
 {
-    printf("Using +- rule\n");
     if (operator->type != PLUS_MINUS)
     {
         return false;
@@ -166,7 +164,6 @@ bool rulePlusMinus(Term *t1, Term *operator, Term * t2)
 
 bool ruleMultDiv(Term *t1, Term *operator, Term * t2)
 {
-    printf("Using */ rule\n");
     if (operator->type != MULT_DIV)
     {
         return false;
@@ -197,7 +194,6 @@ bool ruleMultDiv(Term *t1, Term *operator, Term * t2)
 
 bool ruleBracket(Term *leftBracket, Term *t1, Term *rightBracket)
 {
-    printf("Using () rule\n");
     if (leftBracket->type != L_BRACKET || rightBracket->type != R_BRACKET)
     {
         return false;
@@ -218,7 +214,6 @@ bool ruleBracket(Term *leftBracket, Term *t1, Term *rightBracket)
 
 bool ruleCompare(Term *t1, Term *operator, Term * t2)
 {
-    printf("Using > rule\n");
     if (operator->type != COMPARE)
     {
         return false;
@@ -249,7 +244,6 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2)
 
 bool ruleEquals(Term *t1, Term *operator, Term * t2)
 {
-    printf("Using == rule\n");
     if (operator->type != EQUALS)
     {
         return false;
@@ -280,8 +274,6 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
 
 bool freeAndReturn(bool success, Stack *stack)
 {
-    if (!freeStack(stack))
-        printf("Not freed");
 
     return success;
 }
@@ -317,23 +309,7 @@ bool bottomUp(Expression *exp)
         }
 
         StackNode *tmp = stack->top;
-        while (tmp != NULL)
-        {
-            if (tmp->term->isStop)
-            {
-                printf("<");
-            }
 
-            printf("%s(%d)  ", tmp->term->value, tmp->term->type);
-            tmp = tmp->previous;
-        }
-        printf(" | ");
-
-        for (int i = currentExpPos; i < exp->arrayLen; i++)
-        {
-            printf("%s  ", exp->tokenArray[i]->val);
-        }
-        printf("\n");
         switch (precedenceTable[termType][expType])
         {
         case '<':
@@ -355,8 +331,7 @@ bool bottomUp(Expression *exp)
 
         case '>':
             /* printf("REDUCING\n"); */
-            if (reduce(stack))
-                printf("REDUCING OK\n");
+            reduce(stack);
 
             break; // TODO throw error when false
 
