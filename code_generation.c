@@ -94,6 +94,33 @@ void WRITE(){
     addToString(generatedString,"RETURN\n");
 }
 
+//function floatval(term) : float
+//todo zkontrolovat zda je dobre convert a vypi
+void FLOATVAL(){
+    addToString(generatedString,"LABEL $FLOATVAL \n");
+    addToString(generatedString,"CREATEFRAME\n");
+    addToString(generatedString,"PUSHFRAME\n");
+    addToString(generatedString,"DEFVAR LF@VarFloatval\n");
+    addToString(generatedString,"INT2FLOAT LF@VarFloatval LF@VarFloatval\n");//konvert na float
+    addToString(generatedString,"WRITE LF@VarWrite\n");//vypise na vystup
+    
+    addToString(generatedString,"POPFRAME\n");
+    addToString(generatedString,"RETURN\n");
+}
+
+//function intval(term) : int
+//todo zkontrolovat zda je dobre convert a vypi
+void INTVAL(){
+    addToString(generatedString,"LABEL $INTVAL \n");
+    addToString(generatedString,"CREATEFRAME\n");
+    addToString(generatedString,"PUSHFRAME\n");
+    addToString(generatedString,"DEFVAR LF@VarIntval\n");
+    addToString(generatedString,"FLOAT2INT LF@VarIntval LF@VarIntval\n");//konvert na int
+    addToString(generatedString,"WRITE LF@VarWrite\n");//vypise na vystup
+    
+    addToString(generatedString,"POPFRAME\n");
+    addToString(generatedString,"RETURN\n");
+}
 
 
 // /** 
