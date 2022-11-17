@@ -189,41 +189,41 @@
 "JUMPIFEQ chr$return LF@_cond_range bool@true \n" \
 "INT2CHAR LF@%_ret LF@%0 \n" \
 "LABEL chr$return \n" \
-"POPFRRAME \n" \
+"POPFRAME \n" \
 "RETURN\n" \
 
 
     //MARTIN
-    // NOT_DEFINED,  // initial type
+    // NOT_DEFINED,  // initial type    --
     // VAR_ID,       // $variable
     // SLASH,        // / (divide)
-    // EOF_T,        // EOF
-    // L_PAR,        // (
-    // R_PAR,        // )
-    // L_CPAR,       // {
-    // R_CPAR,       // }
-    // SEMICOL,      // ;
+    // EOF_T,        // EOF             --
+    // L_PAR,        // (               --
+    // R_PAR,        // )               --
+    // L_CPAR,       // {               --
+    // R_CPAR,       // }               --
+    // SEMICOL,      // ;               --
     // COMMA,        // ,
     // PLUS,         // +
     // MINUS,        // -
     // DOT,          // .
     // MUL,          // *
+    // EQ,           // =
     // ID,           // write, reads..
-    // ELSE,         // else
-    // FLOAT_TYPE,   // float
 
     //MATEJ
     // FUNCTION,     // function
     // IF,           // if
+    // ELSE,         // else
     // INT_TYPE,     // int
     // NULL_KEYWORD, // null
     // RETURN,       // return
     // STRING_TYPE,  // string
+    // FLOAT_TYPE,   // float
     // VOID,         // void
     // WHILE,        // while
     // INT,          // 123e-1
     // FLOAT,        // 1.32e+32
-    // EQ,           // =
     // THREE_EQ,     // ===
     // LESS,         // <
     // MORE,         // >
@@ -233,20 +233,158 @@
     // STRING,       // "string \x1F"
     // COLON         // :
 
-    /**
-     * @brief 
-     * 
-     * @param str 
-     * @param add 
-     */
-    void add_to_string(string *str, char *add)
-    {
-        int len = strlen(add);
-        int new_len = str->length + len;
-        str->str = realloc(str->str, new_len + 1);
-        memcpy(str->str + str->length, add, len);
-        str->str[new_len] = '\0';
-        str->length = new_len;
+
+void addToString(char *str, char *newStr)
+{
+    if (str == NULL) {
+        str = calloc(strlen(newStr) + 1, sizeof(char)); 
+    } else {
+        str = realloc(str, (strlen(str) + strlen(newStr) + 1)*sizeof(char));
     }
 
+    if (str == NULL) {
+        exit(99);
+    }
+    strcat(str, newStr);
+}
 
+void store(char *val) {
+    if (storage == NULL) {
+        storage = malloc(sizeof(char*));
+    } else {
+        storage = realloc(storage, (storageLen+1)*sizeof(char*));
+    }
+
+    storage[storageLen] = calloc(strlen(val)+1, sizeof(char));
+    strcpy(storage[storageLen], val);
+
+    storageLen++;
+
+    //todo if malloc fail
+    //todo free -> jednotky a cele
+}
+
+void removeLastFromStorage() {
+    free(storage[storageLen-1]);
+    storage[storageLen-1] = NULL;
+    storageLen--;
+}
+
+void addToOperator(char *op) {
+    operator = calloc(strlen(op) + 1, sizeof(char));
+    strcpy(operator, op);
+}
+
+void removeOperator() {
+    if (operator != NULL) {
+        free(operator);
+    }
+    operator = NULL;
+}
+
+void resetGlobalValues() {
+    removeOperator();
+    if (storage != NULL) {
+        free(storage[storageLen]);
+        free(storage);
+        storage = NULL;
+    }
+    storageLen = 0;
+}
+
+void codeGeneration(Token *token) {
+    int defined = 0;
+    char *frameStr;
+
+    switch (token->t) {
+    case NOT_DEFINED:
+        break;
+    case EOF_T:
+        break;
+    case VAR_ID:
+        //todo typy??, globalne premenne?
+        if (IAmInFunction) {
+            if (strstr(inFunctionString, token->val)) {
+                defined = 1;
+            } 
+        } else {
+            if (strstr(generatedString, token->val)) { // todo ked bude merge tak moze byt v fun ale v global nie definovane
+                defined = 1;
+            } 
+        }
+
+        store(token->val);
+
+        if (!defined) {
+            if (IAmInFunction) {
+                addToString(inFunctionString, "DEFVAR ");
+                addToString(inFunctionString, token->val);
+            } else {
+                addToString(generatedString, "DEFVAR ");
+                addToString(generatedString, token->val);
+            }
+        }
+
+        if (operator != NULL) {
+            if (IAmInFunction) {
+                frameStr = inFunctionString;
+            } else {
+                frameStr = generatedString;
+            }
+
+            //bottom up
+
+            removeOperator();
+        }
+
+
+        //ak neni v stringu -> vytvor (podla toho ci som vo fun)
+        //uloz
+        // ak mam ulozeny operator -> vyprintuj podla operatora a vymaz posledne 2 -> vymaz operator
+
+        //ak ; ) } tak vyresetuj tieto premenne - storage, operator, storagelen ($var = 2)
+
+        //merge fun string a global ked koniec fun
+        break;
+
+    case L_CPAR:
+        cparCounter++;
+        break;
+
+    case R_CPAR:
+        if (cparCounter) {
+            cparCounter--;
+        }
+        if (!cparCounter) {
+            IAmInFunction = 0;
+        }
+        resetGlobalValues();
+        break;
+
+    case L_PAR:
+        break;
+
+    case R_PAR:
+        resetGlobalValues();
+        break;
+
+    case SEMICOL:
+    
+        resetGlobalValues();
+        break;
+
+    case FUNCTION:
+        IAmInFunction = 1;
+        break;
+    
+    default:
+        break;
+    }
+}
+
+//todo remove todos
+//todo komentare
+//todo escape seq -> niektore nemaju byt premenene
+//todo prejst zadanie znova
+//todo pridat do parsru volanie codeGeneration
+//todo free infunction string

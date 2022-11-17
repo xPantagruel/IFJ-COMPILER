@@ -13,6 +13,7 @@
 
 #include "bottomUp.h"
 #include "parser.h"
+#include "code_generation.h"
 
 Expression *initExpression()
 {
@@ -826,11 +827,17 @@ int main()
     if (prog(token))
     {
         dtorToken(token);
+        if (generatedString != NULL) {
+            free(generatedString);
+        }
         return 0; // exit code 0
     }
     else
     {
         dtorToken(token);
+        if (generatedString != NULL) {
+            free(generatedString);
+        }
         exit(2);
     }
 }
