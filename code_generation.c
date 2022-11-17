@@ -14,40 +14,86 @@
 //todo zkontrolovat v zadani špatného formátu a navratove hodnoty
 //function reads() : ?string
 void READS(){
-    addToString(generatedString,"LABEL readS \n");
-    addToString(generatedString,"CREATEFRAME");
-    addToString(generatedString,"PUSHFRAME");
-    addToString(generatedString,"DEFVAR LF@VarReadS");
-    addToString(generatedString,"READ TF@VarReadS string");
-    addToString(generatedString,"POPFRAME");
-    addToString(generatedString,"RETURN");
+    addToString(generatedString,"LABEL $readS \n");
+    addToString(generatedString,"CREATEFRAME\n");
+    addToString(generatedString,"PUSHFRAME\n");
+    addToString(generatedString,"DEFVAR LF@VarReadS\n");
+    addToString(generatedString,"READ LF@VarReadS string\n");
+    addToString(generatedString,"POPFRAME\n");
+    addToString(generatedString,"RETURN\n");
 }
 
 //todo zkontrolovat v zadani špatného formátu a navratove hodnoty
 //function readi() : ?int
 void READI(){
-    addToString(generatedString,"LABEL readS \n");
-    addToString(generatedString,"CREATEFRAME");
-    addToString(generatedString,"PUSHFRAME");
-    addToString(generatedString,"DEFVAR LF@VarReadI");
-    addToString(generatedString,"READ TF@VarReadS int");
-    addToString(generatedString,"POPFRAME");
-    addToString(generatedString,"RETURN");
+    addToString(generatedString,"LABEL $readS \n");
+    addToString(generatedString,"CREATEFRAME\n");
+    addToString(generatedString,"PUSHFRAME\n");
+    addToString(generatedString,"DEFVAR LF@VarReadI\n");
+    addToString(generatedString,"READ LF@VarReadI int\n");
+    addToString(generatedString,"POPFRAME\n");
+    addToString(generatedString,"RETURN\n");
 }
 
 //todo zkontrolovat v zadani špatného formátu a navratove hodnoty
 //function readf() : ?float
 void READF(){
-    addToString(generatedString,"LABEL readS \n");
-    addToString(generatedString,"CREATEFRAME");
-    addToString(generatedString,"PUSHFRAME");
-    addToString(generatedString,"DEFVAR LF@VarReadF");
-    addToString(generatedString,"READ TF@VarReadS float");
-    addToString(generatedString,"POPFRAME");
-    addToString(generatedString,"RETURN");
+    addToString(generatedString,"LABEL $readS\n");
+    addToString(generatedString,"CREATEFRAME\n");
+    addToString(generatedString,"PUSHFRAME\n");
+    addToString(generatedString,"DEFVAR LF@VarReadF\n");
+    addToString(generatedString,"READ LF@VarReadF float\n");
+    addToString(generatedString,"POPFRAME\n");
+    addToString(generatedString,"RETURN\n");
 }
 
-//function write ( term1 , term2 , …, term𝑛 ) : void
+//todo WRITE - zkontrolovat v zadani zda WRITE vypisuje spravne "%a" nebo to ma byt '%a'
+//todo function write ( term1 , term2 , …, term𝑛 ) : void
+//todo osetrit zda kdyz dostanu bool tak co dal 
+//todo vypise write variable ???
+void WRITE(){
+    addToString(generatedString,"LABEL $write \n");
+    addToString(generatedString,"CREATEFRAME\n");
+    addToString(generatedString,"PUSHFRAME\n");
+    addToString(generatedString,"DEFVAR LF@VarWrite\n");
+    addToString(generatedString,"DEFVAR LF@VarType\n");
+
+    //zjistit typ a zapis do VarType
+    addToString(generatedString,"TYPE LF@VarType LF@VarWrite \n");
+
+    //skoc podle hodnoty VarType
+    addToString(generatedString,"JUMPIFEQ $INT LF@VarType int\n");// type == int
+    addToString(generatedString,"JUMPIFEQ $FLOAT LF@VarType float\n");// type == float
+    addToString(generatedString,"JUMPIFEQ $STRING LF@VarType string\n");// type == string
+    addToString(generatedString,"JUMPIFEQ $NULL LF@VarType null\n");// type == NULL
+
+    //int
+    addToString(generatedString,"LABEL $INT\n");
+    addToString(generatedString,"WRITE LF@VarWrite ”%d”\n");
+    addToString(generatedString,"JUMP $END\n");
+
+    //float
+    addToString(generatedString,"LABEL $FLOAT \n");
+    addToString(generatedString,"WRITE LF@VarWrite ”%a”\n");
+    addToString(generatedString,"JUMP $END\n");
+
+    //string 
+    addToString(generatedString,"LABEL $STRING\n");
+    addToString(generatedString,"WRITE LF@VarWrite\n");
+    addToString(generatedString,"JUMP $END\n");
+
+    //hodnota null dle tabulky 1.
+    addToString(generatedString,"LABEL $NULL\n");
+    addToString(generatedString,"WRITE " "\n");
+    addToString(generatedString,"JUMP $END\n");
+
+    //END
+    addToString(generatedString,"LABEL $END\n");
+
+    addToString(generatedString,"POPFRAME\n");
+    addToString(generatedString,"RETURN\n");
+}
+
 
 
 // /** 
