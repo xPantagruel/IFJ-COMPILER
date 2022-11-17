@@ -333,33 +333,20 @@ void STRVAL(){
 
     //MARTIN
     // NOT_DEFINED,  // initial type    --
-    // VAR_ID,       // $variable
-    // SLASH,        // / (divide)
+    // VAR_ID,       // $variable       -- 
+    // SLASH,        // / (divide)      --
     // EOF_T,        // EOF             --
     // L_PAR,        // (               --
     // R_PAR,        // )               --
     // L_CPAR,       // {               --
     // R_CPAR,       // }               --
     // SEMICOL,      // ;               --
-    // COMMA,        // ,
-    // PLUS,         // +
-    // MINUS,        // -
-    // DOT,          // .
-    // MUL,          // *
-    // EQ,           // =
-    // ID,           // write, reads..
+    // PLUS,         // +               --
+    // MINUS,        // -               --
+    // DOT,          // .               --
+    // MUL,          // *               --
+    // EQ,           // =               --
 
-    //MATEJ
-    // FUNCTION,     // function
-    // IF,           // if
-    // ELSE,         // else
-    // INT_TYPE,     // int
-    // NULL_KEYWORD, // null
-    // RETURN,       // return
-    // STRING_TYPE,  // string
-    // FLOAT_TYPE,   // float
-    // VOID,         // void
-    // WHILE,        // while
     // INT,          // 123e-1
     // FLOAT,        // 1.32e+32
     // THREE_EQ,     // ===
@@ -369,21 +356,62 @@ void STRVAL(){
     // MORE_EQ,      // >=
     // NOT_EQ,       // !==
     // STRING,       // "string \x1F"
+
+    //MATEJ
+    // FUNCTION,     // function
+    // ID,           // write, reads..
+    // COMMA,        // ,
     // COLON         // :
+    // IF,           // if
+    // ELSE,         // else
+    // INT_TYPE,     // int
+    // NULL_KEYWORD, // null
+    // RETURN,       // return
+    // STRING_TYPE,  // string
+    // FLOAT_TYPE,   // float
+    // VOID,         // void
+    // WHILE,        // while
 
 
-void addToString(char *str, char *newStr)
+
+void addToString(int str, char *newStr)
 {
-    if (str == NULL) {
-        str = calloc(strlen(newStr) + 1, sizeof(char)); 
-    } else {
-        str = realloc(str, (strlen(str) + strlen(newStr) + 1)*sizeof(char));
-    }
+    if (newStr != NULL) {
+        if (str == 0) {
+            if (generatedString == NULL) {
+                generatedString = calloc(strlen(newStr) + 1, sizeof(char)); 
+            } else {
+                generatedString = realloc(generatedString, (strlen(generatedString) + strlen(newStr) + 1)*sizeof(char));
+            }
 
-    if (str == NULL) {
-        exit(99);
+            if (generatedString == NULL) {
+                exit(99);
+            }
+            strcat(generatedString, newStr);
+        } else if (str == 1) {
+            if (inFunctionString == NULL) {
+                inFunctionString = calloc(strlen(newStr) + 1, sizeof(char)); 
+            } else {
+                inFunctionString = realloc(inFunctionString, (strlen(inFunctionString) + strlen(newStr) + 1)*sizeof(char));
+            }
+
+            if (inFunctionString == NULL) {
+                exit(99);
+            }
+            strcat(inFunctionString, newStr);
+        } else if (str == 2){
+            if (allFunctionsString == NULL) {
+                allFunctionsString = calloc(strlen(newStr) + 1, sizeof(char)); 
+            } else {
+                allFunctionsString = realloc(allFunctionsString, (strlen(allFunctionsString) + strlen(newStr) + 1)*sizeof(char));
+            }
+
+            if (allFunctionsString == NULL) {
+                exit(99);
+            }
+            strcat(allFunctionsString, newStr);
+        }
     }
-    strcat(str, newStr);
 }
 
 void store(char *val) {
@@ -393,31 +421,34 @@ void store(char *val) {
         storage = realloc(storage, (storageLen+1)*sizeof(char*));
     }
 
+    if (storage == NULL) {
+        exit(99);
+    }
+
     storage[storageLen] = calloc(strlen(val)+1, sizeof(char));
+    if (storage[storageLen] == NULL) {
+        exit(99);
+    }
+
     strcpy(storage[storageLen], val);
 
     storageLen++;
-
-    //todo if malloc fail
-    //todo free -> jednotky a cele
 }
 
 void removeLastFromStorage() {
-    free(storage[storageLen-1]);
-    storage[storageLen-1] = NULL;
-    storageLen--;
+    if (storageLen) {
+        free(storage[storageLen-1]);
+        storage[storageLen-1] = NULL;
+        storageLen--;
+    }
 }
 
-void addToOperator(char *op) {
-    operator = calloc(strlen(op) + 1, sizeof(char));
-    strcpy(operator, op);
+void addToOperator(enum type t) {
+    operator = t;
 }
 
 void removeOperator() {
-    if (operator != NULL) {
-        free(operator);
-    }
-    operator = NULL;
+    operator = NOT_DEFINED;
 }
 
 void resetGlobalValues() {
@@ -430,59 +461,112 @@ void resetGlobalValues() {
     storageLen = 0;
 }
 
+void checkStorage() { // $var1 = 3;
+    int frameStr = 0; 
+    char frame[] = " GF@";
+    if (IAmInFunction) {
+        frameStr = 1;
+        strcpy(frame, " LF@");
+    }
+
+    if (storageLen == 2) {
+        addToString(frameStr, "MOVE");
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[0]);
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[1]);
+
+        removeLastFromStorage();
+        removeLastFromStorage();
+    }
+}
+
+void threeAddress(int frameStr, char *frame) {
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[0]);
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[1]);
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[2]);
+    addToString(frameStr, "\n");
+
+    removeLastFromStorage();
+    removeLastFromStorage();
+    removeOperator();
+} 
+
 void codeGeneration(Token *token) {
     int defined = 0;
-    char *frameStr;
+    int frameStr = 0;
+    char frame[] = " GF@";
+    char tmp[strlen(token->val) + strlen("DEFVAR ") + 1];
+    strcpy(tmp, "DEFVAR ");
+    strcat(tmp, token->val);
 
     switch (token->t) {
     case NOT_DEFINED:
         break;
     case EOF_T:
+        addToString(2, generatedString);
+        if (generatedString != NULL) {
+             //free(generatedString);
+        }
+        printf("-------\n"); //todo remove me
+        printf("%s\n", allFunctionsString);
         break;
-    case VAR_ID:
-        //todo typy??, globalne premenne?
+    case VAR_ID: //todo funguje iba pre $var = ... (ked je tam =)
+        //todo typy
         if (IAmInFunction) {
-            if (strstr(inFunctionString, token->val)) {
-                defined = 1;
-            } 
+            if (inFunctionString) {
+                if (strstr(inFunctionString, tmp)) {
+                    defined = 1;
+                }
+            }
+            frameStr = 1;
+            strcpy(frame, " LF@");
         } else {
-            if (strstr(generatedString, token->val)) { // todo ked bude merge tak moze byt v fun ale v global nie definovane
-                defined = 1;
-            } 
+            if (generatedString) {
+
+                if (strstr(generatedString, tmp)) {
+                    defined = 1;
+                } 
+            }
         }
 
         store(token->val);
 
         if (!defined) {
-            if (IAmInFunction) {
-                addToString(inFunctionString, "DEFVAR ");
-                addToString(inFunctionString, token->val);
-            } else {
-                addToString(generatedString, "DEFVAR ");
-                addToString(generatedString, token->val);
-            }
+            addToString(frameStr, "DEFVAR ");
+            addToString(frameStr, token->val);
+            addToString(frameStr, "\n");
         }
 
-        if (operator != NULL) {
-            if (IAmInFunction) {
-                frameStr = inFunctionString;
-            } else {
-                frameStr = generatedString;
+        if (operator != NOT_DEFINED) {
+            switch(operator) {
+                case PLUS:
+                    addToString(frameStr, "ADD");
+                    threeAddress(frameStr, frame);
+                    break;
+                case MINUS:
+                    addToString(frameStr, "SUB");
+                    threeAddress(frameStr, frame);
+                    break;
+                case SLASH:
+                    //todo idiv
+                    addToString(frameStr, "DIV");
+                    threeAddress(frameStr, frame);
+                    break;
+                case MUL:
+                    addToString(frameStr, "MUL");
+                    threeAddress(frameStr, frame);
+                case DOT:
+                    addToString(frameStr, "CONCAT");
+                    threeAddress(frameStr, frame);
+                default:
+                    break;
             }
-
-            //bottom up
-
             removeOperator();
         }
-
-
-        //ak neni v stringu -> vytvor (podla toho ci som vo fun)
-        //uloz
-        // ak mam ulozeny operator -> vyprintuj podla operatora a vymaz posledne 2 -> vymaz operator
-
-        //ak ; ) } tak vyresetuj tieto premenne - storage, operator, storagelen ($var = 2)
-
-        //merge fun string a global ked koniec fun
         break;
 
     case L_CPAR:
@@ -490,11 +574,14 @@ void codeGeneration(Token *token) {
         break;
 
     case R_CPAR:
+        checkStorage();
         if (cparCounter) {
             cparCounter--;
         }
-        if (!cparCounter) {
+        if (!cparCounter && IAmInFunction) {
             IAmInFunction = 0;
+            addToString(2, inFunctionString);
+            free(inFunctionString);
         }
         resetGlobalValues();
         break;
@@ -503,18 +590,35 @@ void codeGeneration(Token *token) {
         break;
 
     case R_PAR:
+        checkStorage();
         resetGlobalValues();
         break;
 
     case SEMICOL:
-    
+        checkStorage();
         resetGlobalValues();
         break;
 
     case FUNCTION:
         IAmInFunction = 1;
         break;
-    
+    case PLUS:
+        addToOperator(PLUS);
+        break;
+    case MINUS:
+        addToOperator(MINUS);
+        break;
+    case SLASH:
+        addToOperator(SLASH);
+        break;
+    case MUL:
+        addToOperator(MUL);
+        break;
+    case DOT:
+        addToOperator(DOT);
+        break;
+    case EQ:
+        break;
     default:
         break;
     }
@@ -525,4 +629,3 @@ void codeGeneration(Token *token) {
 //todo escape seq -> niektore nemaju byt premenene
 //todo prejst zadanie znova
 //todo pridat do parsru volanie codeGeneration
-//todo free infunction string

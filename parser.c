@@ -538,7 +538,7 @@ int statement(Token *token)
     }
     else if (token->t == VAR_ID)
     { // VAR_ID
-        dtorToken(token);
+        //dtorToken(token);
         token = getToken();
         if (token->t == EQ)
         { // VAR_ID =

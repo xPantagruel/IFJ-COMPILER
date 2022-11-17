@@ -19,16 +19,19 @@ static char *generatedString = NULL;
 
 static char *inFunctionString = NULL;
 
+static char *allFunctionsString = NULL; 
+
 static int IAmInFunction = 0;
 
 static int cparCounter = 0;
 
 static int storageLen = 0;
+
 static char **storage = NULL;
 
-static char *operator = NULL;
+static enum type operator = NOT_DEFINED;
 
-void addToString(char *str, char *newStr);
+void addToString(int str, char *newStr);
 
 void codeGeneration(Token *token);
 
@@ -36,8 +39,12 @@ void store(char *val);
 
 void removeLastFromStorage();
 
-void addToOperator(char *op);
+void addToOperator(enum type t);
 
 void removeOperator();
 
 void resetGlobalValues();
+
+void checkStorage();
+
+void threeAddress();
