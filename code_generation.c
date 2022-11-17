@@ -122,6 +122,32 @@ void INTVAL(){
     addToString(generatedString,"RETURN\n");
 }
 
+//function strval(term) : string –
+void STRVAL(){
+    addToString(generatedString,"LABEL $STRVAL \n");
+    addToString(generatedString,"CREATEFRAME\n");
+    addToString(generatedString,"PUSHFRAME\n");
+    addToString(generatedString,"DEFVAR LF@VarStrval\n");
+    addToString(generatedString,"DEFVAR LF@VarType\n");
+
+    //zjistit typ a zapis do VarType
+    addToString(generatedString,"TYPE LF@VarType LF@VarWrite \n");
+    addToString(generatedString,"JUMPIFEQ $NULL LF@VarType null\n");// type == null
+
+    addToString(generatedString,"WRITE LF@VarWrite\n");//vypise na vystup
+    addToString(generatedString,"JUMP $END\n");
+    
+    //hodnota null dle tabulky 1.
+    addToString(generatedString,"LABEL $NULL\n");
+    addToString(generatedString,"WRITE " "\n");
+    addToString(generatedString,"JUMP $END\n");
+
+    //END
+    addToString(generatedString,"LABEL $END\n");
+
+    addToString(generatedString,"POPFRAME\n");
+    addToString(generatedString,"RETURN\n");
+}
 
 // /** 
 //  * Built-in function READS
