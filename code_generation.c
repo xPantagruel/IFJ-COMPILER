@@ -617,10 +617,88 @@ void pushWithoutDeleting(int frameStr, char *frame) {
     addToString(frameStr, "\n");
 }
 
+void rand_str(char *dest, size_t length) {
+    char charset[] = "0123456789"
+                     "abcdefghijklmnopqrstuvwxyz"
+                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    while (length-- > 0) {
+        size_t index = (double) rand() / RAND_MAX * (sizeof charset - 1);
+        *dest++ = charset[index];
+    }
+    *dest = '\0';
+}
+
+int convertToSameType(int frameStr, char *frame) {
+    //pri add az eqs
+
+    // create tmpvariable1
+    // create tmpvariable2
+    // create tmpvariable3
+    // type do tmp1 storage[0]
+    // type do tmp2 storrage[1]
+    // EQ tmp3 tmp1 tmp2
+    
+    //not eq
+        // EQ string@float tmp1
+            //eq
+                //convert storage[1](nazovpremennej) to float
+            //not eq
+                //convert storage[0](nazovpremennej) to float 
+            //return 1
+    //eq
+        //zisti ci su float
+            //ano -> return 1
+        //nie -> return 0 
+
+    char tmp1[11];
+    char tmp2[11];
+    char tmp3[11];
+
+    rand_str(tmp1, 10);
+    rand_str(tmp2, 10);
+    rand_str(tmp3, 10);
+    
+    addToString(frameStr, "DEFVAR ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "DEFVAR ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp2);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "DEFVAR ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp3);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "TYPE ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen-1]);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "TYPE ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp2);
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen-2]);
+    addToString(frameStr, "\n");
+
+
+}
+
 void codeGeneration(Token *token) {
     int defined = 0; // auxiliary variable to know if variable was defined or not
     int frameStr = 0; // generatedString
     char frame[5]; // string of actual frame LF/GF/TF
+
+    // variables used to create random names
+    char randomVar1[11];
+    char randomVar2[11];
 
     // checking if we are in function -> chaning frame
     if (IAmInFunction) {
@@ -642,6 +720,7 @@ void codeGeneration(Token *token) {
 
     case EOF_T: 
         // end of file -> we want to print generated code
+        addToString(2, ".IFJcode22\n");
         addToString(2, generatedString); //merge
        
         if (generatedString != NULL) {
@@ -655,9 +734,6 @@ void codeGeneration(Token *token) {
     case VAR_ID: case INT: case FLOAT: case NULL_KEYWORD:
         //todo typy
         // setting prefix
-
-        //dosiel mi parameter -> dam na stack 
-
         if (token->t == VAR_ID) { // variable -> GF@-var1
             strcpy(var, "-"); 
             strcat(var, token->val);
@@ -709,14 +785,16 @@ void codeGeneration(Token *token) {
         if (operator != NOT_DEFINED) {
             switch(operator) {
                 case PLUS:
+                    
+
                     if (eqSymbolFound) { // $var = $var1 + 2;
                         addToString(frameStr, "ADD");
                         threeAddress(frameStr, frame);
                     } else { // $var1 + 2 (without '=' -> it means that we are for example in condition, so we store result to stack)
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "ADDS\n");
-                        addToString(frameStr, "PUSHS int@1\n");
-                        addToString(frameStr, "ANDS\n");
+                        addToString(frameStr, "PUSHS int@0\n");
+                        addToString(frameStr, "LTS\n"); 
                     }
                     break;
                 case MINUS:
@@ -726,8 +804,8 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "SUBS\n");
-                        addToString(frameStr, "PUSHS int@1\n");
-                        addToString(frameStr, "ANDS\n");
+                        addToString(frameStr, "PUSHS int@0\n");
+                        addToString(frameStr, "LTS\n");
                     }
                     break;
                 case SLASH:
@@ -738,8 +816,8 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "DIVS\n");
-                        addToString(frameStr, "PUSHS int@1\n");
-                        addToString(frameStr, "ANDS\n");
+                        addToString(frameStr, "PUSHS int@0\n");
+                        addToString(frameStr, "LTS\n");
                     }
                     break;
                 case MUL:
@@ -749,8 +827,8 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "MULS\n");
-                        addToString(frameStr, "PUSHS int@1\n");
-                        addToString(frameStr, "ANDS\n");
+                        addToString(frameStr, "PUSHS int@0\n");
+                        addToString(frameStr, "LTS\n");
                     }
                     break;
                 case DOT:
@@ -811,20 +889,23 @@ void codeGeneration(Token *token) {
                     break;
 
                 case LESS_EQ:
+                    rand_str(randomVar1, 10);
+                    rand_str(randomVar2, 10);
+
                     addToString(frameStr, "DEFVAR");
                     addToString(frameStr, frame);
-                    addToString(frameStr, "_aux1");
+                    addToString(frameStr, randomVar1);
                     addToString(frameStr, "\n");
 
                     addToString(frameStr, "DEFVAR");
                     addToString(frameStr, frame);
-                    addToString(frameStr, "_aux2");
+                    addToString(frameStr, randomVar2);
                     addToString(frameStr, "\n");
 
                     if (eqSymbolFound) {
                         addToString(frameStr, "LT"); //LESS
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         if (storage[1] != NULL && storage[1][0] == '-') {
                             addToString(frameStr, frame);
                         } else {
@@ -841,7 +922,7 @@ void codeGeneration(Token *token) {
 
                         addToString(frameStr, "EQ"); //EQ
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         if (storage[1] != NULL && storage[1][0] == '-') {
                             addToString(frameStr, frame);
                         } else {
@@ -864,9 +945,9 @@ void codeGeneration(Token *token) {
                         }
                         addToString(frameStr, storage[0]);
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         addToString(frameStr, "\n");
                                    
                         removeLastFromStorage();
@@ -879,22 +960,24 @@ void codeGeneration(Token *token) {
                         addToString(frameStr, "LTS\n"); //LESS
                         addToString(frameStr, "POPS"); //STORE
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1\n");
+                        addToString(frameStr, randomVar1);
+                        addToString(frameStr, "\n");
 
                         pushWithoutDeleting(frameStr, frame);
 
                         addToString(frameStr, "EQS\n"); //EQ
                         addToString(frameStr, "POPS"); //STORE
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2\n");
+                        addToString(frameStr, randomVar2);
+                        addToString(frameStr, "\n");
 
                         addToString(frameStr, "PUSHS");
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         addToString(frameStr, "\n");
                         addToString(frameStr, "PUSHS");
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         addToString(frameStr, "\n");
 
                         addToString(frameStr, "ORS\n"); //OR
@@ -905,20 +988,23 @@ void codeGeneration(Token *token) {
                     }
                     break;
                 case MORE_EQ:
+                    rand_str(randomVar1, 10);
+                    rand_str(randomVar2, 10);
+
                     addToString(frameStr, "DEFVAR");
                     addToString(frameStr, frame);
-                    addToString(frameStr, "_aux1");
+                    addToString(frameStr, randomVar1);
                     addToString(frameStr, "\n");
 
                     addToString(frameStr, "DEFVAR");
                     addToString(frameStr, frame);
-                    addToString(frameStr, "_aux2");
+                    addToString(frameStr, randomVar2);
                     addToString(frameStr, "\n");
 
                     if (eqSymbolFound) {
                         addToString(frameStr, "GT"); //MORE
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         if (storage[1] != NULL && storage[1][0] == '-') {
                             addToString(frameStr, frame);
                         } else {
@@ -935,7 +1021,7 @@ void codeGeneration(Token *token) {
 
                         addToString(frameStr, "EQ"); //EQ
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         if (storage[1] != NULL && storage[1][0] == '-') {
                             addToString(frameStr, frame);
                         } else {
@@ -958,9 +1044,9 @@ void codeGeneration(Token *token) {
                         }
                         addToString(frameStr, storage[0]);
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         addToString(frameStr, "\n");
                                    
                         removeLastFromStorage();
@@ -973,22 +1059,24 @@ void codeGeneration(Token *token) {
                         addToString(frameStr, "GTS\n"); //MORE
                         addToString(frameStr, "POPS"); //STORE
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1\n");
+                        addToString(frameStr, randomVar1);
+                        addToString(frameStr, "\n");
 
                         pushWithoutDeleting(frameStr, frame);
 
                         addToString(frameStr, "EQS\n"); //EQ
                         addToString(frameStr, "POPS"); //STORE
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2\n");
+                        addToString(frameStr, randomVar2);
+                        addToString(frameStr, "\n");
 
                         addToString(frameStr, "PUSHS");
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         addToString(frameStr, "\n");
                         addToString(frameStr, "PUSHS");
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         addToString(frameStr, "\n");
 
                         addToString(frameStr, "ORS\n"); //OR
@@ -1080,8 +1168,8 @@ void codeGeneration(Token *token) {
             }
             addToString(frameStr, storage[0]);
             addToString(frameStr, "\n");
-            addToString(frameStr, "PUSHS int@1\n");
-            addToString(frameStr, "ANDS\n");
+            addToString(frameStr, "PUSHS int@0\n");
+            addToString(frameStr, "LTS\n");
             removeLastFromStorage();
         }
 

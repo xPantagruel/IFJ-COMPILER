@@ -137,4 +137,8 @@ void pushStorage(int frameStr, char *frame);
  */
 void pushWithoutDeleting(int frameStr, char *frame);
 
+int convertToSameType(int frameStr, char *frame);
+
+void rand_str(char *dest, size_t length);
+
 /*** End of code_generation.h ***/
