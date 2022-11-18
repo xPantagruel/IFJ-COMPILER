@@ -149,6 +149,58 @@ void STRVAL(){
     addToString(0,"RETURN\n");
 }
 
+//function strlen(string $𝑠) : int
+void STRLEN(){
+    addToString(0,"LABEL $STRLEN \n");
+    addToString(0,"CREATEFRAME\n");
+    addToString(0,"PUSHFRAME\n");
+    addToString(0,"DEFVAR LF@VarStrlen\n");
+    addToString(0,"DEFVAR LF@Length\n");
+    addToString(0,"STRLEN LF@Length LF@VarStrlen\n");
+    addToString(0,"WRITE LF@Length\n");//vypise na vystup
+    addToString(0,"POPFRAME\n");
+    addToString(0,"RETURN\n");
+}
+
+//• function substring(string $𝑠, int $𝑖, int $𝑗) : ?string –
+void SUBSTRING(){
+
+}
+
+//function ord(string $c) : int –
+void ORD(){
+    addToString(0,"LABEL $ORD \n");
+    addToString(0,"CREATEFRAME\n");
+    addToString(0,"PUSHFRAME\n");
+    addToString(0,"DEFVAR LF@VarOrd\n");
+    addToString(0,"DEFVAR LF@Length\n");
+    addToString(0,"STRLEN LF@Length LF@VarOrd\n");
+
+    addToString(0,"JUMPIFEQ 0 LF@Length END\n");// string je prazdny
+    addToString(0,"DEFVAR LF@Ord\n");
+
+    addToString(0,"GETCHAR LF@Ord LF@VarOrd 0 \n");//ziskani prvniho znaku
+    addToString(0,"WRITE LF@Ord\n");//vypise na vystup
+
+    //END
+    addToString(0,"LABEL $END\n");
+    addToString(0,"POPFRAME\n");
+    addToString(0,"RETURN\n");
+}
+
+//function chr(int $i) : string –
+//todo doresit 
+void CHR(){
+    addToString(0,"LABEL $CHR \n");
+    addToString(0,"CREATEFRAME\n");
+    addToString(0,"PUSHFRAME\n");
+    addToString(0,"DEFVAR LF@VarChr\n");
+
+
+    addToString(0,"POPFRAME\n");
+    addToString(0,"RETURN\n");
+}
+
 // /** 
 //  * Built-in function READS
 //  * 
