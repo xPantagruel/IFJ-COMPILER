@@ -373,11 +373,11 @@ void STRVAL(){
     // WHILE,        // while
 
 
-
 void addToString(int str, char *newStr)
 {
     if (newStr != NULL) {
-        if (str == 0) {
+        if (str == 0) { // generatedString
+            // creating space for new string
             if (generatedString == NULL) {
                 generatedString = calloc(strlen(newStr) + 1, sizeof(char)); 
             } else {
@@ -388,7 +388,9 @@ void addToString(int str, char *newStr)
                 exit(99);
             }
             strcat(generatedString, newStr);
-        } else if (str == 1) {
+
+        } else if (str == 1) { // inFunctionString
+            // creating space for new string
             if (inFunctionString == NULL) {
                 inFunctionString = calloc(strlen(newStr) + 1, sizeof(char)); 
             } else {
@@ -399,7 +401,9 @@ void addToString(int str, char *newStr)
                 exit(99);
             }
             strcat(inFunctionString, newStr);
-        } else if (str == 2){
+
+        } else if (str == 2){ // allFunctionsString
+            // creating space for new string
             if (allFunctionsString == NULL) {
                 allFunctionsString = calloc(strlen(newStr) + 1, sizeof(char)); 
             } else {
@@ -415,6 +419,7 @@ void addToString(int str, char *newStr)
 }
 
 void store(char *val) {
+    //creating space for new item
     if (storage == NULL) {
         storage = malloc(sizeof(char*));
     } else {
@@ -464,23 +469,23 @@ void resetGlobalValues() {
     eqSymbolFound = 0;
 }
 
-void checkStorage() { // $var1 = 3;
+void checkStorage() {
     int frameStr = 0; 
     char frame[] = " GF@";
     if (IAmInFunction) {
-        frameStr = 1;
+        frameStr = 1; // inFunctionString
         strcpy(frame, " LF@");
     }
 
-    if (storageLen == 2) {
+    if (storageLen == 2) { // case $var = 1;
         addToString(frameStr, "MOVE");
-        if (storage[0] != NULL && storage[0][0] == '-') {
+        if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
             addToString(frameStr, frame);
         } else {
             addToString(frameStr, " ");
         }
         addToString(frameStr, storage[0]);
-        if (storage[1] != NULL && storage[1][0] == '-') {
+        if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
             addToString(frameStr, frame);
         } else {
             addToString(frameStr, " ");
@@ -494,19 +499,19 @@ void checkStorage() { // $var1 = 3;
 }
 
 void threeAddress(int frameStr, char *frame) {
-    if (storage[0] != NULL && storage[0][0] == '-') {
+    if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
     } else {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[0]);
-    if (storage[1] != NULL && storage[1][0] == '-') {
+    if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
     } else {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[1]);
-    if (storage[2] != NULL && storage[2][0] == '-') {
+    if (storage[2] != NULL && storage[2][0] == '-') { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
     } else {
         addToString(frameStr, " ");
@@ -521,7 +526,7 @@ void threeAddress(int frameStr, char *frame) {
 
 void pushStorage(int frameStr, char *frame) {
     addToString(frameStr, "PUSHS");
-    if (storage[0] != NULL && storage[0][0] == '-') {
+    if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
     } else {
         addToString(frameStr, " ");
@@ -529,7 +534,7 @@ void pushStorage(int frameStr, char *frame) {
     addToString(frameStr, storage[0]);
     addToString(frameStr, "\n");
     addToString(frameStr, "PUSHS");
-    if (storage[1] != NULL && storage[1][0] == '-') {
+    if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
     } else {
         addToString(frameStr, " ");
@@ -544,7 +549,7 @@ void pushStorage(int frameStr, char *frame) {
 
 void pushWithoutDeleting(int frameStr, char *frame) {
     addToString(frameStr, "PUSHS");
-    if (storage[0] != NULL && storage[0][0] == '-') {
+    if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
     } else {
         addToString(frameStr, " ");
@@ -552,7 +557,7 @@ void pushWithoutDeleting(int frameStr, char *frame) {
     addToString(frameStr, storage[0]);
     addToString(frameStr, "\n");
     addToString(frameStr, "PUSHS");
-    if (storage[1] != NULL && storage[1][0] == '-') {
+    if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
     } else {
         addToString(frameStr, " ");
@@ -562,51 +567,62 @@ void pushWithoutDeleting(int frameStr, char *frame) {
 }
 
 void codeGeneration(Token *token) {
-    int defined = 0;
-    int frameStr = 0;
-    char frame[5];
+    int defined = 0; // auxiliary variable to know if variable was defined or not
+    int frameStr = 0; // generatedString
+    char frame[5]; // string of actual frame LF/GF/TF
+
+    // checking if we are in function -> chaning frame
     if (IAmInFunction) {
         strcpy(frame, " LF@");
     } else {
         strcpy(frame, " GF@");
     }
+    
+    // auxiliary variable for declarating new variables
     char tmp[strlen(token->val) + strlen("DEFVAR GF@") + 1];
     strcpy(tmp, "DEFVAR");
 
-    char var[strlen(token->val) + strlen(" string@") + 1]; 
+    // auxiliary variable which will be send to threeAddress function as newStr
+    char var[strlen(token->val) + strlen(" string@") + 1]; // max lenght which can occur
 
-    switch (token->t) {
+    switch (token->t) { // switch by token type
     case NOT_DEFINED:
         break;
-    case EOF_T:
-        addToString(2, generatedString);
+
+    case EOF_T: 
+        // end of file -> we want to print generated code
+        addToString(2, generatedString); //merge
+       
         if (generatedString != NULL) {
              //free(generatedString); 
         }
+
         printf("\n---\n"); //todo
         printf("%s\n", allFunctionsString);
         break;
+
     case VAR_ID: case INT: case FLOAT:
         //todo typy
-        if (token->t == VAR_ID) {
-            strcpy(var, "-");
+        // setting prefix
+        if (token->t == VAR_ID) { // variable -> GF@-var1
+            strcpy(var, "-"); 
             strcat(var, token->val);
-        } else if (token->t == INT) {
-            strcpy(var, " int@");
+        } else if (token->t == INT) { // int -> int@-7
+            strcpy(var, " int@"); 
             strcat(var, token->val);
-        } else if (token->t == FLOAT) {
+        } else if (token->t == FLOAT) { // float -> float@3.42
             strcpy(var, " float@");
             strcat(var, token->val);
         } else {
             strcpy(var, token->val);
         }
 
-        if (token->t == VAR_ID) {
+        if (token->t == VAR_ID) { // token is variable -> setting up correct frame
             if (IAmInFunction) {
                 strcat(tmp, " LF@");
                 strcat(tmp, var);
                 if (inFunctionString) {
-                    if (strstr(inFunctionString, tmp)) {
+                    if (strstr(inFunctionString, tmp)) { // checking if variable was defined 
                         defined = 1;
                     }
                 }
@@ -615,17 +631,19 @@ void codeGeneration(Token *token) {
                 strcat(tmp, " GF@");
                 strcat(tmp, var);
                 if (generatedString) {
-                    if (strstr(generatedString, tmp)) {
+                    if (strstr(generatedString, tmp)) { // checking if variable was defined 
                         defined = 1;
                     } 
                 }
             }
         } else {
-            defined = 1;
+            defined = 1; // not variable
         }
 
+        // storing variable
         store(var);
 
+        // variable wasn't defined -> define it
         if (!defined) {
             addToString(frameStr, "DEFVAR");
             addToString(frameStr, frame);
@@ -633,13 +651,14 @@ void codeGeneration(Token *token) {
             addToString(frameStr, "\n");
         }
 
+        // if operator was set (it means that in storage we have at least 2 items)
         if (operator != NOT_DEFINED) {
             switch(operator) {
                 case PLUS:
-                    if (eqSymbolFound) {
+                    if (eqSymbolFound) { // $var = $var1 + 2;
                         addToString(frameStr, "ADD");
                         threeAddress(frameStr, frame);
-                    } else {
+                    } else { // $var1 + 2 (without '=' -> it means that we are for example in condition, so we store result to stack)
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "ADDS\n");  
                     }
@@ -921,9 +940,10 @@ void codeGeneration(Token *token) {
                 default:
                     break;
             }
-            removeOperator();
+            removeOperator(); // removing operator
         }
         break;
+    // end of case VAR_ID/INT/FLOAT
 
     case L_CPAR:
         cparCounter++;
@@ -934,7 +954,7 @@ void codeGeneration(Token *token) {
         if (cparCounter) {
             cparCounter--;
         }
-        if (!cparCounter && IAmInFunction) {
+        if (!cparCounter && IAmInFunction) { // function declaration ended
             IAmInFunction = 0;
             addToString(2, inFunctionString);
             free(inFunctionString);
@@ -1008,7 +1028,7 @@ void codeGeneration(Token *token) {
         addToOperator(MORE_EQ);
         break;   
     case STRING:
-        
+        // string@"hello world"
         strcpy(var, " string@");
         strcat(var, token->val);
         store(var);
@@ -1027,7 +1047,6 @@ void codeGeneration(Token *token) {
 }
 
 //todo remove todos
-//todo komentare
 //todo escape seq -> niektore nemaju byt premenene
 //todo prejst zadanie znova
 //todo pridat do parsru volanie codeGeneration
