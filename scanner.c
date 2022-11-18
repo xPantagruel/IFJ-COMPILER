@@ -11,6 +11,7 @@
  * @date 2022-10-08
  */
 
+#include "code_generation.h" //todo
 #include "scanner.h"
 
 void getProlog()
@@ -111,8 +112,6 @@ void addCharToToken(int c, Token *token)
 
         if (c == 'n' && token->val[strlen(token->val) - 1] == '\\')
         { // {\,n} -> {\n}
-            // todo add to .h + comments
-            // todo komment globvar
             changeLastChar('\n', token);
         }
         else if (c == '\\' && token->val[strlen(token->val) - 1] == '\\' && backslashset == 0)
@@ -850,18 +849,18 @@ Token *getToken()
                     addCharToToken(c, token);
                     break;
                 case '+':
-                    if (token->val[strlen(token->val) - 1] != 'e')
-                    { // must be e before +
-                        error(1, token);
-                    }
+                    // if (token->val[strlen(token->val) - 1] != 'e')
+                    // { // must be e before +
+                    //     error(1, token);
+                    // }
                     actualState = NUM_NEEDED_S;
                     addCharToToken(c, token);
                     break;
                 case '-':
-                    if (token->val[strlen(token->val) - 1] != 'e')
-                    { // must be e before -
-                        error(1, token);
-                    }
+                    // if (token->val[strlen(token->val) - 1] != 'e')
+                    // { // must be e before -
+                    //     error(1, token);
+                    // }
                     actualState = NUM_NEEDED_S;
                     addCharToToken(c, token);
                     break;
@@ -1051,6 +1050,7 @@ Token *getToken()
         }
     }
 
+    codeGeneration(token); // todo
     return token;
 }
 /*** End of scanner.c ***/
