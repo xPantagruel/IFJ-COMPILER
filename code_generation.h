@@ -11,9 +11,22 @@
  */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include "scanner.h"
+
+/** string name of function*/
+static char *functionName = NULL;
+
+/** bool if in if body*/
+static bool inIf = false;
+
+/** bool if in else body*/
+static bool inElse = false;
+
+/** bool if in While body*/
+static bool inWhile = false;
 
 /** String for global frame -> 0 */
 static char *generatedString = NULL;

@@ -409,18 +409,18 @@ void CHR(){
     // STRING,       // "string \x1F"   -- //todo typ??
 
     //MATEJ
-    // FUNCTION,     // function
-    // ID,           // write, reads..
-    // COMMA,        // ,
-    // COLON         // :
-    // IF,           // if
-    // ELSE,         // else
-    // INT_TYPE,     // int
-    // NULL_KEYWORD, // null
-    // RETURN,       // return
-    // STRING_TYPE,  // string
-    // FLOAT_TYPE,   // float
-    // VOID,         // void
+    // FUNCTION,     // function        
+    // ID,           // write, reads..  --DONE NOT TESTED
+    // COMMA,        // ,               --DONE NOT TESTED ->only empty case nothing to be done here
+    // COLON         // :               --DONE NOT TESTED ->only empty case nothing to be done here
+    // IF,           // if                  --FUCK UP if i have if else and nested if else is fucked up becouse i need to store somewhere names of labels
+    // ELSE,         // else                --FUCK UP
+    // INT_TYPE,     // int             --DONE NOT TESTED ->only empty case nothing to be done here
+    // NULL_KEYWORD, // null            --DONE NOT TESTED added CASE next to VAR_ID
+    // RETURN,       // return          
+    // STRING_TYPE,  // string          --DONE NOT TESTED ->only empty case nothing to be done here
+    // FLOAT_TYPE,   // float           --DONE NOT TESTED ->only empty case nothing to be done here
+    // VOID,         // void            --DONE NOT TESTED ->only empty case nothing to be done here
     // WHILE,        // while
 
 
@@ -652,7 +652,7 @@ void codeGeneration(Token *token) {
         printf("%s\n", allFunctionsString);
         break;
 
-    case VAR_ID: case INT: case FLOAT:
+    case VAR_ID: case INT: case FLOAT: case NULL_KEYWORD:
         //todo typy
         // setting prefix
 
@@ -1009,6 +1009,47 @@ void codeGeneration(Token *token) {
 
     case L_CPAR:
         cparCounter++;
+
+        // if (inIf)
+        // {
+        //     addToString(frameStr, "DEFVAR ");
+        //     if (IAmInFunction)
+        //     {
+        //         addToString(frameStr, "LF@ ");
+        //     }else{
+        //         addToString(frameStr, "GF@ ");
+        //     }
+        //     addToString(frameStr, "if");
+        //     int RndStr=rand_str();
+        //     addToString(frameStr, RndStr); // DEFVAR GF@ifRndStr | LF@ifRndStr
+        //     addToString(frameStr, "\n");
+            
+        //     addToString(frameStr, "POP ");
+
+        //                 addToString(frameStr, "DEFVAR ");
+        //     if (IAmInFunction)
+        //     {
+        //         addToString(frameStr, "LF@ ");
+        //     }else{
+        //         addToString(frameStr, "GF@ ");
+        //     }
+        //     addToString(frameStr, "if");
+        //     addToString(frameStr, RndStr); // POP GF@ifRndStr | LF@ifRndStr
+
+        //     addToString(frameStr, "JUMPIFEQ ELSE");
+        //     addToString(frameStr, RndStr); // JUMPIFEQ ELSERndStr
+        //     addToString(frameStr, "true"); // JUMPIFEQ ELSERndStr true 
+        //     if (IAmInFunction)
+        //     {
+        //         addToString(frameStr, "LF@ ");
+        //     }else{
+        //         addToString(frameStr, "GF@ ");
+        //     }
+
+        //     addToString(frameStr, RndStr); // JUMPIFEQ ELSERndStr true GF@ifRndStr/LF@ifRndStr
+        //     addToString(frameStr, "\n");
+        // }
+        
         break;
 
     case R_CPAR:
@@ -1042,6 +1083,18 @@ void codeGeneration(Token *token) {
             addToString(frameStr, "PUSHS int@1\n");
             addToString(frameStr, "ANDS\n");
             removeLastFromStorage();
+        }
+
+        if(IAmInFunction){
+            addToString(frameStr,"CALL $");
+            addToString(frameStr, functionName);
+            addToString(frameStr, "\n");
+            
+            if(functionName != NULL)
+            {            
+                free(functionName);
+                functionName=NULL;
+            }
         }
 
         resetGlobalValues();
@@ -1105,6 +1158,33 @@ void codeGeneration(Token *token) {
 
         break;
 
+    case ID:
+        if (IAmInFunction) {
+            if (functionName == NULL) {
+                functionName = malloc(strlen(token->val) + 1);
+                strcpy(functionName, token->val);
+            } else {
+                functionName = realloc(functionName, strlen(token->val) + 1);
+                strcpy(functionName, token->val);
+            }
+        }
+        break;
+
+    case COMMA:    
+        break; 
+
+    case COLON:
+        break;
+
+    case RETURN:
+        addToString(frameStr, "PUSH\n");
+        break;
+    case IF:
+        if(inIf == false)
+        {
+            inIf = true;
+        }
+        break;
     default:
         break;
     }
