@@ -1,3 +1,5 @@
+#ifndef SYMTABLE_H
+#define SYMTABLE_H
 #include <string.h>  // size_t
 #include <stdbool.h> // bool
 #include <stdint.h>
@@ -26,6 +28,7 @@ typedef struct function_param function_param_t;
 typedef struct htab_function htab_function_t;
 typedef struct htab_variable htab_variable_t;
 
+extern htab_t *symTable;
 // Dvojice dat v tabulce:
 typedef struct htab_pair
 {
@@ -95,3 +98,4 @@ bool htab_erase(htab_t *t, htab_key_t key); // ruší zadaný záznam
 void htab_print(htab_t *t);
 void htab_clear(htab_t *t); // ruší všechny záznamy
 void htab_free(htab_t *t);  // destruktor tabulky
+#endif

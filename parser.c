@@ -18,7 +18,6 @@
 #include "code_generation.h"
 
 FrameStack *frameStack;
-htab_t *symTable;
 htab_pair_t *currentSymbol;
 int functionStatus = -1;
 
@@ -559,7 +558,7 @@ int var_rule(Token *token)
         }
     }
     else
-    {   
+    {
         return 2;
     }
 }

@@ -1,4 +1,10 @@
 <?php
 declare(strict_types=1);
 
+function hello(string $y): int{
+  write($y);
+}
+
+
+
 $var = $a + $b;

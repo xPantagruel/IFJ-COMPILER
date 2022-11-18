@@ -24,16 +24,16 @@ int convertTokenToTermType(int type)
     case SLASH:
         return MULT_DIV;
         break;
-    case VAR_ID:
-    case INT:
     case FLOAT:
-        return IDENTIFIER;
+        return I_FLOAT;
+        break;
+    case INT:
+        return I_INT;
         break;
     case L_PAR:
         return L_BRACKET;
     case R_PAR:
         return R_BRACKET;
-
     case LESS_EQ:
     case LESS:
     case MORE_EQ:
@@ -90,6 +90,18 @@ bool reduce(Stack *stack)
         stackNode = initNode(term);
         for (int i = 0; i < termCount; i++)
             term->childTerms[i] = terms[i];
+        if (term->childTerms[0] == L_BRACKET)
+        {
+            term->type = term->childTerms[1]->type;
+        }
+        else if (term->childTerms[0]->type == I_FLOAT || term->childTerms[2]->type == I_FLOAT)
+        {
+            term->type = I_FLOAT;
+        }
+        else if (term->childTerms[0]->type == I_INT || term->childTerms[2]->type == I_INT)
+        {
+            term->type = I_INT;
+        }
 
         push(stack, stackNode);
         return true;
@@ -122,7 +134,7 @@ bool ruleDecider(Term *terms[3], int termCount)
 
 bool ruleIdentifier(Term *t)
 {
-    if (t->type != IDENTIFIER)
+    if (t->type != I_FLOAT || t->type != I_INT)
     {
         return false;
     }
@@ -138,7 +150,8 @@ bool rulePlusMinus(Term *t1, Term *operator, Term * t2)
 
     switch (t1->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
@@ -149,7 +162,8 @@ bool rulePlusMinus(Term *t1, Term *operator, Term * t2)
 
     switch (t2->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
         break;
@@ -171,7 +185,8 @@ bool ruleMultDiv(Term *t1, Term *operator, Term * t2)
 
     switch (t1->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
@@ -181,7 +196,8 @@ bool ruleMultDiv(Term *t1, Term *operator, Term * t2)
 
     switch (t2->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
@@ -201,7 +217,8 @@ bool ruleBracket(Term *leftBracket, Term *t1, Term *rightBracket)
 
     switch (t1->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
@@ -221,7 +238,8 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2)
 
     switch (t1->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
@@ -231,7 +249,8 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2)
 
     switch (t2->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
@@ -251,7 +270,8 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
 
     switch (t1->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
@@ -261,7 +281,8 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
 
     switch (t2->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
@@ -274,7 +295,6 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
 
 bool freeAndReturn(bool success, Stack *stack)
 {
-
     return success;
 }
 
@@ -297,7 +317,25 @@ bool bottomUp(Expression *exp)
     {
         Term *newTerm;
         StackNode *newStackNode;
-        int expType = convertTokenToTermType(exp->tokenArray[currentExpPos]->t);
+        int expType;
+        if (exp->tokenArray[currentExpPos]->t == VAR_ID)
+        {
+            // SEMANTIC CHECK
+            htab_pair_t *pair = htab_search(symTable, exp->tokenArray[currentExpPos]->val);
+            if (pair && pair->variable)
+            {
+                expType = convertTokenToTermType(pair->variable->t);
+            }
+            else
+            {
+                return freeAndReturn(false, stack);
+            }
+        }
+        else
+        {
+            expType = convertTokenToTermType(exp->tokenArray[currentExpPos]->t);
+        }
+
         int termType;
         if (stack->top->term->type == EXPRESSION)
         {

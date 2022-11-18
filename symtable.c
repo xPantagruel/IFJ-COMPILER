@@ -1,6 +1,7 @@
-#ifndef SYMTABLE_H
-#define SYMTABLE_H
+
 #include "symtable.h"
+
+htab_t *symTable;
 
 // funkcia na vytvorenie hashu pre určitý kľúč
 size_t htab_hash_function(htab_key_t str)
@@ -401,4 +402,3 @@ void htab_print(htab_t *t)
 
 // TODO ZMENIT htab_pair STRUKTURU ABY VYHOVOVALA
 // TODO komentare
-#endif

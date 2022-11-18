@@ -5,6 +5,7 @@
 #include "scanner.h"
 #include "stack.h"
 #include "parser.h"
+#include "symtable.h"
 #include <stdbool.h>
 #include <string.h>
 
@@ -16,7 +17,8 @@ enum termType
     EQUALS,
     L_BRACKET,
     R_BRACKET,
-    IDENTIFIER,
+    I_FLOAT,
+    I_INT,
     TOP_BOTTOM,
     EXPRESSION,
 };
