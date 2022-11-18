@@ -12,8 +12,8 @@ copy:
 memcheck: parser
 	valgrind --leak-check=full --track-origins=yes ./parser < testFile.txt
 
-parser: parser.o scanner.o bottomUp.o stack.o symtable.o frames.o
-	$(CC) $(CFLAGS) parser.o scanner.o bottomUp.o stack.o symtable.o frames.o -o parser
+parser: parser.o scanner.o bottomUp.o stack.o symtable.o frames.o code_generation.o
+	$(CC) $(CFLAGS) parser.o scanner.o bottomUp.o stack.o symtable.o frames.o code_generation.o -o parser
 
 parser.o: parser.c
 	$(CC) $(CFLAGS) -c parser.c -o parser.o
@@ -32,5 +32,8 @@ symtable.o: symtable.c
 
 frames.o: frames.c
 	$(CC) $(CFLAGS) -c frames.c -o frames.o
+
+code_generation.o: code_generation.c
+	$(CC) $(CFLAGS) -c code_generation.c -o code_generation.o
 clean:
 	rm *.o parser

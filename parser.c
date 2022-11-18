@@ -20,6 +20,7 @@ FrameStack *frameStack;
 htab_t *symTable;
 htab_pair_t *currentSymbol;
 int functionStatus = -1;
+#include "code_generation.h"
 
 Expression *initExpression()
 {
@@ -889,11 +890,19 @@ int main()
         pushFrame(frameStack, "while");
         pushFrame(frameStack, "print");
         printFrameStack(frameStack);
+        if (generatedString != NULL)
+        {
+            free(generatedString);
+        }
         return 0; // exit code 0
     }
     else
     {
         dtorToken(token);
+        if (generatedString != NULL)
+        {
+            free(generatedString);
+        }
         exit(2);
     }
 }
