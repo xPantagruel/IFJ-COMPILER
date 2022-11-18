@@ -18,7 +18,7 @@
 /** String for global frame -> 0 */
 static char *generatedString = NULL;
 
-/** String for actual funtion -> 1 */
+/** String for actual function -> 1 */
 static char *inFunctionString = NULL;
 
 /** String which will be printed -> 2 */
