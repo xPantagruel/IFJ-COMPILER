@@ -27,6 +27,8 @@ static int cparCounter = 0;
 
 static int storageLen = 0;
 
+static int eqSymbolFound = 0;
+
 static char **storage = NULL;
 
 static enum type operator = NOT_DEFINED;
@@ -48,3 +50,5 @@ void resetGlobalValues();
 void checkStorage();
 
 void threeAddress();
+
+void pushWithoutDeleting(int frameStr, char *frame);

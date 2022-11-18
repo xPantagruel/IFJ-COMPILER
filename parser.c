@@ -495,7 +495,7 @@ int var_rule(Token *token)
 {
     if (token->t == VAR_ID || token->t == STRING || token->t == INT || token->t == FLOAT || token->t == NULL_KEYWORD)
     { // <var_rule> (VAR_ID/STRING/INT/FLOAT/NULL)
-        return 1;
+        return 2;
     }
     else if (token->t == ID)
     { // <var_rule> (<function_call> (ID))
@@ -509,7 +509,7 @@ int var_rule(Token *token)
         }
     }
     else
-    {
+    {   
         return 2;
     }
 }
