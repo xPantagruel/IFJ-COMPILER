@@ -398,7 +398,6 @@ void CHR(){
     // DOT,          // .               --
     // MUL,          // *               --
     // EQ,           // =               --
-
     // INT,          // 123e-1          -- //todo typ
     // FLOAT,        // 1.32e+32        -- //todo typ
     // THREE_EQ,     // ===             --
@@ -656,6 +655,9 @@ void codeGeneration(Token *token) {
     case VAR_ID: case INT: case FLOAT:
         //todo typy
         // setting prefix
+
+        //dosiel mi parameter -> dam na stack 
+
         if (token->t == VAR_ID) { // variable -> GF@-var1
             strcpy(var, "-"); 
             strcat(var, token->val);
@@ -712,7 +714,9 @@ void codeGeneration(Token *token) {
                         threeAddress(frameStr, frame);
                     } else { // $var1 + 2 (without '=' -> it means that we are for example in condition, so we store result to stack)
                         pushStorage(frameStr, frame);
-                        addToString(frameStr, "ADDS\n");  
+                        addToString(frameStr, "ADDS\n");
+                        addToString(frameStr, "PUSHS int@1\n");
+                        addToString(frameStr, "ANDS\n");
                     }
                     break;
                 case MINUS:
@@ -721,7 +725,9 @@ void codeGeneration(Token *token) {
                         threeAddress(frameStr, frame);
                     } else {
                         pushStorage(frameStr, frame);
-                        addToString(frameStr, "SUBS\n");  
+                        addToString(frameStr, "SUBS\n");
+                        addToString(frameStr, "PUSHS int@1\n");
+                        addToString(frameStr, "ANDS\n");
                     }
                     break;
                 case SLASH:
@@ -731,7 +737,9 @@ void codeGeneration(Token *token) {
                         threeAddress(frameStr, frame);
                     } else {
                         pushStorage(frameStr, frame);
-                        addToString(frameStr, "DIVS\n");  
+                        addToString(frameStr, "DIVS\n");
+                        addToString(frameStr, "PUSHS int@1\n");
+                        addToString(frameStr, "ANDS\n");
                     }
                     break;
                 case MUL:
@@ -740,7 +748,9 @@ void codeGeneration(Token *token) {
                         threeAddress(frameStr, frame);
                     } else {
                         pushStorage(frameStr, frame);
-                        addToString(frameStr, "MULS\n");  
+                        addToString(frameStr, "MULS\n");
+                        addToString(frameStr, "PUSHS int@1\n");
+                        addToString(frameStr, "ANDS\n");
                     }
                     break;
                 case DOT:
@@ -1029,6 +1039,8 @@ void codeGeneration(Token *token) {
             }
             addToString(frameStr, storage[0]);
             addToString(frameStr, "\n");
+            addToString(frameStr, "PUSHS int@1\n");
+            addToString(frameStr, "ANDS\n");
             removeLastFromStorage();
         }
 
