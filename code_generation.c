@@ -176,10 +176,10 @@ void ORD(){
     addToString(0,"DEFVAR LF@Length\n");
     addToString(0,"STRLEN LF@Length LF@VarOrd\n");
 
-    addToString(0,"JUMPIFEQ 0 LF@Length END\n");// string je prazdny
+    addToString(0,"JUMPIFEQ int@0 LF@Length END\n");// string je prazdny
     addToString(0,"DEFVAR LF@Ord\n");
 
-    addToString(0,"GETCHAR LF@Ord LF@VarOrd 0 \n");//ziskani prvniho znaku
+    addToString(0,"GETCHAR LF@Ord LF@VarOrd int@0\n");//ziskani prvniho znaku
     addToString(0,"WRITE LF@Ord\n");//vypise na vystup
 
     //END
