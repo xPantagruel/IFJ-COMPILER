@@ -83,10 +83,11 @@ size_t htab_bucket_count(const htab_t *t); // velikost pole
 
 htab_pair_t *htab_find(htab_t *t, htab_key_t key); // hledání
 htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key);
-int htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount);
+htab_pair_t *htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount);
 function_param_t *htab_add_parameter(htab_function_t *function);
 function_param_t *htab_add_return_type(htab_function_t *function);
-int htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum VarType type);
+htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum VarType type);
+htab_pair_t *htab_search(htab_t *t, htab_key_t key);
 int htab_erase_function(htab_function_t *f, int paramCount);
 int htab_erase_variable(htab_variable_t *v);
 

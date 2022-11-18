@@ -15,12 +15,12 @@
 #include "parser.h"
 #include "symtable.h"
 #include "frames.h"
+#include "code_generation.h"
 
 FrameStack *frameStack;
 htab_t *symTable;
 htab_pair_t *currentSymbol;
 int functionStatus = -1;
-#include "code_generation.h"
 
 Expression *initExpression()
 {
@@ -67,9 +67,7 @@ bool function_declaration(Token *token)
     dtorToken(token);
     token = getToken();
 
-    functionStatus = htab_add_function(symTable, token->val, NULL, NULL, 0);
-
-    if (function_call(token) == 0)
+    if (function_call(token, true) == 0)
     {                 // FUNCTION <function_call>
         return false; // missing function name
     }
@@ -412,22 +410,19 @@ int condition(Token *token)
     }
 }
 
-int function_call(Token *token)
+int function_call(Token *token, bool isDeclaration)
 {
     if (token->t == ID)
     { // ID
 
-        if (functionStatus == 0)
+        if (isDeclaration)
         {
-            currentSymbol = htab_lookup_add(symTable, token->val);
+            currentSymbol = htab_add_function(symTable, token->val, NULL, NULL, 0);
         }
-        else if (functionStatus == 1)
+
+        if (!currentSymbol)
         {
-            // function exists!
-        }
-        else
-        {
-            // error
+            // function exists;
         }
 
         dtorToken(token);
@@ -554,7 +549,7 @@ int var_rule(Token *token)
     }
     else if (token->t == ID)
     { // <var_rule> (<function_call> (ID))
-        if (function_call(token) == 1)
+        if (function_call(token, false) == 1)
         { // <var_rule> (<function_call>)
             return 1;
         }
@@ -593,7 +588,7 @@ int statement(Token *token)
     }
     else if (token->t == VAR_ID)
     { // VAR_ID
-        htab_add_variable(symTable, token->val, peekFrame(frameStack), -1);
+        currentSymbol = htab_add_variable(symTable, token->val, peekFrame(frameStack), -1);
         dtorToken(token);
         token = getToken();
         if (token->t == EQ)
@@ -612,11 +607,15 @@ int statement(Token *token)
                 {
                     addCharToToken(token->val[i], tmp);
                 }
-
+                char *tmpStr = calloc(token->valLen + 1, sizeof(char));
+                strcpy(tmpStr, token->val);
                 dtorToken(token);
                 token = getToken();
                 if (token->t == SEMICOL)
                 { // VAR_ID = VAR_ID;
+                    htab_variable_t *var = htab_search(symTable, tmpStr)->variable;
+                    currentSymbol->variable->t = var->t;
+                    free(tmpStr);
                     dtorToken(tmp);
                     dtorToken(token);
                     token = getToken();
@@ -661,6 +660,7 @@ int statement(Token *token)
             }
             else if (var_rule(token) == 1)
             { // VAR_ID = <var_rule>
+                currentSymbol->variable->t = token->t;
                 dtorToken(token);
                 token = getToken();
                 if (token->t == SEMICOL)
@@ -839,7 +839,7 @@ int statement(Token *token)
     }
     else if (token->t == ID)
     { // <function_call> (ID)
-        if (function_call(token) == 1)
+        if (function_call(token, false) == 1)
         { // <function_call>
             dtorToken(token);
             token = getToken();

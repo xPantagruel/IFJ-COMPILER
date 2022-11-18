@@ -231,12 +231,12 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
     return NULL;
 }
 
-int htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount)
+htab_pair_t *htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount)
 {
     htab_pair_t *pair = htab_lookup_add(t, name);
     if (pair->function || pair->variable)
     {
-        return 1;
+        return NULL;
     }
 
     pair->function = calloc(1, sizeof(htab_function_t));
@@ -244,14 +244,14 @@ int htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, 
     pair->function->name = calloc(strlen(name) + 1, sizeof(char));
     if (!pair->function->name)
     {
-        return 2;
+        return NULL;
     }
 
     strcpy(pair->function->name, name);
     pair->function->params = params;
     pair->function->paramCount = paramCount;
     pair->function->returnType = returnType;
-    return 0;
+    return pair;
 }
 
 int htab_erase_function(htab_function_t *f, int paramCount)
@@ -268,30 +268,32 @@ int htab_erase_function(htab_function_t *f, int paramCount)
     return 0;
 }
 
-int htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum VarType type)
+htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum VarType type)
 {
     htab_pair_t *pair = htab_lookup_add(t, name);
     if (pair->function || pair->variable)
     {
-        return 1;
+        return NULL;
     }
 
     pair->variable = calloc(1, sizeof(htab_variable_t));
     if (!pair->variable)
     {
-        return 2;
+        // ERROR(99)
+        return NULL;
     }
 
     pair->variable->name = calloc(strlen(name) + 1, sizeof(char));
     if (!pair->variable->name)
     {
-        return 2;
+        // ERROR(99)
+        return NULL;
     }
 
     strcpy(pair->variable->name, name);
     pair->variable->frame = frame;
     pair->variable->t = type;
-    return 0;
+    return pair;
 }
 
 function_param_t *htab_add_parameter(htab_function_t *function)
@@ -320,10 +322,12 @@ int htab_erase_variable(htab_variable_t *v)
 
 void htab_print_variable(htab_variable_t *var)
 {
-
     if (var->name)
         printf("variable: %s\n", var->name);
-    printf("OK, FUCK");
+    if (var->t != -1)
+    {
+        printf("type: %d\n", var->t);
+    }
     if (var->frame && var->frame->name)
         printf("frame: %s\n", var->frame->name);
 }
@@ -349,6 +353,20 @@ void htab_print_function(htab_function_t *func)
     {
         printf("return type: %d\n", func->returnType->t);
     }
+}
+
+htab_pair_t *htab_search(htab_t *t, htab_key_t key)
+{
+    size_t index = htab_hash_function(key) % htab_bucket_count(t);
+    htab_item_t *tmp = t->ptr_arr[index];
+    while (tmp)
+    {
+        if (strcmp(tmp->pair->key, key) == 0)
+        {
+            return tmp->pair;
+        }
+    }
+    return NULL;
 }
 
 void htab_print(htab_t *t)
