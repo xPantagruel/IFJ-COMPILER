@@ -149,6 +149,58 @@ void STRVAL(){
     addToString(0,"RETURN\n");
 }
 
+//function strlen(string $𝑠) : int
+void STRLEN(){
+    addToString(0,"LABEL $STRLEN \n");
+    addToString(0,"CREATEFRAME\n");
+    addToString(0,"PUSHFRAME\n");
+    addToString(0,"DEFVAR LF@VarStrlen\n");
+    addToString(0,"DEFVAR LF@Length\n");
+    addToString(0,"STRLEN LF@Length LF@VarStrlen\n");
+    addToString(0,"WRITE LF@Length\n");//vypise na vystup
+    addToString(0,"POPFRAME\n");
+    addToString(0,"RETURN\n");
+}
+
+//• function substring(string $𝑠, int $𝑖, int $𝑗) : ?string –
+void SUBSTRING(){
+
+}
+
+//function ord(string $c) : int –
+void ORD(){
+    addToString(0,"LABEL $ORD \n");
+    addToString(0,"CREATEFRAME\n");
+    addToString(0,"PUSHFRAME\n");
+    addToString(0,"DEFVAR LF@VarOrd\n");
+    addToString(0,"DEFVAR LF@Length\n");
+    addToString(0,"STRLEN LF@Length LF@VarOrd\n");
+
+    addToString(0,"JUMPIFEQ int@0 LF@Length END\n");// string je prazdny
+    addToString(0,"DEFVAR LF@Ord\n");
+
+    addToString(0,"GETCHAR LF@Ord LF@VarOrd int@0\n");//ziskani prvniho znaku
+    addToString(0,"WRITE LF@Ord\n");//vypise na vystup
+
+    //END
+    addToString(0,"LABEL $END\n");
+    addToString(0,"POPFRAME\n");
+    addToString(0,"RETURN\n");
+}
+
+//function chr(int $i) : string –
+//todo doresit 
+void CHR(){
+    addToString(0,"LABEL $CHR \n");
+    addToString(0,"CREATEFRAME\n");
+    addToString(0,"PUSHFRAME\n");
+    addToString(0,"DEFVAR LF@VarChr\n");
+
+
+    addToString(0,"POPFRAME\n");
+    addToString(0,"RETURN\n");
+}
+
 // /** 
 //  * Built-in function READS
 //  * 
@@ -346,7 +398,6 @@ void STRVAL(){
     // DOT,          // .               --
     // MUL,          // *               --
     // EQ,           // =               --
-
     // INT,          // 123e-1          -- //todo typ
     // FLOAT,        // 1.32e+32        -- //todo typ
     // THREE_EQ,     // ===             --
@@ -604,6 +655,9 @@ void codeGeneration(Token *token) {
     case VAR_ID: case INT: case FLOAT:
         //todo typy
         // setting prefix
+
+        //dosiel mi parameter -> dam na stack 
+
         if (token->t == VAR_ID) { // variable -> GF@-var1
             strcpy(var, "-"); 
             strcat(var, token->val);
@@ -660,7 +714,9 @@ void codeGeneration(Token *token) {
                         threeAddress(frameStr, frame);
                     } else { // $var1 + 2 (without '=' -> it means that we are for example in condition, so we store result to stack)
                         pushStorage(frameStr, frame);
-                        addToString(frameStr, "ADDS\n");  
+                        addToString(frameStr, "ADDS\n");
+                        addToString(frameStr, "PUSHS int@1\n");
+                        addToString(frameStr, "ANDS\n");
                     }
                     break;
                 case MINUS:
@@ -669,7 +725,9 @@ void codeGeneration(Token *token) {
                         threeAddress(frameStr, frame);
                     } else {
                         pushStorage(frameStr, frame);
-                        addToString(frameStr, "SUBS\n");  
+                        addToString(frameStr, "SUBS\n");
+                        addToString(frameStr, "PUSHS int@1\n");
+                        addToString(frameStr, "ANDS\n");
                     }
                     break;
                 case SLASH:
@@ -679,7 +737,9 @@ void codeGeneration(Token *token) {
                         threeAddress(frameStr, frame);
                     } else {
                         pushStorage(frameStr, frame);
-                        addToString(frameStr, "DIVS\n");  
+                        addToString(frameStr, "DIVS\n");
+                        addToString(frameStr, "PUSHS int@1\n");
+                        addToString(frameStr, "ANDS\n");
                     }
                     break;
                 case MUL:
@@ -688,7 +748,9 @@ void codeGeneration(Token *token) {
                         threeAddress(frameStr, frame);
                     } else {
                         pushStorage(frameStr, frame);
-                        addToString(frameStr, "MULS\n");  
+                        addToString(frameStr, "MULS\n");
+                        addToString(frameStr, "PUSHS int@1\n");
+                        addToString(frameStr, "ANDS\n");
                     }
                     break;
                 case DOT:
@@ -977,6 +1039,8 @@ void codeGeneration(Token *token) {
             }
             addToString(frameStr, storage[0]);
             addToString(frameStr, "\n");
+            addToString(frameStr, "PUSHS int@1\n");
+            addToString(frameStr, "ANDS\n");
             removeLastFromStorage();
         }
 
