@@ -573,7 +573,7 @@ void codeGeneration(Token *token) {
     char tmp[strlen(token->val) + strlen("DEFVAR GF@") + 1];
     strcpy(tmp, "DEFVAR");
 
-    char var[strlen(token->val) + 2]; 
+    char var[strlen(token->val) + strlen(" string@") + 1]; 
 
     switch (token->t) {
     case NOT_DEFINED:
@@ -590,6 +590,12 @@ void codeGeneration(Token *token) {
         //todo typy
         if (token->t == VAR_ID) {
             strcpy(var, "-");
+            strcat(var, token->val);
+        } else if (token->t == INT) {
+            strcpy(var, " int@");
+            strcat(var, token->val);
+        } else if (token->t == FLOAT) {
+            strcpy(var, " float@");
             strcat(var, token->val);
         } else {
             strcpy(var, token->val);
@@ -1002,27 +1008,10 @@ void codeGeneration(Token *token) {
         addToOperator(MORE_EQ);
         break;   
     case STRING:
-        if (IAmInFunction) {
-            strcat(tmp, " LF@");
-            strcat(tmp, token->val);
-            if (inFunctionString) {
-                if (strstr(inFunctionString, tmp)) {
-                    defined = 1;
-                }
-            }
-            frameStr = 1;
-            strcpy(frame, " LF@");
-        } else {
-            strcat(tmp, " GF@");
-            strcat(tmp, token->val);
-            if (generatedString) {
-                if (strstr(generatedString, tmp)) {
-                    defined = 1;
-                } 
-            }
-        }
-
-        store(token->val);
+        
+        strcpy(var, " string@");
+        strcat(var, token->val);
+        store(var);
 
         if (operator == DOT) {
             addToString(frameStr, "CONCAT");
@@ -1037,11 +1026,10 @@ void codeGeneration(Token *token) {
     }
 }
 
-//todo nedava LF ked sme vo funkcii
 //todo remove todos
 //todo komentare
 //todo escape seq -> niektore nemaju byt premenene
 //todo prejst zadanie znova
 //todo pridat do parsru volanie codeGeneration
 //todo remove zo scanneru
-//todo asi dat string do ""
+//todo test an merlin + interpret
