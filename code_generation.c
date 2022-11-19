@@ -398,15 +398,15 @@ void CHR(){
     // DOT,          // .               --
     // MUL,          // *               --
     // EQ,           // =               --
-    // INT,          // 123e-1          -- //todo typ
-    // FLOAT,        // 1.32e+32        -- //todo typ
+    // INT,          // 123e-1          --
+    // FLOAT,        // 1.32e+32        -- 
     // THREE_EQ,     // ===             --
     // LESS,         // <               --
     // MORE,         // >               --
     // LESS_EQ,      // <=              --
     // MORE_EQ,      // >=              --
     // NOT_EQ,       // !==             --
-    // STRING,       // "string \x1F"   -- //todo typ??
+    // STRING,       // "string \x1F"   -- 
 
     //MATEJ
     // FUNCTION,     // function        
@@ -618,7 +618,7 @@ void pushWithoutDeleting(int frameStr, char *frame) {
 }
 
 void rand_str(char *dest, size_t length) {
-    char charset[] = "0123456789"
+    char charset[] = 
                      "abcdefghijklmnopqrstuvwxyz"
                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -629,7 +629,7 @@ void rand_str(char *dest, size_t length) {
     *dest = '\0';
 }
 
-int convertToSameType(int frameStr, char *frame) {
+void convertToSameType(int frameStr, char *frame) {
     //pri add az eqs
 
     // create tmpvariable1
@@ -650,15 +650,27 @@ int convertToSameType(int frameStr, char *frame) {
         //zisti ci su float
             //ano -> return 1
         //nie -> return 0 
-
     char tmp1[11];
     char tmp2[11];
-    char tmp3[11];
+
+    char neqLabel[11];
+    char checkTypeLabel[11];
+    char checkTypeEnd[11];
+
+    char neqEqLabel[11];
+    char neqNeqLabel[11];
 
     rand_str(tmp1, 10);
     rand_str(tmp2, 10);
-    rand_str(tmp3, 10);
+    rand_str(neqLabel, 10);
+    rand_str(neqEqLabel, 10);
+    rand_str(neqNeqLabel, 10);
+    rand_str(checkTypeLabel, 10);
+    rand_str(checkTypeEnd, 10);
     
+    addToString(frameStr, "LABEL ");
+    addToString(frameStr, checkTypeLabel);
+    addToString(frameStr, "\n");
     addToString(frameStr, "DEFVAR ");
     addToString(frameStr, frame);
     addToString(frameStr, tmp1);
@@ -667,11 +679,6 @@ int convertToSameType(int frameStr, char *frame) {
     addToString(frameStr, "DEFVAR ");
     addToString(frameStr, frame);
     addToString(frameStr, tmp2);
-    addToString(frameStr, "\n");
-
-    addToString(frameStr, "DEFVAR ");
-    addToString(frameStr, frame);
-    addToString(frameStr, tmp3);
     addToString(frameStr, "\n");
 
     addToString(frameStr, "TYPE ");
@@ -688,7 +695,67 @@ int convertToSameType(int frameStr, char *frame) {
     addToString(frameStr, storage[storageLen-2]);
     addToString(frameStr, "\n");
 
+    addToString(frameStr, "JUMPIFNEQ ");
+    addToString(frameStr, neqLabel);
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp2);
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, "\n");
 
+    addToString(frameStr, "JUMP ");
+    addToString(frameStr, checkTypeEnd);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL "); //neq
+    addToString(frameStr, neqLabel);
+    addToString(frameStr, "\n");
+        addToString(frameStr, "JUMPIFEQ ");
+        addToString(frameStr, neqEqLabel); //create
+        addToString(frameStr, " string@float");
+        addToString(frameStr, frame);
+        addToString(frameStr, tmp1);
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "JUMPIFNEQ ");
+        addToString(frameStr, neqNeqLabel); //create
+        addToString(frameStr, " string@float");
+        addToString(frameStr, frame);
+        addToString(frameStr, tmp1);
+        addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL "); //neqEq
+    addToString(frameStr, neqEqLabel);
+    addToString(frameStr, "\n");
+        addToString(frameStr, "INT2FLOAT ");
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-1]);
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-1]);
+        addToString(frameStr, "\n");
+        
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, checkTypeEnd);
+        addToString(frameStr, "\n");
+
+
+    addToString(frameStr, "LABEL "); //neqNeq
+    addToString(frameStr, neqNeqLabel);
+    addToString(frameStr, "\n");
+        addToString(frameStr, "INT2FLOAT ");
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-2]);
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-2]);
+        addToString(frameStr, "\n");
+        
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, checkTypeEnd);
+        addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL ");
+    addToString(frameStr, checkTypeEnd);
+    addToString(frameStr, "\n");
 }
 
 void codeGeneration(Token *token) {
@@ -726,13 +793,10 @@ void codeGeneration(Token *token) {
         if (generatedString != NULL) {
              //free(generatedString); 
         }
-
-        printf("\n---\n"); //todo
         printf("%s\n", allFunctionsString);
         break;
 
-    case VAR_ID: case INT: case FLOAT: case NULL_KEYWORD:
-        //todo typy
+    case VAR_ID: case INT: case FLOAT:
         // setting prefix
         if (token->t == VAR_ID) { // variable -> GF@-var1
             strcpy(var, "-"); 
@@ -783,10 +847,9 @@ void codeGeneration(Token *token) {
 
         // if operator was set (it means that in storage we have at least 2 items)
         if (operator != NOT_DEFINED) {
+            convertToSameType(frameStr, frame);
             switch(operator) {
                 case PLUS:
-                    
-
                     if (eqSymbolFound) { // $var = $var1 + 2;
                         addToString(frameStr, "ADD");
                         threeAddress(frameStr, frame);
@@ -1284,3 +1347,4 @@ void codeGeneration(Token *token) {
 //todo pridat do parsru volanie codeGeneration
 //todo remove zo scanneru
 //todo test an merlin + interpret
+//todo komentare na nove veci
