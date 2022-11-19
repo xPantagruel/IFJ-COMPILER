@@ -118,6 +118,16 @@ void checkStorage();
 void threeAddress(int frameStr, char *frame);
 
 /**
+ * @brief Same as threeAddress function but without calling remove functions at the end.
+ * 
+ * @param frameStr  0 -> generatedString
+                    1 -> inFunctionString
+                    2 -> allFunctionsString
+ * @param frame  GF/TF/LF
+ */
+void threeAddressWithoutRemove(int frameStr, char *frame);
+
+/**
  * @brief Function which generates code which pushes vars to stack.
  * 
  * @param frameStr  0 -> generatedString
@@ -144,10 +154,8 @@ void pushWithoutDeleting(int frameStr, char *frame);
                     1 -> inFunctionString
                     2 -> allFunctionsString
  * @param frame  GF/TF/LF
- * 
- * @return int 1 -> both are floats or 0 -> both are ints
  */
-int convertToSameType(int frameStr, char *frame);
+void convertToSameType(int frameStr, char *frame);
 
 /**
  * @brief Function which generates random string.
@@ -156,5 +164,15 @@ int convertToSameType(int frameStr, char *frame);
  * @param length number of chars generated
  */
 void randStr(char *dest, size_t length);
+
+/**
+ * @brief Creating instructions for dividing.
+ * 
+ * @param frameStr  0 -> generatedString
+                    1 -> inFunctionString
+                    2 -> allFunctionsString
+ * @param frame  GF/TF/LF
+ */
+void divIdiv(int frameStr, char* frame);
 
 /*** End of code_generation.h ***/

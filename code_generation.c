@@ -575,6 +575,28 @@ void threeAddress(int frameStr, char *frame) {
     removeOperator();
 } 
 
+void threeAddressWithoutRemove(int frameStr, char* frame) {
+    if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
+        addToString(frameStr, frame);
+    } else {
+        addToString(frameStr, " ");
+    }
+    addToString(frameStr, storage[0]);
+    if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
+        addToString(frameStr, frame);
+    } else {
+        addToString(frameStr, " ");
+    }
+    addToString(frameStr, storage[1]);
+    if (storage[2] != NULL && storage[2][0] == '-') { // if first letter is '-' -> it is variable
+        addToString(frameStr, frame);
+    } else {
+        addToString(frameStr, " ");
+    }
+    addToString(frameStr, storage[2]);
+    addToString(frameStr, "\n");
+}
+
 void pushStorage(int frameStr, char *frame) {
     addToString(frameStr, "PUSHS");
     if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
@@ -629,31 +651,196 @@ void randStr(char *dest, size_t length) {
     *dest = '\0';
 }
 
-int convertToSameType(int frameStr, char *frame) {
-    if (strchr(storage[storageLen-2], '.')) { // compare first string with second
-        if (!strchr(storage[storageLen-1], '.')) { 
-            addToString(frameStr, "INT2FLOAT ");
-            addToString(frameStr, frame);
-            addToString(frameStr, storage[storageLen-1]);
-            addToString(frameStr, frame);
-            addToString(frameStr, storage[storageLen-1]);
-            addToString(frameStr, "\n");
-        }
-        return 1;
-    }
+void convertToSameType(int frameStr, char *frame) {
+    char tmp1[11];
+    char tmp2[11];
 
-    if (strchr(storage[storageLen-1], '.')) { // compare second string with first
-        if (!strchr(storage[storageLen-2], '.')) {
-            addToString(frameStr, "INT2FLOAT ");
+    char neqLabel[11];
+    char checkTypeLabel[11];
+    char checkTypeEnd[11];
+
+    char neqEqLabel[11];
+    char neqNeqLabel[11];
+
+    randStr(tmp1, 10);
+    randStr(tmp2, 10);
+    randStr(neqLabel, 10);
+    randStr(neqEqLabel, 10);
+    randStr(neqNeqLabel, 10);
+    randStr(checkTypeLabel, 10);
+    randStr(checkTypeEnd, 10);
+    
+    addToString(frameStr, "LABEL ");
+    addToString(frameStr, checkTypeLabel);
+    addToString(frameStr, "\n");
+    addToString(frameStr, "DEFVAR ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "DEFVAR ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp2);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "TYPE ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen-1]);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "TYPE ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp2);
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen-2]);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "JUMPIFNEQ ");
+    addToString(frameStr, neqLabel);
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp2);
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "JUMP ");
+    addToString(frameStr, checkTypeEnd);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL "); //neq
+    addToString(frameStr, neqLabel);
+    addToString(frameStr, "\n");
+        addToString(frameStr, "JUMPIFEQ ");
+        addToString(frameStr, neqEqLabel); //create
+        addToString(frameStr, " string@float");
+        addToString(frameStr, frame);
+        addToString(frameStr, tmp1);
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "JUMPIFNEQ ");
+        addToString(frameStr, neqNeqLabel); //create
+        addToString(frameStr, " string@float");
+        addToString(frameStr, frame);
+        addToString(frameStr, tmp1);
+        addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL "); //neqEq
+    addToString(frameStr, neqEqLabel);
+    addToString(frameStr, "\n");
+        addToString(frameStr, "INT2FLOAT ");
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-1]);
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-1]);
+        addToString(frameStr, "\n");
+        
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, checkTypeEnd);
+        addToString(frameStr, "\n");
+
+
+    addToString(frameStr, "LABEL "); //neqNeq
+    addToString(frameStr, neqNeqLabel);
+    addToString(frameStr, "\n");
+        addToString(frameStr, "INT2FLOAT ");
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-2]);
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-2]);
+        addToString(frameStr, "\n");
+        
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, checkTypeEnd);
+        addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL ");
+    addToString(frameStr, checkTypeEnd);
+    addToString(frameStr, "\n");
+}
+
+void divIdiv(int frameStr, char* frame) {
+    char tmp1[11];
+    char endLabel[11];
+    char startLabel[11];
+    char eqLabel[11];
+    char neqLabel[11];
+
+    randStr(tmp1, 10);
+    randStr(startLabel, 10);
+    randStr(endLabel, 10);
+    randStr(eqLabel, 10);
+
+    addToString(frameStr, "LABEL "); //start 
+    addToString(frameStr, startLabel);
+    addToString(frameStr, "\n");
+            addToString(frameStr, "DEFVAR ");
             addToString(frameStr, frame);
-            addToString(frameStr, storage[storageLen-2]);
-            addToString(frameStr, frame);
-            addToString(frameStr, storage[storageLen-2]);
+            addToString(frameStr, tmp1);
             addToString(frameStr, "\n");
+
+            addToString(frameStr, "TYPE ");
+            addToString(frameStr, frame);
+            addToString(frameStr, tmp1); // result in tmp1
+            addToString(frameStr, frame);
+            addToString(frameStr, storage[storageLen-1]);
+            addToString(frameStr, "\n");
+             
+            addToString(frameStr, "JUMPIFEQ ");
+            addToString(frameStr, eqLabel);
+            addToString(frameStr, frame);
+            addToString(frameStr, tmp1);
+            addToString(frameStr, " string@float");
+            addToString(frameStr, "\n");
+
+            addToString(frameStr, "JUMPIFNEQ ");
+            addToString(frameStr, neqLabel);
+            addToString(frameStr, frame);
+            addToString(frameStr, tmp1);
+            addToString(frameStr, " string@float");
+            addToString(frameStr, "\n");
+
+    
+    addToString(frameStr, "LABEL "); //eq
+    addToString(frameStr, eqLabel);
+    addToString(frameStr, "\n");
+        
+        if (eqSymbolFound) {
+            addToString(frameStr, "DIV");
+            threeAddress(frameStr, frame);
+        } else {
+            pushStorage(frameStr, frame);
+            addToString(frameStr, "DIVS\n");
+            addToString(frameStr, "PUSHS int@0\n");
+            addToString(frameStr, "LTS\n");
         }
-        return 1;
-    }
-    return 0;
+
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, endLabel);
+        addToString(frameStr, "\n");
+    
+    addToString(frameStr, "LABEL "); //neq
+    addToString(frameStr, eqLabel);
+    addToString(frameStr, "\n");
+
+        if (eqSymbolFound) {
+            addToString(frameStr, "IDIV");
+            threeAddressWithoutRemove(frameStr, frame);
+        } else {
+            pushStorage(frameStr, frame);
+            addToString(frameStr, "IDIVS\n");
+            addToString(frameStr, "PUSHS int@0\n");
+            addToString(frameStr, "LTS\n");
+        }
+
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, endLabel);
+        addToString(frameStr, "\n");
+         
+    addToString(frameStr, "LABEL "); //end 
+    addToString(frameStr, endLabel);
+    addToString(frameStr, "\n");
 }
 
 void codeGeneration(Token *token) {
@@ -745,7 +932,7 @@ void codeGeneration(Token *token) {
 
         // if operator was set (it means that in storage we have at least 2 items)
         if (operator != NOT_DEFINED) {
-            int floatOrInt = convertToSameType(frameStr, frame);
+            convertToSameType(frameStr, frame);
             switch(operator) {
                 case PLUS:
                     if (eqSymbolFound) { // $var = $var1 + 2;
@@ -770,28 +957,8 @@ void codeGeneration(Token *token) {
                     }
                     break;
                 case SLASH:
-                    if (floatOrInt) {
-                        if (eqSymbolFound) {
-                            addToString(frameStr, "DIV");
-                            threeAddress(frameStr, frame);
-                        } else {
-                            pushStorage(frameStr, frame);
-                            addToString(frameStr, "DIVS\n");
-                            addToString(frameStr, "PUSHS int@0\n");
-                            addToString(frameStr, "LTS\n");
-                        }
-                    } else {
-                        if (eqSymbolFound) {
-                            addToString(frameStr, "IDIV");
-                            threeAddress(frameStr, frame);
-                        } else {
-                            pushStorage(frameStr, frame);
-                            addToString(frameStr, "IDIVS\n");
-                            addToString(frameStr, "PUSHS int@0\n");
-                            addToString(frameStr, "LTS\n");
-                        }
-                    }
-                    break;
+                    divIdiv(frameStr, frame);
+                break;
                 case MUL:
                     if (eqSymbolFound) {
                         addToString(frameStr, "MUL");
