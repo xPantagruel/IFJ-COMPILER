@@ -738,6 +738,7 @@ Token *getToken()
                 }
                 else
                 {
+                    unGetC(c);
                     addTypeToToken(NOT_EQ, token);
                     addRowToToken(row, token);
                     actualState = START;
