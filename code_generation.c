@@ -1,16 +1,15 @@
 /**
  * @file code_generation.c
- * 
+ *
  * @author Martin Kubička (xkubic45)
  * @author Matěj Macek (xmacek27)
  * @author Dominik Petřík (xpetri25)
  * @author Lukáš Zítko (xzitko00)
- * 
+ *
  * @brief  Code generation implementation
- * 
+ *
  */
 #include "code_generation.h"
-
 
 /**
  * Provede inicializaci seznamu list před jeho prvním použitím (tzn. žádná
@@ -21,6 +20,7 @@
  *
  * @param list Ukazatel na strukturu dvousměrně vázaného seznamu
  */
+<<<<<<< Updated upstream
 void DLL_Init(int num) {
     if (num == 0) {
         listCodeGen = malloc(sizeof(DLList));
@@ -115,201 +115,274 @@ void DLL_InsertFirst(int num,char* data ) {
         }
     }
 	
-}
-//todo zkontrolovat v zadani špatného formátu a navratove hodnoty
-//function reads() : ?string
-void READS(){
-    addToString(0,"LABEL $readS \n");
-    addToString(0,"CREATEFRAME\n");
-    addToString(0,"PUSHFRAME\n");
-    addToString(0,"DEFVAR LF@VarReadS\n");
-    addToString(0,"READ LF@VarReadS string\n");
-    addToString(0,"POPFRAME\n");
-    addToString(0,"RETURN\n");
-}
-
-//todo zkontrolovat v zadani špatného formátu a navratove hodnoty
-//function readi() : ?int
-void READI(){
-    addToString(0,"LABEL $readS \n");
-    addToString(0,"CREATEFRAME\n");
-    addToString(0,"PUSHFRAME\n");
-    addToString(0,"DEFVAR LF@VarReadI\n");
-    addToString(0,"READ LF@VarReadI int\n");
-    addToString(0,"POPFRAME\n");
-    addToString(0,"RETURN\n");
+=======
+void DLL_Init(DLList *list)
+{
+    list = malloc(sizeof(DLList));
+    if (list == NULL)
+    {
+        exit(99);
+    }
+    list->firstElement = NULL;
+    list->lastElement = NULL;
+    list->activeElement = NULL;
 }
 
-//todo zkontrolovat v zadani špatného formátu a navratove hodnoty
-//function readf() : ?float
-void READF(){
-    addToString(0,"LABEL $readS\n");
-    addToString(0,"CREATEFRAME\n");
-    addToString(0,"PUSHFRAME\n");
-    addToString(0,"DEFVAR LF@VarReadF\n");
-    addToString(0,"READ LF@VarReadF float\n");
-    addToString(0,"POPFRAME\n");
-    addToString(0,"RETURN\n");
+void DLL_Dispose(DLList *list)
+{
+    while (list->firstElement != NULL)
+    { // removing first element until first element will be NULL
+        // the code below is just copied DLL_DeleteFirst function
+        DLLElementPtr tmp = list->firstElement;
+
+        if (list->firstElement == list->activeElement)
+        { // checking if first element is active
+            list->activeElement = NULL;
+        }
+
+        if (list->firstElement == list->lastElement)
+        { // checking if the first element is also the last element
+            list->lastElement = NULL;
+        }
+
+        list->firstElement = list->firstElement->nextElement;
+        if (list->firstElement != NULL)
+        {
+            list->firstElement->previousElement = NULL;
+        }
+        free(tmp);
+    }
 }
 
-//todo WRITE - zkontrolovat v zadani zda WRITE vypisuje spravne "%a" nebo to ma byt '%a'
-//todo function write ( term1 , term2 , …, term𝑛 ) : void
-//todo osetrit zda kdyz dostanu bool tak co dal 
-//todo vypise write variable ???
-void WRITE(){
-    addToString(0,"LABEL $write \n");
-    addToString(0,"CREATEFRAME\n");
-    addToString(0,"PUSHFRAME\n");
-    addToString(0,"DEFVAR LF@VarWrite\n");
-    addToString(0,"DEFVAR LF@VarType\n");
+void DLL_InsertFirst(DLList *list, char *data)
+{
+    DLLElementPtr new_element = malloc(sizeof(struct DLLElement));
+    if (new_element == NULL)
+    {
+        exit(99);
+        return;
+    }
 
-    //zjistit typ a zapis do VarType
-    addToString(0,"TYPE LF@VarType LF@VarWrite \n");
+    new_element->data = data;
+    new_element->nextElement = list->firstElement;
+    new_element->previousElement = NULL;
+    if (list->firstElement != NULL)
+    { // if list isn't empty
+        list->firstElement->previousElement = new_element;
+    }
 
-    //skoc podle hodnoty VarType
-    addToString(0,"JUMPIFEQ $INT LF@VarType int\n");// type == int
-    addToString(0,"JUMPIFEQ $FLOAT LF@VarType float\n");// type == float
-    addToString(0,"JUMPIFEQ $STRING LF@VarType string\n");// type == string
-    addToString(0,"JUMPIFEQ $NULL LF@VarType null\n");// type == NULL
-
-    //int
-    addToString(0,"LABEL $INT\n");
-    addToString(0,"WRITE LF@VarWrite ”%d”\n");
-    addToString(0,"JUMP $END\n");
-
-    //float
-    addToString(0,"LABEL $FLOAT \n");
-    addToString(0,"WRITE LF@VarWrite ”%a”\n");
-    addToString(0,"JUMP $END\n");
-
-    //string 
-    addToString(0,"LABEL $STRING\n");
-    addToString(0,"WRITE LF@VarWrite\n");
-    addToString(0,"JUMP $END\n");
-
-    //hodnota null dle tabulky 1.
-    addToString(0,"LABEL $NULL\n");
-    addToString(0,"WRITE " "\n");
-    addToString(0,"JUMP $END\n");
-
-    //END
-    addToString(0,"LABEL $END\n");
-
-    addToString(0,"POPFRAME\n");
-    addToString(0,"RETURN\n");
+    list->firstElement = new_element;
+    if (list->lastElement == NULL)
+    { // if list was empty -> we need to set last element too
+        list->lastElement = list->firstElement;
+    }
+>>>>>>> Stashed changes
+}
+// todo zkontrolovat v zadani špatného formátu a navratove hodnoty
+// function reads() : ?string
+void READS()
+{
+    addToString(0, "LABEL $readS \n");
+    addToString(0, "CREATEFRAME\n");
+    addToString(0, "PUSHFRAME\n");
+    addToString(0, "DEFVAR LF@VarReadS\n");
+    addToString(0, "READ LF@VarReadS string\n");
+    addToString(0, "POPFRAME\n");
+    addToString(0, "RETURN\n");
 }
 
-//function floatval(term) : float
-//todo zkontrolovat zda je dobre convert a vypi
-void FLOATVAL(){
-    addToString(0,"LABEL $FLOATVAL \n");
-    addToString(0,"CREATEFRAME\n");
-    addToString(0,"PUSHFRAME\n");
-    addToString(0,"DEFVAR LF@VarFloatval\n");
-    addToString(0,"INT2FLOAT LF@VarFloatval LF@VarFloatval\n");//konvert na float
-    addToString(0,"WRITE LF@VarWrite\n");//vypise na vystup
-    
-    addToString(0,"POPFRAME\n");
-    addToString(0,"RETURN\n");
+// todo zkontrolovat v zadani špatného formátu a navratove hodnoty
+// function readi() : ?int
+void READI()
+{
+    addToString(0, "LABEL $readS \n");
+    addToString(0, "CREATEFRAME\n");
+    addToString(0, "PUSHFRAME\n");
+    addToString(0, "DEFVAR LF@VarReadI\n");
+    addToString(0, "READ LF@VarReadI int\n");
+    addToString(0, "POPFRAME\n");
+    addToString(0, "RETURN\n");
 }
 
-//function intval(term) : int
-//todo zkontrolovat zda je dobre convert a vypi
-void INTVAL(){
-    addToString(0,"LABEL $INTVAL \n");
-    addToString(0,"CREATEFRAME\n");
-    addToString(0,"PUSHFRAME\n");
-    addToString(0,"DEFVAR LF@VarIntval\n");
-    addToString(0,"FLOAT2INT LF@VarIntval LF@VarIntval\n");//konvert na int
-    addToString(0,"WRITE LF@VarWrite\n");//vypise na vystup
-    
-    addToString(0,"POPFRAME\n");
-    addToString(0,"RETURN\n");
+// todo zkontrolovat v zadani špatného formátu a navratove hodnoty
+// function readf() : ?float
+void READF()
+{
+    addToString(0, "LABEL $readS\n");
+    addToString(0, "CREATEFRAME\n");
+    addToString(0, "PUSHFRAME\n");
+    addToString(0, "DEFVAR LF@VarReadF\n");
+    addToString(0, "READ LF@VarReadF float\n");
+    addToString(0, "POPFRAME\n");
+    addToString(0, "RETURN\n");
 }
 
-//function strval(term) : string –
-void STRVAL(){
-    addToString(0,"LABEL $STRVAL \n");
-    addToString(0,"CREATEFRAME\n");
-    addToString(0,"PUSHFRAME\n");
-    addToString(0,"DEFVAR LF@VarStrval\n");
-    addToString(0,"DEFVAR LF@VarType\n");
+// todo WRITE - zkontrolovat v zadani zda WRITE vypisuje spravne "%a" nebo to ma byt '%a'
+// todo function write ( term1 , term2 , …, term𝑛 ) : void
+// todo osetrit zda kdyz dostanu bool tak co dal
+// todo vypise write variable ???
+void WRITE()
+{
+    addToString(0, "LABEL $write \n");
+    addToString(0, "CREATEFRAME\n");
+    addToString(0, "PUSHFRAME\n");
+    addToString(0, "DEFVAR LF@VarWrite\n");
+    addToString(0, "DEFVAR LF@VarType\n");
 
-    //zjistit typ a zapis do VarType
-    addToString(0,"TYPE LF@VarType LF@VarWrite \n");
-    addToString(0,"JUMPIFEQ $NULL LF@VarType null\n");// type == null
+    // zjistit typ a zapis do VarType
+    addToString(0, "TYPE LF@VarType LF@VarWrite \n");
 
-    addToString(0,"WRITE LF@VarWrite\n");//vypise na vystup
-    addToString(0,"JUMP $END\n");
-    
-    //hodnota null dle tabulky 1.
-    addToString(0,"LABEL $NULL\n");
-    addToString(0,"WRITE " "\n");
-    addToString(0,"JUMP $END\n");
+    // skoc podle hodnoty VarType
+    addToString(0, "JUMPIFEQ $INT LF@VarType int\n");       // type == int
+    addToString(0, "JUMPIFEQ $FLOAT LF@VarType float\n");   // type == float
+    addToString(0, "JUMPIFEQ $STRING LF@VarType string\n"); // type == string
+    addToString(0, "JUMPIFEQ $NULL LF@VarType null\n");     // type == NULL
 
-    //END
-    addToString(0,"LABEL $END\n");
+    // int
+    addToString(0, "LABEL $INT\n");
+    addToString(0, "WRITE LF@VarWrite ”%d”\n");
+    addToString(0, "JUMP $END\n");
 
-    addToString(0,"POPFRAME\n");
-    addToString(0,"RETURN\n");
+    // float
+    addToString(0, "LABEL $FLOAT \n");
+    addToString(0, "WRITE LF@VarWrite ”%a”\n");
+    addToString(0, "JUMP $END\n");
+
+    // string
+    addToString(0, "LABEL $STRING\n");
+    addToString(0, "WRITE LF@VarWrite\n");
+    addToString(0, "JUMP $END\n");
+
+    // hodnota null dle tabulky 1.
+    addToString(0, "LABEL $NULL\n");
+    addToString(0, "WRITE "
+                   "\n");
+    addToString(0, "JUMP $END\n");
+
+    // END
+    addToString(0, "LABEL $END\n");
+
+    addToString(0, "POPFRAME\n");
+    addToString(0, "RETURN\n");
 }
 
-//function strlen(string $𝑠) : int
-void STRLEN(){
-    addToString(0,"LABEL $STRLEN \n");
-    addToString(0,"CREATEFRAME\n");
-    addToString(0,"PUSHFRAME\n");
-    addToString(0,"DEFVAR LF@VarStrlen\n");
-    addToString(0,"DEFVAR LF@Length\n");
-    addToString(0,"STRLEN LF@Length LF@VarStrlen\n");
-    addToString(0,"WRITE LF@Length\n");//vypise na vystup
-    addToString(0,"POPFRAME\n");
-    addToString(0,"RETURN\n");
+// function floatval(term) : float
+// todo zkontrolovat zda je dobre convert a vypi
+void FLOATVAL()
+{
+    addToString(0, "LABEL $FLOATVAL \n");
+    addToString(0, "CREATEFRAME\n");
+    addToString(0, "PUSHFRAME\n");
+    addToString(0, "DEFVAR LF@VarFloatval\n");
+    addToString(0, "INT2FLOAT LF@VarFloatval LF@VarFloatval\n"); // konvert na float
+    addToString(0, "WRITE LF@VarWrite\n");                       // vypise na vystup
+
+    addToString(0, "POPFRAME\n");
+    addToString(0, "RETURN\n");
+}
+
+// function intval(term) : int
+// todo zkontrolovat zda je dobre convert a vypi
+void INTVAL()
+{
+    addToString(0, "LABEL $INTVAL \n");
+    addToString(0, "CREATEFRAME\n");
+    addToString(0, "PUSHFRAME\n");
+    addToString(0, "DEFVAR LF@VarIntval\n");
+    addToString(0, "FLOAT2INT LF@VarIntval LF@VarIntval\n"); // konvert na int
+    addToString(0, "WRITE LF@VarWrite\n");                   // vypise na vystup
+
+    addToString(0, "POPFRAME\n");
+    addToString(0, "RETURN\n");
+}
+
+// function strval(term) : string –
+void STRVAL()
+{
+    addToString(0, "LABEL $STRVAL \n");
+    addToString(0, "CREATEFRAME\n");
+    addToString(0, "PUSHFRAME\n");
+    addToString(0, "DEFVAR LF@VarStrval\n");
+    addToString(0, "DEFVAR LF@VarType\n");
+
+    // zjistit typ a zapis do VarType
+    addToString(0, "TYPE LF@VarType LF@VarWrite \n");
+    addToString(0, "JUMPIFEQ $NULL LF@VarType null\n"); // type == null
+
+    addToString(0, "WRITE LF@VarWrite\n"); // vypise na vystup
+    addToString(0, "JUMP $END\n");
+
+    // hodnota null dle tabulky 1.
+    addToString(0, "LABEL $NULL\n");
+    addToString(0, "WRITE "
+                   "\n");
+    addToString(0, "JUMP $END\n");
+
+    // END
+    addToString(0, "LABEL $END\n");
+
+    addToString(0, "POPFRAME\n");
+    addToString(0, "RETURN\n");
+}
+
+// function strlen(string $𝑠) : int
+void STRLEN()
+{
+    addToString(0, "LABEL $STRLEN \n");
+    addToString(0, "CREATEFRAME\n");
+    addToString(0, "PUSHFRAME\n");
+    addToString(0, "DEFVAR LF@VarStrlen\n");
+    addToString(0, "DEFVAR LF@Length\n");
+    addToString(0, "STRLEN LF@Length LF@VarStrlen\n");
+    addToString(0, "WRITE LF@Length\n"); // vypise na vystup
+    addToString(0, "POPFRAME\n");
+    addToString(0, "RETURN\n");
 }
 
 //• function substring(string $𝑠, int $𝑖, int $𝑗) : ?string –
-void SUBSTRING(){
-
+void SUBSTRING()
+{
 }
 
-//function ord(string $c) : int –
-void ORD(){
-    addToString(0,"LABEL $ORD \n");
-    addToString(0,"CREATEFRAME\n");
-    addToString(0,"PUSHFRAME\n");
-    addToString(0,"DEFVAR LF@VarOrd\n");
-    addToString(0,"DEFVAR LF@Length\n");
-    addToString(0,"STRLEN LF@Length LF@VarOrd\n");
+// function ord(string $c) : int –
+void ORD()
+{
+    addToString(0, "LABEL $ORD \n");
+    addToString(0, "CREATEFRAME\n");
+    addToString(0, "PUSHFRAME\n");
+    addToString(0, "DEFVAR LF@VarOrd\n");
+    addToString(0, "DEFVAR LF@Length\n");
+    addToString(0, "STRLEN LF@Length LF@VarOrd\n");
 
-    addToString(0,"JUMPIFEQ int@0 LF@Length END\n");// string je prazdny
-    addToString(0,"DEFVAR LF@Ord\n");
+    addToString(0, "JUMPIFEQ int@0 LF@Length END\n"); // string je prazdny
+    addToString(0, "DEFVAR LF@Ord\n");
 
-    addToString(0,"GETCHAR LF@Ord LF@VarOrd int@0\n");//ziskani prvniho znaku
-    addToString(0,"WRITE LF@Ord\n");//vypise na vystup
+    addToString(0, "GETCHAR LF@Ord LF@VarOrd int@0\n"); // ziskani prvniho znaku
+    addToString(0, "WRITE LF@Ord\n");                   // vypise na vystup
 
-    //END
-    addToString(0,"LABEL $END\n");
-    addToString(0,"POPFRAME\n");
-    addToString(0,"RETURN\n");
+    // END
+    addToString(0, "LABEL $END\n");
+    addToString(0, "POPFRAME\n");
+    addToString(0, "RETURN\n");
 }
 
-//function chr(int $i) : string –
-//todo doresit 
-void CHR(){
-    addToString(0,"LABEL $CHR \n");
-    addToString(0,"CREATEFRAME\n");
-    addToString(0,"PUSHFRAME\n");
-    addToString(0,"DEFVAR LF@VarChr\n");
+// function chr(int $i) : string –
+// todo doresit
+void CHR()
+{
+    addToString(0, "LABEL $CHR \n");
+    addToString(0, "CREATEFRAME\n");
+    addToString(0, "PUSHFRAME\n");
+    addToString(0, "DEFVAR LF@VarChr\n");
 
-
-    addToString(0,"POPFRAME\n");
-    addToString(0,"RETURN\n");
+    addToString(0, "POPFRAME\n");
+    addToString(0, "RETURN\n");
 }
 
-// /** 
+// /**
 //  * Built-in function READS
-//  * 
-//  * 
+//  *
+//  *
 //  */
 // #define READS \
 //     "LABEL reads \n" \
@@ -321,7 +394,7 @@ void CHR(){
 
 // /**
 //  * Built-in function READI
-//  * 
+//  *
 //  */
 // #define READI \
 //     "LABEL readi \n" \
@@ -332,7 +405,7 @@ void CHR(){
 //     "RETURN\n"
 // /**
 //  * Built-in function READF
-//  * 
+//  *
 //  */
 // #define READF \
 //     "LABEL readf \n" \
@@ -344,7 +417,7 @@ void CHR(){
 
 // /**
 //  * Built-in function WRITE
-//  * 
+//  *
 //  */
 // #define WRITE \
 //     "LABEL write \n" \
@@ -366,14 +439,14 @@ void CHR(){
 
 // /**
 //  * Built-in function FLOATVAL, INTVAL, STRVAL
-//  * 
+//  *
 //  * Part of bonus task STRNUM, not necessary rn
-//  * 
+//  *
 //  */
 
 // /**
 //  * Built-in function STRLEN
-//  * 
+//  *
 //  */
 // #define STRLEN \
 //     "LABEL strlen \n" \
@@ -385,7 +458,7 @@ void CHR(){
 
 // /**
 //  * Built-in function SUBSTRING
-//  * 
+//  *
 //  *
 //  */
 // #define SUBSTRING \
@@ -444,7 +517,7 @@ void CHR(){
 
 // /**
 //  * Built-in function ORD
-//  * 
+//  *
 //  */
 // #define ORD \
 // "LABEL ord \n" \
@@ -470,7 +543,7 @@ void CHR(){
 
 // /**
 //  * Built-in function CHR
-//  * 
+//  *
 //  */
 // #define CHR \
 // "LABEL chr \n" \
@@ -488,101 +561,124 @@ void CHR(){
 // "RETURN\n" \
 
 
-    //MARTIN
-    // NOT_DEFINED,  // initial type    --
-    // VAR_ID,       // $variable       --      TODO check return == 1 and we have to push var to stack
-    // SLASH,        // / (divide)      --
-    // EOF_T,        // EOF             --
-    // L_PAR,        // (               --
-    // R_PAR,        // )               --      TODO check comment if we are at the end of storage of parameters in function
-    // L_CPAR,       // {               --
-    // R_CPAR,       // }               --
-    // SEMICOL,      // ;               --
-    // PLUS,         // +               --
-    // MINUS,        // -               --
-    // DOT,          // .               --
-    // MUL,          // *               --
-    // EQ,           // =               --
-    // INT,          // 123e-1          --
-    // FLOAT,        // 1.32e+32        -- 
-    // THREE_EQ,     // ===             --
-    // LESS,         // <               --
-    // MORE,         // >               --
-    // LESS_EQ,      // <=              --
-    // MORE_EQ,      // >=              --
-    // NOT_EQ,       // !==             --
-    // STRING,       // "string \x1F"   -- 
+// MARTIN
+//  NOT_DEFINED,  // initial type    --
+//  VAR_ID,       // $variable       --      TODO check return == 1 and we have to push var to stack
+//  SLASH,        // / (divide)      --
+//  EOF_T,        // EOF             --
+//  L_PAR,        // (               --
+//  R_PAR,        // )               --      TODO check comment if we are at the end of storage of parameters in function
+//  L_CPAR,       // {               --
+//  R_CPAR,       // }               --
+//  SEMICOL,      // ;               --
+//  PLUS,         // +               --
+//  MINUS,        // -               --
+//  DOT,          // .               --
+//  MUL,          // *               --
+//  EQ,           // =               --
+//  INT,          // 123e-1          --
+//  FLOAT,        // 1.32e+32        --
+//  THREE_EQ,     // ===             --
+//  LESS,         // <               --
+//  MORE,         // >               --
+//  LESS_EQ,      // <=              --
+//  MORE_EQ,      // >=              --
+//  NOT_EQ,       // !==             --
+//  STRING,       // "string \x1F"   --
 
-    //MATEJ
-    // FUNCTION,     // function        --DONE NOT TESTED 
-    // ID,           // write, reads..  --DONE NOT TESTED
-    // COMMA,        // ,               --DONE CHECK IF ITS RIGHT   ( TODO popisane pri case comma)
-    // COLON         // :               --DONE NOT TESTED ->only empty case nothing to be done here
-    // IF,           // if                  --FUCK UP if i have if else and nested if else is fucked up becouse i need to store somewhere names of labels
-    // ELSE,         // else                --FUCK UP
-    // INT_TYPE,     // int             --DONE NOT TESTED ->only empty case nothing to be done here
-    // NULL_KEYWORD, // null            --DONE NOT TESTED added CASE next to VAR_ID
-    // RETURN,       // return          
-    // STRING_TYPE,  // string          --DONE NOT TESTED ->only empty case nothing to be done here
-    // FLOAT_TYPE,   // float           --DONE NOT TESTED ->only empty case nothing to be done here
-    // VOID,         // void            --DONE NOT TESTED ->only empty case nothing to be done here
-    // WHILE,        // while
+// MATEJ
+//  FUNCTION,     // function        --DONE NOT TESTED
+//  ID,           // write, reads..  --DONE NOT TESTED
+//  COMMA,        // ,               --DONE CHECK IF ITS RIGHT   ( TODO popisane pri case comma)
+//  COLON         // :               --DONE NOT TESTED ->only empty case nothing to be done here
+//  IF,           // if                  --FUCK UP if i have if else and nested if else is fucked up becouse i need to store somewhere names of labels
+//  ELSE,         // else                --FUCK UP
+//  INT_TYPE,     // int             --DONE NOT TESTED ->only empty case nothing to be done here
+//  NULL_KEYWORD, // null            --DONE NOT TESTED added CASE next to VAR_ID
+//  RETURN,       // return
+//  STRING_TYPE,  // string          --DONE NOT TESTED ->only empty case nothing to be done here
+//  FLOAT_TYPE,   // float           --DONE NOT TESTED ->only empty case nothing to be done here
+//  VOID,         // void            --DONE NOT TESTED ->only empty case nothing to be done here
+//  WHILE,        // while
 
-//function add in UniqueName +1 its for purpose of not having same name of function and variable
-int GetUniqueName(){
+// function add in UniqueName +1 its for purpose of not having same name of function and variable
+int GetUniqueName()
+{
     UniqueName++;
     return UniqueName;
 }
 
 void addToString(int str, char *newStr)
 {
-    if (newStr != NULL) {
-        if (str == 0) { // generatedString
+    if (newStr != NULL)
+    {
+        if (str == 0)
+        { // generatedString
             // creating space for new string
-            if (generatedString == NULL) {
-                generatedString = calloc(strlen(newStr) + 1, sizeof(char)); 
-            } else {
-                generatedString = realloc(generatedString, (strlen(generatedString) + strlen(newStr) + 1)*sizeof(char));
+            if (generatedString == NULL)
+            {
+                generatedString = calloc(strlen(newStr) + 1, sizeof(char));
+            }
+            else
+            {
+                generatedString = realloc(generatedString, (strlen(generatedString) + strlen(newStr) + 1) * sizeof(char));
             }
 
-            if (generatedString == NULL) {
+            if (generatedString == NULL)
+            {
                 exit(99);
             }
             strcat(generatedString, newStr);
-
-        } else if (str == 1) { // inFunctionString
+        }
+        else if (str == 1)
+        { // inFunctionString
             // creating space for new string
-            if (inFunctionString == NULL) {
-                inFunctionString = calloc(strlen(newStr) + 1, sizeof(char)); 
-            } else {
-                inFunctionString = realloc(inFunctionString, (strlen(inFunctionString) + strlen(newStr) + 1)*sizeof(char));
+            if (inFunctionString == NULL)
+            {
+                inFunctionString = calloc(strlen(newStr) + 1, sizeof(char));
+            }
+            else
+            {
+                inFunctionString = realloc(inFunctionString, (strlen(inFunctionString) + strlen(newStr) + 1) * sizeof(char));
             }
 
-            if (inFunctionString == NULL) {
+            if (inFunctionString == NULL)
+            {
                 exit(99);
             }
             strcat(inFunctionString, newStr);
-
-        } else if (str == 2){ // allFunctionsString
+        }
+        else if (str == 2)
+        { // allFunctionsString
             // creating space for new string
-            if (allFunctionsString == NULL) {
-                allFunctionsString = calloc(strlen(newStr) + 1, sizeof(char)); 
-            } else {
-                allFunctionsString = realloc(allFunctionsString, (strlen(allFunctionsString) + strlen(newStr) + 1)*sizeof(char));
+            if (allFunctionsString == NULL)
+            {
+                allFunctionsString = calloc(strlen(newStr) + 1, sizeof(char));
+            }
+            else
+            {
+                allFunctionsString = realloc(allFunctionsString, (strlen(allFunctionsString) + strlen(newStr) + 1) * sizeof(char));
             }
 
-            if (allFunctionsString == NULL) {
+            if (allFunctionsString == NULL)
+            {
                 exit(99);
             }
             strcat(allFunctionsString, newStr);
-        } else if (str == 3) { // listCodeGen->firstElement->data
-            if (whileIfString == NULL) {
-                whileIfString = calloc(strlen(newStr) + 1, sizeof(char)); 
-            } else {
-                whileIfString = realloc(whileIfString, (strlen(whileIfString) + strlen(newStr) + 1)*sizeof(char));
+        }
+        else if (str == 3)
+        { // listCodeGen->firstElement->data
+            if (whileIfString == NULL)
+            {
+                whileIfString = calloc(strlen(newStr) + 1, sizeof(char));
+            }
+            else
+            {
+                whileIfString = realloc(whileIfString, (strlen(whileIfString) + strlen(newStr) + 1) * sizeof(char));
             }
 
-            if (whileIfString == NULL) {
+            if (whileIfString == NULL)
+            {
                 exit(99);
             }
             strcat(whileIfString, newStr);
@@ -590,20 +686,26 @@ void addToString(int str, char *newStr)
     }
 }
 
-void store(char *val) {
-    //creating space for new item
-    if (storage == NULL) {
-        storage = malloc(sizeof(char*));
-    } else {
-        storage = realloc(storage, (storageLen+1)*sizeof(char*));
+void store(char *val)
+{
+    // creating space for new item
+    if (storage == NULL)
+    {
+        storage = malloc(sizeof(char *));
+    }
+    else
+    {
+        storage = realloc(storage, (storageLen + 1) * sizeof(char *));
     }
 
-    if (storage == NULL) {
+    if (storage == NULL)
+    {
         exit(99);
     }
 
-    storage[storageLen] = calloc(strlen(val)+1, sizeof(char));
-    if (storage[storageLen] == NULL) {
+    storage[storageLen] = calloc(strlen(val) + 1, sizeof(char));
+    if (storage[storageLen] == NULL)
+    {
         exit(99);
     }
 
@@ -612,27 +714,34 @@ void store(char *val) {
     storageLen++;
 }
 
-void removeLastFromStorage() {
-    if (storageLen) {
-        free(storage[storageLen-1]);
-        storage[storageLen-1] = NULL;
+void removeLastFromStorage()
+{
+    if (storageLen)
+    {
+        free(storage[storageLen - 1]);
+        storage[storageLen - 1] = NULL;
         storageLen--;
     }
 }
 
-void addToOperator(enum type t) {
-    operator = t;
+void addToOperator(enum type t)
+{
+    operator= t;
 }
 
-void removeOperator() {
-    operator = NOT_DEFINED;
+void removeOperator()
+{
+    operator= NOT_DEFINED;
 }
 
-void resetGlobalValues() {
+void resetGlobalValues()
+{
     removeOperator();
-    while (storage != NULL) {
+    while (storage != NULL)
+    {
         removeLastFromStorage();
-        if (storageLen == 0) {
+        if (storageLen == 0)
+        {
             free(storage);
             storage = NULL;
         }
@@ -641,25 +750,34 @@ void resetGlobalValues() {
     eqSymbolFound = 0;
 }
 
-void checkStorage() {
-    int frameStr = 0; 
+void checkStorage()
+{
+    int frameStr = 0;
     char frame[] = " GF@";
-    if (IAmInFunction) {
+    if (IAmInFunction)
+    {
         frameStr = 1; // inFunctionString
         strcpy(frame, " LF@");
     }
 
-    if (storageLen == 2) { // case $var = 1;
+    if (storageLen == 2)
+    { // case $var = 1;
         addToString(frameStr, "MOVE");
-        if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
+        if (storage[0] != NULL && storage[0][0] == '-')
+        { // if first letter is '-' -> it is variable
             addToString(frameStr, frame);
-        } else {
+        }
+        else
+        {
             addToString(frameStr, " ");
         }
         addToString(frameStr, storage[0]);
-        if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
+        if (storage[1] != NULL && storage[1][0] == '-')
+        { // if first letter is '-' -> it is variable
             addToString(frameStr, frame);
-        } else {
+        }
+        else
+        {
             addToString(frameStr, " ");
         }
         addToString(frameStr, storage[1]);
@@ -670,22 +788,32 @@ void checkStorage() {
     }
 }
 
-void threeAddress(int frameStr, char *frame) {
-    if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
+void threeAddress(int frameStr, char *frame)
+{
+    if (storage[0] != NULL && storage[0][0] == '-')
+    { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
-    } else {
+    }
+    else
+    {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[0]);
-    if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
+    if (storage[1] != NULL && storage[1][0] == '-')
+    { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
-    } else {
+    }
+    else
+    {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[1]);
-    if (storage[2] != NULL && storage[2][0] == '-') { // if first letter is '-' -> it is variable
+    if (storage[2] != NULL && storage[2][0] == '-')
+    { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
-    } else {
+    }
+    else
+    {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[2]);
@@ -694,85 +822,112 @@ void threeAddress(int frameStr, char *frame) {
     removeLastFromStorage();
     removeLastFromStorage();
     removeOperator();
-} 
+}
 
-void threeAddressWithoutRemove(int frameStr, char* frame) {
-    if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
+void threeAddressWithoutRemove(int frameStr, char *frame)
+{
+    if (storage[0] != NULL && storage[0][0] == '-')
+    { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
-    } else {
+    }
+    else
+    {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[0]);
-    if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
+    if (storage[1] != NULL && storage[1][0] == '-')
+    { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
-    } else {
+    }
+    else
+    {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[1]);
-    if (storage[2] != NULL && storage[2][0] == '-') { // if first letter is '-' -> it is variable
+    if (storage[2] != NULL && storage[2][0] == '-')
+    { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
-    } else {
+    }
+    else
+    {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[2]);
     addToString(frameStr, "\n");
 }
 
-void pushStorage(int frameStr, char *frame) {
+void pushStorage(int frameStr, char *frame)
+{
     addToString(frameStr, "PUSHS");
-    if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
+    if (storage[0] != NULL && storage[0][0] == '-')
+    { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
-    } else {
+    }
+    else
+    {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[0]);
     addToString(frameStr, "\n");
     addToString(frameStr, "PUSHS");
-    if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
+    if (storage[1] != NULL && storage[1][0] == '-')
+    { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
-    } else {
+    }
+    else
+    {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[1]);
     addToString(frameStr, "\n");
-    
+
     removeLastFromStorage();
     removeLastFromStorage();
     removeOperator();
 }
 
-void pushWithoutDeleting(int frameStr, char *frame) {
+void pushWithoutDeleting(int frameStr, char *frame)
+{
     addToString(frameStr, "PUSHS");
-    if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
+    if (storage[0] != NULL && storage[0][0] == '-')
+    { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
-    } else {
+    }
+    else
+    {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[0]);
     addToString(frameStr, "\n");
     addToString(frameStr, "PUSHS");
-    if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
+    if (storage[1] != NULL && storage[1][0] == '-')
+    { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
-    } else {
+    }
+    else
+    {
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[1]);
     addToString(frameStr, "\n");
 }
 
-void randStr(char *dest, size_t length) {
-    char charset[] = 
-                     "abcdefghijklmnopqrstuvwxyz"
-                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+void randStr(char *dest, size_t length)
+{
+    char charset[] =
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    while (length-- > 0) {
-        size_t index = (double) rand() / RAND_MAX * (sizeof charset - 1);
+    while (length-- > 0)
+    {
+        size_t index = (double)rand() / RAND_MAX * (sizeof charset - 1);
         *dest++ = charset[index];
     }
     *dest = '\0';
 }
 
-void convertToSameType(int frameStr, char *frame) {
+void convertToSameType(int frameStr, char *frame)
+{
     char tmp1[11];
     char tmp2[11];
 
@@ -790,7 +945,7 @@ void convertToSameType(int frameStr, char *frame) {
     randStr(neqNeqLabel, 10);
     randStr(checkTypeLabel, 10);
     randStr(checkTypeEnd, 10);
-    
+
     addToString(frameStr, "LABEL ");
     addToString(frameStr, checkTypeLabel);
     addToString(frameStr, "\n");
@@ -808,14 +963,14 @@ void convertToSameType(int frameStr, char *frame) {
     addToString(frameStr, frame);
     addToString(frameStr, tmp1);
     addToString(frameStr, frame);
-    addToString(frameStr, storage[storageLen-1]);
+    addToString(frameStr, storage[storageLen - 1]);
     addToString(frameStr, "\n");
 
     addToString(frameStr, "TYPE ");
     addToString(frameStr, frame);
     addToString(frameStr, tmp2);
     addToString(frameStr, frame);
-    addToString(frameStr, storage[storageLen-2]);
+    addToString(frameStr, storage[storageLen - 2]);
     addToString(frameStr, "\n");
 
     addToString(frameStr, "JUMPIFNEQ ");
@@ -830,58 +985,58 @@ void convertToSameType(int frameStr, char *frame) {
     addToString(frameStr, checkTypeEnd);
     addToString(frameStr, "\n");
 
-    addToString(frameStr, "LABEL "); //neq
+    addToString(frameStr, "LABEL "); // neq
     addToString(frameStr, neqLabel);
     addToString(frameStr, "\n");
-        addToString(frameStr, "JUMPIFEQ ");
-        addToString(frameStr, neqEqLabel); //create
-        addToString(frameStr, " string@float");
-        addToString(frameStr, frame);
-        addToString(frameStr, tmp1);
-        addToString(frameStr, "\n");
+    addToString(frameStr, "JUMPIFEQ ");
+    addToString(frameStr, neqEqLabel); // create
+    addToString(frameStr, " string@float");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, "\n");
 
-        addToString(frameStr, "JUMPIFNEQ ");
-        addToString(frameStr, neqNeqLabel); //create
-        addToString(frameStr, " string@float");
-        addToString(frameStr, frame);
-        addToString(frameStr, tmp1);
-        addToString(frameStr, "\n");
+    addToString(frameStr, "JUMPIFNEQ ");
+    addToString(frameStr, neqNeqLabel); // create
+    addToString(frameStr, " string@float");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, "\n");
 
-    addToString(frameStr, "LABEL "); //neqEq
+    addToString(frameStr, "LABEL "); // neqEq
     addToString(frameStr, neqEqLabel);
     addToString(frameStr, "\n");
-        addToString(frameStr, "INT2FLOAT ");
-        addToString(frameStr, frame);
-        addToString(frameStr, storage[storageLen-1]);
-        addToString(frameStr, frame);
-        addToString(frameStr, storage[storageLen-1]);
-        addToString(frameStr, "\n");
-        
-        addToString(frameStr, "JUMP ");
-        addToString(frameStr, checkTypeEnd);
-        addToString(frameStr, "\n");
+    addToString(frameStr, "INT2FLOAT ");
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen - 1]);
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen - 1]);
+    addToString(frameStr, "\n");
 
+    addToString(frameStr, "JUMP ");
+    addToString(frameStr, checkTypeEnd);
+    addToString(frameStr, "\n");
 
-    addToString(frameStr, "LABEL "); //neqNeq
+    addToString(frameStr, "LABEL "); // neqNeq
     addToString(frameStr, neqNeqLabel);
     addToString(frameStr, "\n");
-        addToString(frameStr, "INT2FLOAT ");
-        addToString(frameStr, frame);
-        addToString(frameStr, storage[storageLen-2]);
-        addToString(frameStr, frame);
-        addToString(frameStr, storage[storageLen-2]);
-        addToString(frameStr, "\n");
-        
-        addToString(frameStr, "JUMP ");
-        addToString(frameStr, checkTypeEnd);
-        addToString(frameStr, "\n");
+    addToString(frameStr, "INT2FLOAT ");
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen - 2]);
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen - 2]);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "JUMP ");
+    addToString(frameStr, checkTypeEnd);
+    addToString(frameStr, "\n");
 
     addToString(frameStr, "LABEL ");
     addToString(frameStr, checkTypeEnd);
     addToString(frameStr, "\n");
 }
 
-void divIdiv(int frameStr, char* frame) {
+void divIdiv(int frameStr, char *frame)
+{
     char tmp1[11];
     char endLabel[11];
     char startLabel[11];
@@ -893,93 +1048,102 @@ void divIdiv(int frameStr, char* frame) {
     randStr(endLabel, 10);
     randStr(eqLabel, 10);
 
-    addToString(frameStr, "LABEL "); //start 
+    addToString(frameStr, "LABEL "); // start
     addToString(frameStr, startLabel);
     addToString(frameStr, "\n");
-            addToString(frameStr, "DEFVAR ");
-            addToString(frameStr, frame);
-            addToString(frameStr, tmp1);
-            addToString(frameStr, "\n");
-
-            addToString(frameStr, "TYPE ");
-            addToString(frameStr, frame);
-            addToString(frameStr, tmp1); // result in tmp1
-            addToString(frameStr, frame);
-            addToString(frameStr, storage[storageLen-1]);
-            addToString(frameStr, "\n");
-             
-            addToString(frameStr, "JUMPIFEQ ");
-            addToString(frameStr, eqLabel);
-            addToString(frameStr, frame);
-            addToString(frameStr, tmp1);
-            addToString(frameStr, " string@float");
-            addToString(frameStr, "\n");
-
-            addToString(frameStr, "JUMPIFNEQ ");
-            addToString(frameStr, neqLabel);
-            addToString(frameStr, frame);
-            addToString(frameStr, tmp1);
-            addToString(frameStr, " string@float");
-            addToString(frameStr, "\n");
-
-    
-    addToString(frameStr, "LABEL "); //eq
-    addToString(frameStr, eqLabel);
+    addToString(frameStr, "DEFVAR ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
     addToString(frameStr, "\n");
-        
-        if (eqSymbolFound) {
-            addToString(frameStr, "DIV");
-            threeAddress(frameStr, frame);
-        } else {
-            pushStorage(frameStr, frame);
-            addToString(frameStr, "DIVS\n");
-            addToString(frameStr, "PUSHS int@0\n");
-            addToString(frameStr, "LTS\n");
-        }
 
-        addToString(frameStr, "JUMP ");
-        addToString(frameStr, endLabel);
-        addToString(frameStr, "\n");
-    
-    addToString(frameStr, "LABEL "); //neq
+    addToString(frameStr, "TYPE ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1); // result in tmp1
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen - 1]);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "JUMPIFEQ ");
+    addToString(frameStr, eqLabel);
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, " string@float");
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "JUMPIFNEQ ");
+    addToString(frameStr, neqLabel);
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, " string@float");
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL "); // eq
     addToString(frameStr, eqLabel);
     addToString(frameStr, "\n");
 
-        if (eqSymbolFound) {
-            addToString(frameStr, "IDIV");
-            threeAddressWithoutRemove(frameStr, frame);
-        } else {
-            pushStorage(frameStr, frame);
-            addToString(frameStr, "IDIVS\n");
-            addToString(frameStr, "PUSHS int@0\n");
-            addToString(frameStr, "LTS\n");
-        }
+    if (eqSymbolFound)
+    {
+        addToString(frameStr, "DIV");
+        threeAddress(frameStr, frame);
+    }
+    else
+    {
+        pushStorage(frameStr, frame);
+        addToString(frameStr, "DIVS\n");
+        addToString(frameStr, "PUSHS int@0\n");
+        addToString(frameStr, "LTS\n");
+    }
 
-        addToString(frameStr, "JUMP ");
-        addToString(frameStr, endLabel);
-        addToString(frameStr, "\n");
-         
-    addToString(frameStr, "LABEL "); //end 
+    addToString(frameStr, "JUMP ");
+    addToString(frameStr, endLabel);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL "); // neq
+    addToString(frameStr, eqLabel);
+    addToString(frameStr, "\n");
+
+    if (eqSymbolFound)
+    {
+        addToString(frameStr, "IDIV");
+        threeAddressWithoutRemove(frameStr, frame);
+    }
+    else
+    {
+        pushStorage(frameStr, frame);
+        addToString(frameStr, "IDIVS\n");
+        addToString(frameStr, "PUSHS int@0\n");
+        addToString(frameStr, "LTS\n");
+    }
+
+    addToString(frameStr, "JUMP ");
+    addToString(frameStr, endLabel);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL "); // end
     addToString(frameStr, endLabel);
     addToString(frameStr, "\n");
 }
 
-void codeGeneration(Token *token) {
-    int defined = 0; // auxiliary variable to know if variable was defined or not
+void codeGeneration(Token *token)
+{
+    int defined = 0;  // auxiliary variable to know if variable was defined or not
     int frameStr = 0; // generatedString
-    char frame[5]; // string of actual frame LF/GF/TF
+    char frame[5];    // string of actual frame LF/GF/TF
 
     // variables used to create random names
     char randomVar1[11];
     char randomVar2[11];
 
     // checking if we are in function -> chaning frame
-    if (IAmInFunction) {
+    if (IAmInFunction)
+    {
         strcpy(frame, " LF@");
-    } else {
+    }
+    else
+    {
         strcpy(frame, " GF@");
     }
-    
+
     // auxiliary variable for declarating new variables
     char tmp[strlen(token->val) + strlen("DEFVAR GF@") + 1];
     strcpy(tmp, "DEFVAR");
@@ -987,56 +1151,77 @@ void codeGeneration(Token *token) {
     // auxiliary variable which will be send to threeAddress function as newStr
     char var[strlen(token->val) + strlen(" string@") + 1]; // max lenght which can occur
 
-    switch (token->t) { // switch by token type
+    switch (token->t)
+    { // switch by token type
     case NOT_DEFINED:
         break;
 
-    case EOF_T: 
+    case EOF_T:
         // end of file -> we want to print generated code
         addToString(2, ".IFJcode22\n");
-        addToString(2, generatedString); //merge
-       
-        if (generatedString != NULL) {
-             //free(generatedString); 
+        addToString(2, generatedString); // merge
+
+        if (generatedString != NULL)
+        {
+            // free(generatedString);
         }
         printf("%s\n", allFunctionsString);
         break;
 
-    case VAR_ID: case INT: case FLOAT:
+    case VAR_ID:
+    case INT:
+    case FLOAT:
         // setting prefix
-        if (token->t == VAR_ID) { // variable -> GF@-var1
-            strcpy(var, "-"); 
+        if (token->t == VAR_ID)
+        { // variable -> GF@-var1
+            strcpy(var, "-");
             strcat(var, token->val);
-        } else if (token->t == INT) { // int -> int@-7
-            strcpy(var, " int@"); 
+        }
+        else if (token->t == INT)
+        { // int -> int@-7
+            strcpy(var, " int@");
             strcat(var, token->val);
-        } else if (token->t == FLOAT) { // float -> float@3.42
+        }
+        else if (token->t == FLOAT)
+        { // float -> float@3.42
             strcpy(var, " float@");
             strcat(var, token->val);
-        } else {
+        }
+        else
+        {
             strcpy(var, token->val);
         }
 
-        if (token->t == VAR_ID) { // token is variable -> setting up correct frame
-            if (IAmInFunction) {
+        if (token->t == VAR_ID)
+        { // token is variable -> setting up correct frame
+            if (IAmInFunction)
+            {
                 strcat(tmp, " LF@");
                 strcat(tmp, var);
-                if (inFunctionString) {
-                    if (strstr(inFunctionString, tmp)) { // checking if variable was defined 
+                if (inFunctionString)
+                {
+                    if (strstr(inFunctionString, tmp))
+                    { // checking if variable was defined
                         defined = 1;
                     }
                 }
                 frameStr = 1;
-            } else {
+            }
+            else
+            {
                 strcat(tmp, " GF@");
                 strcat(tmp, var);
-                if (generatedString) {
-                    if (strstr(generatedString, tmp)) { // checking if variable was defined 
+                if (generatedString)
+                {
+                    if (strstr(generatedString, tmp))
+                    { // checking if variable was defined
                         defined = 1;
-                    } 
+                    }
                 }
             }
-        } else {
+        }
+        else
+        {
             defined = 1; // not variable
         }
 
@@ -1044,7 +1229,8 @@ void codeGeneration(Token *token) {
         store(var);
 
         // variable wasn't defined -> define it
-        if (!defined) {
+        if (!defined)
+        {
             addToString(frameStr, "DEFVAR");
             addToString(frameStr, frame);
             addToString(frameStr, var);
@@ -1052,393 +1238,455 @@ void codeGeneration(Token *token) {
         }
 
         // if operator was set (it means that in storage we have at least 2 items)
-        if (operator != NOT_DEFINED) {
+        if (operator!= NOT_DEFINED)
+        {
             convertToSameType(frameStr, frame);
-            switch(operator) {
-                case PLUS:
-                    if (eqSymbolFound) { // $var = $var1 + 2;
-                        addToString(frameStr, "ADD");
-                        threeAddress(frameStr, frame);
-                    } else { // $var1 + 2 (without '=' -> it means that we are for example in condition, so we store result to stack)
-                        pushStorage(frameStr, frame);
-                        addToString(frameStr, "ADDS\n");
-                        addToString(frameStr, "PUSHS int@0\n");
-                        addToString(frameStr, "LTS\n"); 
-
-                        pushStorage(3, frame);
-                        addToString(3, "ADDS\n");
-                        addToString(3, "PUSHS int@0\n");
-                        addToString(3, "LTS\n"); 
-                    }
-                    break;
-                case MINUS:
-                    if (eqSymbolFound) {
-                        addToString(frameStr, "SUB");
-                        threeAddress(frameStr, frame);
-                    } else {
-                        pushStorage(frameStr, frame);
-                        addToString(frameStr, "SUBS\n");
-                        addToString(frameStr, "PUSHS int@0\n");
-                        addToString(frameStr, "LTS\n");
-
-                        pushStorage(3, frame);
-                        addToString(3, "SUBS\n");
-                        addToString(3, "PUSHS int@0\n");
-                        addToString(3, "LTS\n");
-                    }
-                    break;
-                case SLASH:
-                    divIdiv(frameStr, frame);
-                break;
-                case MUL:
-                    if (eqSymbolFound) {
-                        addToString(frameStr, "MUL");
-                        threeAddress(frameStr, frame);
-                    } else {
-                        pushStorage(frameStr, frame);
-                        addToString(frameStr, "MULS\n");
-                        addToString(frameStr, "PUSHS int@0\n");
-                        addToString(frameStr, "LTS\n");
-
-                        pushStorage(3, frame);
-                        addToString(3, "MULS\n");
-                        addToString(3, "PUSHS int@0\n");
-                        addToString(3, "LTS\n");
-                    }
-                    break;
-                case DOT:
-                    addToString(frameStr, "CONCAT");
+            switch (operator)
+            {
+            case PLUS:
+                if (eqSymbolFound)
+                { // $var = $var1 + 2;
+                    addToString(frameStr, "ADD");
                     threeAddress(frameStr, frame);
-                    break;
-                case THREE_EQ:
-                    if (eqSymbolFound) {
-                        addToString(frameStr, "EQ");
-                        threeAddress(frameStr, frame);
-                    } else {
-                        pushStorage(frameStr, frame);
-                        addToString(frameStr, "EQS\n");  
+                }
+                else
+                { // $var1 + 2 (without '=' -> it means that we are for example in condition, so we store result to stack)
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "ADDS\n");
+                    addToString(frameStr, "PUSHS int@0\n");
+                    addToString(frameStr, "LTS\n");
 
-                        pushStorage(3, frame);
-                        addToString(3, "EQS\n");  
+                    pushStorage(3, frame);
+                    addToString(3, "ADDS\n");
+                    addToString(3, "PUSHS int@0\n");
+                    addToString(3, "LTS\n");
+                }
+                break;
+            case MINUS:
+                if (eqSymbolFound)
+                {
+                    addToString(frameStr, "SUB");
+                    threeAddress(frameStr, frame);
+                }
+                else
+                {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "SUBS\n");
+                    addToString(frameStr, "PUSHS int@0\n");
+                    addToString(frameStr, "LTS\n");
+
+                    pushStorage(3, frame);
+                    addToString(3, "SUBS\n");
+                    addToString(3, "PUSHS int@0\n");
+                    addToString(3, "LTS\n");
+                }
+                break;
+            case SLASH:
+                divIdiv(frameStr, frame);
+                break;
+            case MUL:
+                if (eqSymbolFound)
+                {
+                    addToString(frameStr, "MUL");
+                    threeAddress(frameStr, frame);
+                }
+                else
+                {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "MULS\n");
+                    addToString(frameStr, "PUSHS int@0\n");
+                    addToString(frameStr, "LTS\n");
+
+                    pushStorage(3, frame);
+                    addToString(3, "MULS\n");
+                    addToString(3, "PUSHS int@0\n");
+                    addToString(3, "LTS\n");
+                }
+                break;
+            case DOT:
+                addToString(frameStr, "CONCAT");
+                threeAddress(frameStr, frame);
+                break;
+            case THREE_EQ:
+                if (eqSymbolFound)
+                {
+                    addToString(frameStr, "EQ");
+                    threeAddress(frameStr, frame);
+                }
+                else
+                {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "EQS\n");
+
+                    pushStorage(3, frame);
+                    addToString(3, "EQS\n");
+                }
+                break;
+            case LESS:
+                if (eqSymbolFound)
+                {
+                    addToString(frameStr, "LT");
+                    threeAddress(frameStr, frame);
+                }
+                else
+                {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "LTS\n");
+
+                    pushStorage(3, frame);
+                    addToString(3, "LTS\n");
+                }
+                break;
+            case MORE:
+                if (eqSymbolFound)
+                {
+                    addToString(frameStr, "GT");
+                    threeAddress(frameStr, frame);
+                }
+                else
+                {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "GTS\n");
+
+                    pushStorage(3, frame);
+                    addToString(3, "GTS\n");
+                }
+                break;
+            case NOT_EQ:
+                if (eqSymbolFound)
+                {
+                    addToString(frameStr, "EQ");
+                    threeAddress(frameStr, frame);
+                    addToString(frameStr, "NOT");
+                    if (storage[0] != NULL && storage[0][0] == '-')
+                    {
+                        addToString(frameStr, frame);
                     }
-                    break;
-                case LESS:
-                    if (eqSymbolFound) {
-                        addToString(frameStr, "LT");
-                        threeAddress(frameStr, frame);
-                    } else {
-                        pushStorage(frameStr, frame);
-                        addToString(frameStr, "LTS\n");  
-
-                        pushStorage(3, frame);
-                        addToString(3, "LTS\n");  
+                    else
+                    {
+                        addToString(frameStr, " ");
                     }
-                    break;
-                case MORE:
-                    if (eqSymbolFound) {
-                        addToString(frameStr, "GT");
-                        threeAddress(frameStr, frame);
-                    } else {
-                        pushStorage(frameStr, frame);
-                        addToString(frameStr, "GTS\n");  
-
-                        pushStorage(3, frame);
-                        addToString(3, "GTS\n"); 
+                    addToString(frameStr, storage[0]);
+                    if (storage[0] != NULL && storage[0][0] == '-')
+                    {
+                        addToString(frameStr, frame);
                     }
-                    break;
-                case NOT_EQ:
-                    if (eqSymbolFound) {
-                        addToString(frameStr, "EQ");
-                        threeAddress(frameStr, frame);
-                        addToString(frameStr, "NOT");
-                        if (storage[0] != NULL && storage[0][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[0]);
-                        if (storage[0] != NULL && storage[0][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[0]);
-                        addToString(frameStr, "\n");   
-
-                    } else {
-                        pushStorage(frameStr, frame);
-                        addToString(frameStr, "EQS\n");
-                        addToString(frameStr, "NOTS\n");  
-
-                        pushStorage(3, frame);
-                        addToString(3, "EQS\n");
-                        addToString(3, "NOTS\n");
+                    else
+                    {
+                        addToString(frameStr, " ");
                     }
-                    break;
+                    addToString(frameStr, storage[0]);
+                    addToString(frameStr, "\n");
+                }
+                else
+                {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "EQS\n");
+                    addToString(frameStr, "NOTS\n");
 
-                case LESS_EQ:
-                    randStr(randomVar1, 10);
-                    randStr(randomVar2, 10);
+                    pushStorage(3, frame);
+                    addToString(3, "EQS\n");
+                    addToString(3, "NOTS\n");
+                }
+                break;
 
-                    addToString(frameStr, "DEFVAR");
+            case LESS_EQ:
+                randStr(randomVar1, 10);
+                randStr(randomVar2, 10);
+
+                addToString(frameStr, "DEFVAR");
+                addToString(frameStr, frame);
+                addToString(frameStr, randomVar1);
+                addToString(frameStr, "\n");
+
+                addToString(frameStr, "DEFVAR");
+                addToString(frameStr, frame);
+                addToString(frameStr, randomVar2);
+                addToString(frameStr, "\n");
+
+                if (eqSymbolFound)
+                {
+                    addToString(frameStr, "LT"); // LESS
                     addToString(frameStr, frame);
                     addToString(frameStr, randomVar1);
+                    if (storage[1] != NULL && storage[1][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[1]);
+                    if (storage[2] != NULL && storage[2][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[2]);
                     addToString(frameStr, "\n");
 
-                    addToString(frameStr, "DEFVAR");
+                    addToString(frameStr, "EQ"); // EQ
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar2);
+                    if (storage[1] != NULL && storage[1][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[1]);
+                    if (storage[2] != NULL && storage[2][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[2]);
+                    addToString(frameStr, "\n");
+
+                    addToString(frameStr, "OR"); // OR
+                    if (storage[0] != NULL && storage[0][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[0]);
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar1);
                     addToString(frameStr, frame);
                     addToString(frameStr, randomVar2);
                     addToString(frameStr, "\n");
 
-                    if (eqSymbolFound) {
-                        addToString(frameStr, "LT"); //LESS
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar1);
-                        if (storage[1] != NULL && storage[1][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[1]);
-                        if (storage[2] != NULL && storage[2][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[2]);
-                        addToString(frameStr, "\n");
+                    removeLastFromStorage();
+                    removeLastFromStorage();
+                    removeOperator();
+                }
+                else
+                {
+                    pushWithoutDeleting(frameStr, frame);
 
-                        addToString(frameStr, "EQ"); //EQ
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar2);
-                        if (storage[1] != NULL && storage[1][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[1]);
-                        if (storage[2] != NULL && storage[2][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[2]);
-                        addToString(frameStr, "\n");
-
-                        addToString(frameStr, "OR"); //OR
-                        if (storage[0] != NULL && storage[0][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[0]);
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar1);
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar2);
-                        addToString(frameStr, "\n");
-                                   
-                        removeLastFromStorage();
-                        removeLastFromStorage();
-                        removeOperator();
-
-                    } else {
-                        pushWithoutDeleting(frameStr, frame);
-
-                        addToString(frameStr, "LTS\n"); //LESS
-                        addToString(frameStr, "POPS"); //STORE
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar1);
-                        addToString(frameStr, "\n");
-
-                        pushWithoutDeleting(frameStr, frame);
-
-                        addToString(frameStr, "EQS\n"); //EQ
-                        addToString(frameStr, "POPS"); //STORE
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar2);
-                        addToString(frameStr, "\n");
-
-                        addToString(frameStr, "PUSHS");
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar1);
-                        addToString(frameStr, "\n");
-                        addToString(frameStr, "PUSHS");
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar2);
-                        addToString(frameStr, "\n");
-
-                        addToString(frameStr, "ORS\n"); //OR
-
-                        //---
-                        pushWithoutDeleting(3, frame);
-
-                        addToString(3, "LTS\n"); //LESS
-                        addToString(3, "POPS"); //STORE
-                        addToString(3, frame);
-                        addToString(3, randomVar1);
-                        addToString(3, "\n");
-
-                        pushWithoutDeleting(3, frame);
-
-                        addToString(3, "EQS\n"); //EQ
-                        addToString(3, "POPS"); //STORE
-                        addToString(3, frame);
-                        addToString(3, randomVar2);
-                        addToString(3, "\n");
-
-                        addToString(3, "PUSHS");
-                        addToString(3, frame);
-                        addToString(3, randomVar1);
-                        addToString(3, "\n");
-                        addToString(3, "PUSHS");
-                        addToString(3, frame);
-                        addToString(3, randomVar2);
-                        addToString(3, "\n");
-
-                        addToString(3, "ORS\n"); //OR
-
-                        removeLastFromStorage();
-                        removeLastFromStorage();
-                        removeOperator();
-                    }
-                    break;
-                case MORE_EQ:
-                    randStr(randomVar1, 10);
-                    randStr(randomVar2, 10);
-
-                    addToString(frameStr, "DEFVAR");
+                    addToString(frameStr, "LTS\n"); // LESS
+                    addToString(frameStr, "POPS");  // STORE
                     addToString(frameStr, frame);
                     addToString(frameStr, randomVar1);
                     addToString(frameStr, "\n");
 
-                    addToString(frameStr, "DEFVAR");
+                    pushWithoutDeleting(frameStr, frame);
+
+                    addToString(frameStr, "EQS\n"); // EQ
+                    addToString(frameStr, "POPS");  // STORE
                     addToString(frameStr, frame);
                     addToString(frameStr, randomVar2);
                     addToString(frameStr, "\n");
 
-                    if (eqSymbolFound) {
-                        addToString(frameStr, "GT"); //MORE
+                    addToString(frameStr, "PUSHS");
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar1);
+                    addToString(frameStr, "\n");
+                    addToString(frameStr, "PUSHS");
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar2);
+                    addToString(frameStr, "\n");
+
+                    addToString(frameStr, "ORS\n"); // OR
+
+                    //---
+                    pushWithoutDeleting(3, frame);
+
+                    addToString(3, "LTS\n"); // LESS
+                    addToString(3, "POPS");  // STORE
+                    addToString(3, frame);
+                    addToString(3, randomVar1);
+                    addToString(3, "\n");
+
+                    pushWithoutDeleting(3, frame);
+
+                    addToString(3, "EQS\n"); // EQ
+                    addToString(3, "POPS");  // STORE
+                    addToString(3, frame);
+                    addToString(3, randomVar2);
+                    addToString(3, "\n");
+
+                    addToString(3, "PUSHS");
+                    addToString(3, frame);
+                    addToString(3, randomVar1);
+                    addToString(3, "\n");
+                    addToString(3, "PUSHS");
+                    addToString(3, frame);
+                    addToString(3, randomVar2);
+                    addToString(3, "\n");
+
+                    addToString(3, "ORS\n"); // OR
+
+                    removeLastFromStorage();
+                    removeLastFromStorage();
+                    removeOperator();
+                }
+                break;
+            case MORE_EQ:
+                randStr(randomVar1, 10);
+                randStr(randomVar2, 10);
+
+                addToString(frameStr, "DEFVAR");
+                addToString(frameStr, frame);
+                addToString(frameStr, randomVar1);
+                addToString(frameStr, "\n");
+
+                addToString(frameStr, "DEFVAR");
+                addToString(frameStr, frame);
+                addToString(frameStr, randomVar2);
+                addToString(frameStr, "\n");
+
+                if (eqSymbolFound)
+                {
+                    addToString(frameStr, "GT"); // MORE
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar1);
+                    if (storage[1] != NULL && storage[1][0] == '-')
+                    {
                         addToString(frameStr, frame);
-                        addToString(frameStr, randomVar1);
-                        if (storage[1] != NULL && storage[1][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[1]);
-                        if (storage[2] != NULL && storage[2][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[2]);
-                        addToString(frameStr, "\n");
-
-                        addToString(frameStr, "EQ"); //EQ
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar2);
-                        if (storage[1] != NULL && storage[1][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[1]);
-                        if (storage[2] != NULL && storage[2][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[2]);
-                        addToString(frameStr, "\n");
-
-                        addToString(frameStr, "OR"); //OR
-                        if (storage[0] != NULL && storage[0][0] == '-') {
-                            addToString(frameStr, frame);
-                        } else {
-                            addToString(frameStr, " ");
-                        }
-                        addToString(frameStr, storage[0]);
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar1);
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar2);
-                        addToString(frameStr, "\n");
-                                   
-                        removeLastFromStorage();
-                        removeLastFromStorage();
-                        removeOperator();
-
-                    } else {
-                        pushWithoutDeleting(frameStr, frame);
-
-                        addToString(frameStr, "GTS\n"); //MORE
-                        addToString(frameStr, "POPS"); //STORE
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar1);
-                        addToString(frameStr, "\n");
-
-                        pushWithoutDeleting(frameStr, frame);
-
-                        addToString(frameStr, "EQS\n"); //EQ
-                        addToString(frameStr, "POPS"); //STORE
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar2);
-                        addToString(frameStr, "\n");
-
-                        addToString(frameStr, "PUSHS");
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar1);
-                        addToString(frameStr, "\n");
-                        addToString(frameStr, "PUSHS");
-                        addToString(frameStr, frame);
-                        addToString(frameStr, randomVar2);
-                        addToString(frameStr, "\n");
-
-                        addToString(frameStr, "ORS\n"); //OR
-
-                        // --- 
-
-                        pushWithoutDeleting(3, frame);
-
-                        addToString(3, "GTS\n"); //MORE
-                        addToString(3, "POPS"); //STORE
-                        addToString(3, frame);
-                        addToString(3, randomVar1);
-                        addToString(3, "\n");
-
-                        pushWithoutDeleting(3, frame);
-
-                        addToString(3, "EQS\n"); //EQ
-                        addToString(3, "POPS"); //STORE
-                        addToString(3, frame);
-                        addToString(3, randomVar2);
-                        addToString(3, "\n");
-
-                        addToString(3, "PUSHS");
-                        addToString(3, frame);
-                        addToString(3, randomVar1);
-                        addToString(3, "\n");
-                        addToString(3, "PUSHS");
-                        addToString(3, frame);
-                        addToString(3, randomVar2);
-                        addToString(3, "\n");
-
-                        addToString(3, "ORS\n"); //OR
-                        
-                        removeLastFromStorage();
-                        removeLastFromStorage();
-                        removeOperator();
                     }
-                    break;
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[1]);
+                    if (storage[2] != NULL && storage[2][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[2]);
+                    addToString(frameStr, "\n");
 
-                default:
-                    break;
+                    addToString(frameStr, "EQ"); // EQ
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar2);
+                    if (storage[1] != NULL && storage[1][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[1]);
+                    if (storage[2] != NULL && storage[2][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[2]);
+                    addToString(frameStr, "\n");
+
+                    addToString(frameStr, "OR"); // OR
+                    if (storage[0] != NULL && storage[0][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[0]);
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar1);
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar2);
+                    addToString(frameStr, "\n");
+
+                    removeLastFromStorage();
+                    removeLastFromStorage();
+                    removeOperator();
+                }
+                else
+                {
+                    pushWithoutDeleting(frameStr, frame);
+
+                    addToString(frameStr, "GTS\n"); // MORE
+                    addToString(frameStr, "POPS");  // STORE
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar1);
+                    addToString(frameStr, "\n");
+
+                    pushWithoutDeleting(frameStr, frame);
+
+                    addToString(frameStr, "EQS\n"); // EQ
+                    addToString(frameStr, "POPS");  // STORE
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar2);
+                    addToString(frameStr, "\n");
+
+                    addToString(frameStr, "PUSHS");
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar1);
+                    addToString(frameStr, "\n");
+                    addToString(frameStr, "PUSHS");
+                    addToString(frameStr, frame);
+                    addToString(frameStr, randomVar2);
+                    addToString(frameStr, "\n");
+
+                    addToString(frameStr, "ORS\n"); // OR
+
+                    // ---
+
+                    pushWithoutDeleting(3, frame);
+
+                    addToString(3, "GTS\n"); // MORE
+                    addToString(3, "POPS");  // STORE
+                    addToString(3, frame);
+                    addToString(3, randomVar1);
+                    addToString(3, "\n");
+
+                    pushWithoutDeleting(3, frame);
+
+                    addToString(3, "EQS\n"); // EQ
+                    addToString(3, "POPS");  // STORE
+                    addToString(3, frame);
+                    addToString(3, randomVar2);
+                    addToString(3, "\n");
+
+                    addToString(3, "PUSHS");
+                    addToString(3, frame);
+                    addToString(3, randomVar1);
+                    addToString(3, "\n");
+                    addToString(3, "PUSHS");
+                    addToString(3, frame);
+                    addToString(3, randomVar2);
+                    addToString(3, "\n");
+
+                    addToString(3, "ORS\n"); // OR
+
+                    removeLastFromStorage();
+                    removeLastFromStorage();
+                    removeOperator();
+                }
+                break;
+
+            default:
+                break;
             }
             removeOperator(); // removing operator
         }
         break;
-    // end of case VAR_ID/INT/FLOAT
+        // end of case VAR_ID/INT/FLOAT
 
     case L_CPAR:
         cparCounter++;
@@ -1456,7 +1704,7 @@ void codeGeneration(Token *token) {
         //     int RndStr=rand_str();
         //     addToString(frameStr, RndStr); // DEFVAR GF@ifRndStr | LF@ifRndStr
         //     addToString(frameStr, "\n");
-            
+
         //     addToString(frameStr, "POP ");
 
         //                 addToString(frameStr, "DEFVAR ");
@@ -1471,7 +1719,7 @@ void codeGeneration(Token *token) {
 
         //     addToString(frameStr, "JUMPIFEQ ELSE");
         //     addToString(frameStr, RndStr); // JUMPIFEQ ELSERndStr
-        //     addToString(frameStr, "true"); // JUMPIFEQ ELSERndStr true 
+        //     addToString(frameStr, "true"); // JUMPIFEQ ELSERndStr true
         //     if (IAmInFunction)
         //     {
         //         addToString(frameStr, "LF@ ");
@@ -1482,24 +1730,39 @@ void codeGeneration(Token *token) {
         //     addToString(frameStr, RndStr); // JUMPIFEQ ELSERndStr true GF@ifRndStr/LF@ifRndStr
         //     addToString(frameStr, "\n");
         // }
-        
+
         break;
 
     case R_CPAR:
         checkStorage();
-        if (cparCounter) {
+        if (cparCounter)
+        {
             cparCounter--;
         }
-        if (!cparCounter && IAmInFunction) { // function declaration ended
+        if (!cparCounter && IAmInFunction)
+        { // function declaration ended
             IAmInFunction = 0;
             addToString(2, inFunctionString);
             free(inFunctionString);
+<<<<<<< Updated upstream
         } else {
             //not function
             if (whileIfString != NULL) { // not else {}
                 DLL_InsertFirst(0 ,NULL);
                 listCodeGen->firstElement->data = malloc(sizeof(char)*(strlen(whileIfString)+1));
                 if (listCodeGen->firstElement->data == NULL) {
+=======
+        }
+        else
+        {
+            // not function
+            if (whileIfString != NULL)
+            { // not else {}
+                DLL_InsertFirst(listCodeGen, NULL);
+                listCodeGen->firstElement->data = malloc(sizeof(char) * (strlen(whileIfString) + 1));
+                if (listCodeGen->firstElement->data == NULL)
+                {
+>>>>>>> Stashed changes
                     exit(99);
                 }
                 strcpy(listCodeGen->firstElement->data, whileIfString);
@@ -1514,19 +1777,23 @@ void codeGeneration(Token *token) {
         break;
 
     case R_PAR:
-    //added  check and uncomment
-        // if (IAmInFunction) {
-        // pushStorage(storage[storageLen-1], frameStr, frame);
-        // removeLastFromStorage();
-        // }
-    
+        // added  check and uncomment
+        //  if (IAmInFunction) {
+        //  pushStorage(storage[storageLen-1], frameStr, frame);
+        //  removeLastFromStorage();
+        //  }
+
         checkStorage();
-        
-        if (storageLen == 1) { // if ($var1)
-            addToString(frameStr, "PUSHS"); 
-            if (storage[0][0] == '-') {
+
+        if (storageLen == 1)
+        { // if ($var1)
+            addToString(frameStr, "PUSHS");
+            if (storage[0][0] == '-')
+            {
                 addToString(frameStr, frame);
-            } else {
+            }
+            else
+            {
                 addToString(frameStr, " ");
             }
             addToString(frameStr, storage[0]);
@@ -1536,15 +1803,16 @@ void codeGeneration(Token *token) {
             removeLastFromStorage();
         }
 
-        if(IAmInFunction){
-            addToString(frameStr,"CALL $");
+        if (IAmInFunction)
+        {
+            addToString(frameStr, "CALL $");
             addToString(frameStr, functionName);
             addToString(frameStr, "\n");
-            
-            if(functionName != NULL)
-            {            
+
+            if (functionName != NULL)
+            {
                 free(functionName);
-                functionName=NULL;
+                functionName = NULL;
             }
         }
 
@@ -1594,14 +1862,15 @@ void codeGeneration(Token *token) {
         break;
     case MORE_EQ:
         addToOperator(MORE_EQ);
-        break;   
+        break;
     case STRING:
         // string@"hello world"
         strcpy(var, " string@");
         strcat(var, token->val);
         store(var);
 
-        if (operator == DOT) {
+        if (operator== DOT)
+        {
             addToString(frameStr, "CONCAT");
             threeAddress(frameStr, frame);
             removeOperator();
@@ -1610,30 +1879,38 @@ void codeGeneration(Token *token) {
         break;
 
     case ID:
-        if (IAmInFunction) {
-            if (functionName == NULL) {
+        if (IAmInFunction)
+        {
+            if (functionName == NULL)
+            {
                 functionName = malloc(strlen(token->val) + 1);
                 strcpy(functionName, token->val);
-            } else {
+            }
+            else
+            {
                 functionName = realloc(functionName, strlen(token->val) + 1);
                 strcpy(functionName, token->val);
             }
         }
         break;
 
+<<<<<<< Updated upstream
     case COMMA:    
         pushStorage(storage[storageLen-1], frame);
+=======
+    case COMMA:
+        // pushStorage(storage[storageLen-1], frameStr, frame);
+>>>>>>> Stashed changes
         removeLastFromStorage();
         // todo push last from storage storage[storageLen-1] (var1)
         // removeLastFromStorage();
         // pozor na posledny parameter -> nebude comma
-        break; 
+        break;
 
     case COLON:
         break;
     case WHILE:
         // inWhile +=1;
-        
 
         break;
     case RETURN:
@@ -1641,6 +1918,7 @@ void codeGeneration(Token *token) {
         break;
     case IF:
 
+<<<<<<< Updated upstream
         //todo segfault
         // inIf += 1;
         // addToString(frameStr, "JUMP $IFCOND");
@@ -1670,6 +1948,31 @@ void codeGeneration(Token *token) {
         // strcat(listIfLabels->firstElement->data, UniqueName);
         
         //todo nechyba ti tu break; ??
+=======
+        // store in listIfLabels IFCOND and GetUniqueName() value
+        DLL_InsertFirst(listIfLabels, NULL);
+        listIfLabels->firstElement->data = malloc(sizeof(char) * (strlen("IFCOND") + strlen(UniqueName) + 1));
+        if (listIfLabels->firstElement->data == NULL)
+        {
+            exit(99);
+        }
+        strcpy(listIfLabels->firstElement->data, "IFCOND");
+        strcat(listIfLabels->firstElement->data, UniqueName);
+
+        addToString(frameStr, "LABEL $STARTIF");
+        addToString(frameStr, UniqueName);
+        addToString(frameStr, "\n");
+
+        // store in listIfLabels STARTIF and UniqueName value
+        DLL_InsertFirst(listIfLabels, NULL);
+        listIfLabels->firstElement->data = malloc(sizeof(char) * (strlen("STARTIF") + strlen(UniqueName) + 1));
+        if (listIfLabels->firstElement->data == NULL)
+        {
+            exit(99);
+        }
+        strcpy(listIfLabels->firstElement->data, "STARTIF");
+        strcat(listIfLabels->firstElement->data, UniqueName);
+>>>>>>> Stashed changes
 
     case ELSE:
     //todo segfault
@@ -1678,11 +1981,15 @@ void codeGeneration(Token *token) {
         // addToString(frameStr, "\n");
         break;
 
+<<<<<<< Updated upstream
+=======
+        break;
+>>>>>>> Stashed changes
     default:
         break;
     }
 }
 
-//todo pridat do parsru volanie codeGeneration
-//todo remove zo scanneru
-//todo test an merlin + interpret
+// todo pridat do parsru volanie codeGeneration
+// todo remove zo scanneru
+// todo test an merlin + interpret

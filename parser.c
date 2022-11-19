@@ -281,7 +281,7 @@ int expression(Token *token)
     int count = 0;
     while (token->t != SEMICOL && (token->t != R_PAR || count != 0))
     { // getting all tokens in expression
-
+        printf("T: %s\n", token->val);
         if (token->t == L_PAR)
             count++;
         if (token->t == R_PAR)

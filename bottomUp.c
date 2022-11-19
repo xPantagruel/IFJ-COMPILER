@@ -182,6 +182,15 @@ bool reduce(Stack *stack)
             {
                 term->type = I_STRING;
             }
+
+            for (int i = 0; i < termCount; i++)
+            {
+                if (term->childTerms[i]->value && term->childTerms[i]->type != L_BRACKET && term->childTerms[i]->type != R_BRACKET)
+                {
+                    printf("%s ", term->childTerms[i]->value);
+                }
+            }
+            printf("\n");
         }
         else
         {
@@ -189,6 +198,7 @@ bool reduce(Stack *stack)
         }
 
         push(stack, stackNode);
+
         return true;
     }
     else
@@ -429,6 +439,11 @@ bool freeAndReturn(bool success, Stack *stack)
 
 bool bottomUp(Expression *exp, int *resultType)
 {
+    for (int i = 0; i < exp->arrayLen; i++)
+    {
+        printf("%s\n", exp->tokenArray[i]->val);
+    }
+
     *resultType = NULL;
     int currentExpPos = 0;
 
@@ -445,7 +460,7 @@ bool bottomUp(Expression *exp, int *resultType)
 
     while (currentExpPos < exp->arrayLen)
     {
-
+        printBottomUp(stack, exp, currentExpPos);
         Term *newTerm;
         StackNode *newStackNode;
         int expType;
