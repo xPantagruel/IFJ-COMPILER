@@ -16,17 +16,93 @@
 #include <string.h>
 #include "scanner.h"
 
+/** Prvek dvousměrně vázaného seznamu. */
+typedef struct DLLElement {
+	/** Užitečná data. */
+	char *data;
+	/** Ukazatel na předcházející prvek seznamu. */
+	struct DLLElement *previousElement;
+	/** Ukazatel na následující prvek seznamu. */
+	struct DLLElement *nextElement;
+} *DLLElementPtr;
+
+/** Dvousměrně vázaný seznam. */
+typedef struct {
+	/** Ukazatel na první prvek seznamu. */
+	DLLElementPtr firstElement;
+	/** Ukazatel na aktuální prvek seznamu. */
+	DLLElementPtr activeElement;
+	/** Ukazatel na posledni prvek seznamu. */
+	DLLElementPtr lastElement;
+} DLList;
+
+/**
+ * Provede inicializaci seznamu list před jeho prvním použitím (tzn. žádná
+ * z následujících funkcí nebude volána nad neinicializovaným seznamem).
+ * Tato inicializace se nikdy nebude provádět nad již inicializovaným seznamem,
+ * a proto tuto možnost neošetřujte.
+ * Vždy předpokládejte, že neinicializované proměnné mají nedefinovanou hodnotu.
+ *
+ * @param list Ukazatel na strukturu dvousměrně vázaného seznamu
+ */
+void DLL_Init( DLList *list ) {
+	list->firstElement = NULL;
+	list->lastElement = NULL;
+	list->activeElement = NULL;
+}
+
+void DLL_Dispose( DLList *list ) {
+	while (list->firstElement != NULL) { //removing first element until first element will be NULL
+		//the code below is just copied DLL_DeleteFirst function
+		DLLElementPtr tmp = list->firstElement;
+
+		if (list->firstElement == list->activeElement) { //checking if first element is active
+			list->activeElement = NULL;
+		}
+
+		if (list->firstElement == list->lastElement) { //checking if the first element is also the last element
+			list->lastElement = NULL;
+		}
+
+		list->firstElement = list->firstElement->nextElement;
+		if (list->firstElement != NULL) {
+			list->firstElement->previousElement = NULL;
+		}
+		free(tmp);
+	}
+}
+
+void DLL_InsertLast( DLList *list, char* data ) {
+	DLLElementPtr new_element = malloc(sizeof(struct DLLElement));
+	if (new_element == NULL) {
+		DLL_Error();
+		return;
+	}
+
+	new_element->data = data;
+	new_element->nextElement = NULL;
+	new_element->previousElement = list->lastElement;
+	if (list->lastElement != NULL) { //if there is last element
+		list->lastElement->nextElement = new_element;
+	} 
+	
+	list->lastElement = new_element;
+	if (list->firstElement == NULL) { //if list was empty -> we need to set first element too
+		list->firstElement = list->lastElement;
+	}
+}
+
 /** string name of function*/
 static char *functionName = NULL;
 
-/** bool if in if body*/
-static bool inIf = false;
+/** int if in if body*/
+static int inIf = false;
 
-/** bool if in else body*/
-static bool inElse = false;
+/** int if in else body*/
+static int inElse = false;
 
-/** bool if in While body*/
-static bool inWhile = false;
+/** int if in While body*/
+static int inWhile = false;
 
 /** String for global frame -> 0 */
 static char *generatedString = NULL;
