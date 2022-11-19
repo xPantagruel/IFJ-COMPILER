@@ -1,10 +1,9 @@
 <?php
 declare(strict_types=1);
 
-function hello(string $y): int{
-  write($y);
-}
 
 
+$a = 8.04;
+$b = 8;
 
-$var = $a + $b;
+$var = "hello" . "world";

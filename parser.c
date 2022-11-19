@@ -278,9 +278,21 @@ int params_n(Token *token)
 int expression(Token *token)
 {
     Expression *exp = initExpression();
-
-    while (token->t != SEMICOL && token->t != R_PAR)
+    int count = 0;
+    while (token->t != SEMICOL && (token->t != R_PAR || count != 0))
     { // getting all tokens in expression
+
+        if (token->t == L_PAR)
+            count++;
+        if (token->t == R_PAR)
+        {
+            count--;
+        }
+        if (count < 0)
+        {
+            // error
+        }
+
         addTokenToExpression(exp, token);
         token = getToken();
     }
@@ -294,8 +306,25 @@ int expression(Token *token)
         ungetc(')', stdin);
     }
 
-    if (bottomUp(exp))
+    if (exp->arrayLen == 1)
     {
+        if (currentSymbol)
+        {
+            currentSymbol->variable->t = exp->tokenArray[0]->t;
+        }
+
+        return 1;
+    }
+
+    int resultType;
+
+    if (bottomUp(exp, &resultType))
+    {
+        if (currentSymbol)
+        {
+            currentSymbol->variable->t = resultType;
+        }
+
         dtorExpression(exp);
         return 1;
     }
@@ -612,8 +641,12 @@ int statement(Token *token)
                 token = getToken();
                 if (token->t == SEMICOL)
                 { // VAR_ID = VAR_ID;
-                    htab_variable_t *var = htab_search(symTable, tmpStr)->variable;
-                    currentSymbol->variable->t = var->t;
+                    htab_pair_t *pair = htab_search(symTable, tmpStr);
+                    if (pair && pair->variable)
+                    {
+                        currentSymbol->variable->t = pair->variable->t;
+                    }
+
                     free(tmpStr);
                     dtorToken(tmp);
                     dtorToken(token);
@@ -659,7 +692,6 @@ int statement(Token *token)
             }
             else if (var_rule(token) == 1)
             { // VAR_ID = <var_rule>
-                currentSymbol->variable->t = token->t;
                 dtorToken(token);
                 token = getToken();
                 if (token->t == SEMICOL)
@@ -885,10 +917,8 @@ int main()
     if (prog(token))
     {
         dtorToken(token);
-        htab_print(symTable);
-        pushFrame(frameStack, "while");
-        pushFrame(frameStack, "print");
-        printFrameStack(frameStack);
+        // htab_print(symTable);
+        // printFrameStack(frameStack);
         if (generatedString != NULL)
         {
             free(generatedString);
@@ -897,7 +927,7 @@ int main()
     }
     else
     {
-        dtorToken(token);
+        // dtorToken(token);
         if (generatedString != NULL)
         {
             free(generatedString);

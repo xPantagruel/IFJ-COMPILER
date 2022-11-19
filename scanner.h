@@ -45,8 +45,8 @@ enum type
     STRING_TYPE = 22, // string
     VOID,             // void
     WHILE,            // while
-    INT,              // 123e-1
-    FLOAT,            // 1.32e+32
+    INT = 25,         // 123e-1
+    FLOAT = 26,       // 1.32e+32
     EQ,               // =
     THREE_EQ,         // ===
     LESS,             // <

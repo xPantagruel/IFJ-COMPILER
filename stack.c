@@ -36,6 +36,7 @@ bool push(Stack *s, StackNode *t)
     StackNode *n = s->top;
     s->top = t;
     t->previous = n;
+    n->next = t;
     return true;
 }
 
