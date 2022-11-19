@@ -11,6 +11,63 @@
  */
 #include "code_generation.h"
 
+
+/**
+ * Provede inicializaci seznamu list před jeho prvním použitím (tzn. žádná
+ * z následujících funkcí nebude volána nad neinicializovaným seznamem).
+ * Tato inicializace se nikdy nebude provádět nad již inicializovaným seznamem,
+ * a proto tuto možnost neošetřujte.
+ * Vždy předpokládejte, že neinicializované proměnné mají nedefinovanou hodnotu.
+ *
+ * @param list Ukazatel na strukturu dvousměrně vázaného seznamu
+ */
+void DLL_Init( DLList *list ) {
+	list->firstElement = NULL;
+	list->lastElement = NULL;
+	list->activeElement = NULL;
+}
+
+void DLL_Dispose( DLList *list ) {
+	while (list->firstElement != NULL) { //removing first element until first element will be NULL
+		//the code below is just copied DLL_DeleteFirst function
+		DLLElementPtr tmp = list->firstElement;
+
+		if (list->firstElement == list->activeElement) { //checking if first element is active
+			list->activeElement = NULL;
+		}
+
+		if (list->firstElement == list->lastElement) { //checking if the first element is also the last element
+			list->lastElement = NULL;
+		}
+
+		list->firstElement = list->firstElement->nextElement;
+		if (list->firstElement != NULL) {
+			list->firstElement->previousElement = NULL;
+		}
+		free(tmp);
+	}
+}
+
+void DLL_InsertFirst( DLList *list, char* data ) {
+	DLLElementPtr new_element = malloc(sizeof(struct DLLElement));
+	if (new_element == NULL) {
+		DLL_Error();
+		return;
+	}
+
+	new_element->data = data;
+	new_element->nextElement = list->firstElement;
+	new_element->previousElement = NULL;
+	if (list->firstElement != NULL) { //if list isn't empty
+		list->firstElement->previousElement = new_element;
+	}
+
+	list->firstElement = new_element;
+	if (list->lastElement == NULL) { //if list was empty -> we need to set last element too
+	 	list->lastElement = list->firstElement;
+	}
+	
+}
 //todo zkontrolovat v zadani špatného formátu a navratove hodnoty
 //function reads() : ?string
 void READS(){
@@ -1402,9 +1459,20 @@ void codeGeneration(Token *token) {
 
     case COLON:
         break;
+    case WHILE:
 
+//  while(x==1)
+//      {
+//  //Do something
+//      }
+// The same loop in assembler:
+
+//         jmp loop1   ; Jump to condition first
+// cloop1  nop         ; Execute the content of the loop
+// loop1   cmp ax,1    ; Check the condition
+//         je cloop1   ; Jump to content of the loop if met
+        break;
     case RETURN:
-        addToString(frameStr, "PUSH\n");
         break;
     case IF:
         if(inIf == false)
