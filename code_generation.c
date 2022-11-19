@@ -442,11 +442,11 @@ void CHR(){
 
     //MARTIN
     // NOT_DEFINED,  // initial type    --
-    // VAR_ID,       // $variable       -- 
+    // VAR_ID,       // $variable       --      TODO check return == 1 and we have to push var to stack
     // SLASH,        // / (divide)      --
     // EOF_T,        // EOF             --
     // L_PAR,        // (               --
-    // R_PAR,        // )               --
+    // R_PAR,        // )               --      TODO check comment if we are at the end of storage of parameters in function
     // L_CPAR,       // {               --
     // R_CPAR,       // }               --
     // SEMICOL,      // ;               --
@@ -466,9 +466,9 @@ void CHR(){
     // STRING,       // "string \x1F"   -- 
 
     //MATEJ
-    // FUNCTION,     // function        
+    // FUNCTION,     // function        --DONE NOT TESTED 
     // ID,           // write, reads..  --DONE NOT TESTED
-    // COMMA,        // ,               --   TODO popisane pri case comma
+    // COMMA,        // ,               --DONE CHECK IF ITS RIGHT   ( TODO popisane pri case comma)
     // COLON         // :               --DONE NOT TESTED ->only empty case nothing to be done here
     // IF,           // if                  --FUCK UP if i have if else and nested if else is fucked up becouse i need to store somewhere names of labels
     // ELSE,         // else                --FUCK UP
@@ -480,6 +480,11 @@ void CHR(){
     // VOID,         // void            --DONE NOT TESTED ->only empty case nothing to be done here
     // WHILE,        // while
 
+//function add in UniqueName +1 its for purpose of not having same name of function and variable
+int GetUniqueName(){
+    UniqueName++;
+    return UniqueName;
+}
 
 void addToString(int str, char *newStr)
 {
@@ -1461,8 +1466,14 @@ void codeGeneration(Token *token) {
         break;
 
     case R_PAR:
+    //added  check and uncomment
+        // if (IAmInFunction) {
+        // pushStorage(storage[storageLen-1], frameStr, frame);
+        // removeLastFromStorage();
+        // }
+    
         checkStorage();
-
+        
         if (storageLen == 1) { // if ($var1)
             addToString(frameStr, "PUSHS"); 
             if (storage[0][0] == '-') {
@@ -1563,6 +1574,8 @@ void codeGeneration(Token *token) {
         break;
 
     case COMMA:    
+        pushStorage(storage[storageLen-1], frameStr, frame);
+        removeLastFromStorage();
         // todo push last from storage storage[storageLen-1] (var1)
         // removeLastFromStorage();
         // pozor na posledny parameter -> nebude comma
@@ -1571,25 +1584,49 @@ void codeGeneration(Token *token) {
     case COLON:
         break;
     case WHILE:
+        // inWhile +=1;
+        
 
-//  while(x==1)
-//      {
-//  //Do something
-//      }
-// The same loop in assembler:
-
-//         jmp loop1   ; Jump to condition first
-// cloop1  nop         ; Execute the content of the loop
-// loop1   cmp ax,1    ; Check the condition
-//         je cloop1   ; Jump to content of the loop if met
         break;
     case RETURN:
+        Return = true;
         break;
     case IF:
-        if(inIf == false)
-        {
-            inIf = true;
+        inIf += 1;
+        addToString(frameStr, "JUMP $IFCOND");
+        addToString(frameStr, GetUniqueName());
+        addToString(frameStr, "\n");
+
+        //store in listIfLabels IFCOND and GetUniqueName() value
+        DLL_InsertFirst(listIfLabels, NULL);
+        listIfLabels->firstElement->data = malloc(sizeof(char)*(strlen("IFCOND")+strlen(UniqueName)+1));
+        if (listIfLabels->firstElement->data == NULL) {
+            exit(99);
         }
+        strcpy(listIfLabels->firstElement->data, "IFCOND");
+        strcat(listIfLabels->firstElement->data, UniqueName);
+        
+        addToString(frameStr, "LABEL $STARTIF");
+        addToString(frameStr, UniqueName);
+        addToString(frameStr, "\n");
+
+        //store in listIfLabels STARTIF and UniqueName value
+        DLL_InsertFirst(listIfLabels, NULL);
+        listIfLabels->firstElement->data = malloc(sizeof(char)*(strlen("STARTIF")+strlen(UniqueName)+1));
+        if (listIfLabels->firstElement->data == NULL) {
+            exit(99);
+        }
+        strcpy(listIfLabels->firstElement->data, "STARTIF");
+        strcat(listIfLabels->firstElement->data, UniqueName);
+
+
+    case ELSE:
+        addToString(frameStr, "LABEL ");
+        addToString(frameStr, listIfLabels->firstElement->nextElement->data);
+        addToString(frameStr, "\n");
+        break;
+
+
         break;
     default:
         break;
