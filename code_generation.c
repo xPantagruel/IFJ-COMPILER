@@ -1578,7 +1578,7 @@ void codeGeneration(Token *token) {
         break;
 
     case COMMA:    
-        pushStorage(storage[storageLen-1], frameStr, frame);
+        pushStorage(storage[storageLen-1], frame);
         removeLastFromStorage();
         // todo push last from storage storage[storageLen-1] (var1)
         // removeLastFromStorage();
