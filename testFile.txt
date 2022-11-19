@@ -1,4 +1,9 @@
 <?php
 declare(strict_types=1);
 
-$var = $a + $b;
+
+
+$a = 8.04;
+$b = 8;
+
+$var = "hello" . "world";

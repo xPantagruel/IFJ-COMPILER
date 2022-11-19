@@ -1,16 +1,69 @@
 #include "bottomUp.h"
 
-int precedenceTable[8][8] = {
-    {'>', '>', '>', '>', '<', '>', '<', '>'}, // * /
-    {'<', '>', '>', '>', '<', '>', '<', '>'}, // + -
-    {'<', '<', '>', '>', '<', '>', '<', '>'}, // CMP
-    {'<', '<', '<', '>', '<', '>', '<', '>'}, // EQ
-    {'<', '<', '<', '<', '<', '=', '<', -1},  // (
-    {'>', '>', '>', '>', -1, '<', -1, '>'},   // )
-    {'>', '>', '>', '>', -1, '>', -1, '>'},   // IDENTIFIER
-    {'<', '<', '<', '<', -1, -1, '<', 0},     //$
+int precedenceTable[11][11] = {
+    //*/   +-.  CMP  EQ   (    )    I    F    S    $
+    {'>', '>', '>', '>', '>', '<', '>', '<', '<', '<', '>'}, // * /
+    {'<', '>', '>', '>', '>', '<', '>', '<', '<', '<', '>'},
+    {'<', '>', '>', '>', '>', '<', '>', '<', '<', '<', '>'}, // + - .
+    {'<', '<', '<', '>', '>', '<', '>', '<', '<', '<', '>'}, // CMP
+    {'<', '<', '<', '<', '>', '<', '>', '<', '<', '<', '>'}, // EQ
+    {'<', '<', '<', '<', '<', '<', '=', '<', '<', '<', -1},  // (
+    {'>', '>', '>', '>', '>', -1, '<', -1, -1, -1, '>'},     // )
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, '>'},
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, '>'},  // IDENTIFIER
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, '>'},  // IDENTIFIER
+    {'<', '<', '<', '<', '<', '<', -1, '<', '<', '<', 0}, //$
 
 };
+
+void printBottomUp(Stack *s, Expression *e, int current)
+{
+    printf("\n");
+    StackNode *tmp = s->top;
+    while (tmp && tmp->previous)
+    {
+        tmp = tmp->previous;
+    }
+
+    while (tmp)
+    {
+        if (tmp->term->isStop)
+        {
+            printf("<");
+        }
+
+        if (tmp->term->childTerms[0])
+        {
+            printf("'");
+        }
+        if (tmp->term->type != -1)
+        {
+            printf("[%d", tmp->term->type);
+        }
+        else
+        {
+            printf("[NULL");
+        }
+
+        if (tmp->term->value)
+        {
+            printf(",%s] ", tmp->term->value);
+        }
+        else
+        {
+            printf(",NULL] ");
+        }
+
+        tmp = tmp->next;
+    }
+    printf("\t\t");
+    for (int i = current; i < e->arrayLen; i++)
+    {
+        printf("[%d", e->tokenArray[i]->t);
+        printf(",%s] ", e->tokenArray[i]->val);
+    }
+    printf("\n");
+}
 
 int convertTokenToTermType(int type)
 {
@@ -20,20 +73,25 @@ int convertTokenToTermType(int type)
     case MINUS:
         return PLUS_MINUS;
         break;
+    case DOT:
+        return CONCAT;
+        break;
     case MUL:
     case SLASH:
         return MULT_DIV;
         break;
-    case VAR_ID:
     case INT:
-    case FLOAT:
-        return IDENTIFIER;
+        return I_INT;
         break;
+    case FLOAT:
+        return I_FLOAT;
+        break;
+    case STRING:
+        return I_STRING;
     case L_PAR:
         return L_BRACKET;
     case R_PAR:
         return R_BRACKET;
-
     case LESS_EQ:
     case LESS:
     case MORE_EQ:
@@ -72,9 +130,18 @@ bool reduce(Stack *stack)
     while (stack->top && termCount != 3)
     {
         StackNode *popped = pop(stack);
-        terms[termCount] = popped->term;
+        if (terms[0])
+        {
+            if (terms[1])
+            {
+                terms[2] = terms[1];
+            }
+            terms[1] = terms[0];
+        }
+        terms[0] = popped->term;
+
         free(popped);
-        if (terms[termCount]->isStop)
+        if (terms[0]->isStop)
         {
             termCount++;
             break;
@@ -90,6 +157,29 @@ bool reduce(Stack *stack)
         stackNode = initNode(term);
         for (int i = 0; i < termCount; i++)
             term->childTerms[i] = terms[i];
+        if (termCount == 3)
+        {
+            if (term->childTerms[0]->type == L_BRACKET)
+            {
+                term->type = term->childTerms[1]->type;
+            }
+            else if (term->childTerms[0]->type == I_FLOAT || term->childTerms[2]->type == I_FLOAT)
+            {
+                term->type = I_FLOAT;
+            }
+            else if (term->childTerms[0]->type == I_INT || term->childTerms[2]->type == I_INT)
+            {
+                term->type = I_INT;
+            }
+            else if (term->childTerms[0]->type == I_STRING && term->childTerms[2]->type == I_STRING)
+            {
+                term->type = I_STRING;
+            }
+        }
+        else
+        {
+            term->type = term->childTerms[0]->type;
+        }
 
         push(stack, stackNode);
         return true;
@@ -110,6 +200,7 @@ bool ruleDecider(Term *terms[3], int termCount)
     {
         return (ruleMultDiv(terms[0], terms[1], terms[2]) ||
                 rulePlusMinus(terms[0], terms[1], terms[2]) ||
+                ruleConcat(terms[0], terms[1], terms[2]) ||
                 ruleBracket(terms[0], terms[1], terms[2]) ||
                 ruleCompare(terms[0], terms[1], terms[2]) ||
                 ruleEquals(terms[0], terms[1], terms[2]));
@@ -122,8 +213,7 @@ bool ruleDecider(Term *terms[3], int termCount)
 
 bool ruleIdentifier(Term *t)
 {
-    printf("Using i rule\n");
-    if (t->type != IDENTIFIER)
+    if (t->type != I_FLOAT && t->type != I_INT && t->type != I_STRING)
     {
         return false;
     }
@@ -132,7 +222,6 @@ bool ruleIdentifier(Term *t)
 
 bool rulePlusMinus(Term *t1, Term *operator, Term * t2)
 {
-    printf("Using +- rule\n");
     if (operator->type != PLUS_MINUS)
     {
         return false;
@@ -140,24 +229,57 @@ bool rulePlusMinus(Term *t1, Term *operator, Term * t2)
 
     switch (t1->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
     default:
-        printf("ERROR");
+        return false;
         break;
     }
 
     switch (t2->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
-        break;
+
         break;
 
     default:
-        printf("ERROR");
+        return false;
+        break;
+    }
+
+    return true;
+}
+
+bool ruleConcat(Term *t1, Term *operator, Term * t2)
+{
+    if (operator->type != CONCAT)
+    {
+        return false;
+    }
+
+    switch (t1->type)
+    {
+
+    case I_STRING:
+        break;
+
+    default:
+        return false;
+        break;
+    }
+
+    switch (t2->type)
+    {
+    case I_STRING:
+        break;
+
+    default:
+        return false;
         break;
     }
 
@@ -166,7 +288,6 @@ bool rulePlusMinus(Term *t1, Term *operator, Term * t2)
 
 bool ruleMultDiv(Term *t1, Term *operator, Term * t2)
 {
-    printf("Using */ rule\n");
     if (operator->type != MULT_DIV)
     {
         return false;
@@ -174,22 +295,26 @@ bool ruleMultDiv(Term *t1, Term *operator, Term * t2)
 
     switch (t1->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
     default:
-        printf("ERROR");
+        return false;
+        break;
     }
 
     switch (t2->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
     case EXPRESSION:
         break;
 
     default:
-        printf("ERROR");
+        return false;
+        break;
     }
 
     return true;
@@ -197,7 +322,6 @@ bool ruleMultDiv(Term *t1, Term *operator, Term * t2)
 
 bool ruleBracket(Term *leftBracket, Term *t1, Term *rightBracket)
 {
-    printf("Using () rule\n");
     if (leftBracket->type != L_BRACKET || rightBracket->type != R_BRACKET)
     {
         return false;
@@ -205,12 +329,15 @@ bool ruleBracket(Term *leftBracket, Term *t1, Term *rightBracket)
 
     switch (t1->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
+    case I_STRING:
     case EXPRESSION:
         break;
 
     default:
-        printf("ERROR");
+        return false;
+        break;
     }
 
     return true;
@@ -218,7 +345,6 @@ bool ruleBracket(Term *leftBracket, Term *t1, Term *rightBracket)
 
 bool ruleCompare(Term *t1, Term *operator, Term * t2)
 {
-    printf("Using > rule\n");
     if (operator->type != COMPARE)
     {
         return false;
@@ -226,22 +352,28 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2)
 
     switch (t1->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
+    case I_STRING:
     case EXPRESSION:
         break;
 
     default:
-        printf("ERROR");
+        return false;
+        break;
     }
 
     switch (t2->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
+    case I_STRING:
     case EXPRESSION:
         break;
 
     default:
-        printf("ERROR");
+        return false;
+        break;
     }
 
     return true;
@@ -249,7 +381,6 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2)
 
 bool ruleEquals(Term *t1, Term *operator, Term * t2)
 {
-    printf("Using == rule\n");
     if (operator->type != EQUALS)
     {
         return false;
@@ -257,22 +388,28 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
 
     switch (t1->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
+    case I_STRING:
     case EXPRESSION:
         break;
 
     default:
-        printf("ERROR");
+        return false;
+        break;
     }
 
     switch (t2->type)
     {
-    case IDENTIFIER:
+    case I_INT:
+    case I_FLOAT:
+    case I_STRING:
     case EXPRESSION:
         break;
 
     default:
-        printf("ERROR");
+        return false;
+        break;
     }
 
     return true;
@@ -280,14 +417,12 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
 
 bool freeAndReturn(bool success, Stack *stack)
 {
-    if (!freeStack(stack))
-        printf("Not freed");
-
     return success;
 }
 
-bool bottomUp(Expression *exp)
+bool bottomUp(Expression *exp, int *resultType)
 {
+    *resultType = NULL;
     int currentExpPos = 0;
 
     Term *startTerm = initTerm("$", TOP_BOTTOM);
@@ -303,11 +438,30 @@ bool bottomUp(Expression *exp)
 
     while (currentExpPos < exp->arrayLen)
     {
+
         Term *newTerm;
         StackNode *newStackNode;
-        int expType = convertTokenToTermType(exp->tokenArray[currentExpPos]->t);
+        int expType;
+        if (exp->tokenArray[currentExpPos]->t == VAR_ID)
+        {
+            // SEMANTIC CHECK
+            htab_pair_t *pair = htab_search(symTable, exp->tokenArray[currentExpPos]->val);
+            if (pair && pair->variable)
+            {
+                expType = convertTokenToTermType(pair->variable->t);
+            }
+            else
+            {
+                return freeAndReturn(false, stack);
+            }
+        }
+        else
+        {
+            expType = convertTokenToTermType(exp->tokenArray[currentExpPos]->t);
+        }
+
         int termType;
-        if (stack->top->term->type == EXPRESSION)
+        if (stack->top->term->childTerms[0])
         {
             termType = stack->top->previous->term->type;
         }
@@ -316,33 +470,14 @@ bool bottomUp(Expression *exp)
             termType = stack->top->term->type;
         }
 
-        StackNode *tmp = stack->top;
-        while (tmp != NULL)
-        {
-            if (tmp->term->isStop)
-            {
-                printf("<");
-            }
-
-            printf("%s(%d)  ", tmp->term->value, tmp->term->type);
-            tmp = tmp->previous;
-        }
-        printf(" | ");
-
-        for (int i = currentExpPos; i < exp->arrayLen; i++)
-        {
-            printf("%s  ", exp->tokenArray[i]->val);
-        }
-        printf("\n");
         switch (precedenceTable[termType][expType])
         {
         case '<':
-            /* printf("SHIFTING\n"); */
             newTerm = initTerm(exp->tokenArray[currentExpPos]->val, expType);
             newStackNode = initNode(newTerm);
 
             push(stack, newStackNode);
-            if (stack->top->previous && stack->top->previous->term->type == EXPRESSION)
+            if (stack->top->previous && stack->top->previous->term->childTerms[0])
             {
                 stack->top->previous->term->isStop = true;
             }
@@ -354,9 +489,7 @@ bool bottomUp(Expression *exp)
             break;
 
         case '>':
-            /* printf("REDUCING\n"); */
-            if (reduce(stack))
-                printf("REDUCING OK\n");
+            reduce(stack);
 
             break; // TODO throw error when false
 
@@ -367,26 +500,28 @@ bool bottomUp(Expression *exp)
             currentExpPos++;
             break;
         case 0:
-
-            /* while (tmp != NULL)
+            switch (stack->top->term->type)
             {
-                printf("Type: %d, Value: %s\n", tmp->term->type, tmp->term->value);
+            case I_INT:
 
-                tmp = tmp->previous;
+                *resultType = INT;
+                break;
+            case I_FLOAT:
+
+                *resultType = FLOAT;
+                break;
+            case I_STRING:
+                *resultType = STRING;
+                break;
+
+            default:
+                break;
             }
 
-            for (int i = 0; i < 3; i++)
-            {
-                if (stack->top->term->childTerms[i]->value)
-                {
-                    printf("%s\n", stack->top->term->childTerms[i]->value);
-                }
-            } */
-
-            return freeAndReturn(stack->top->term->type == EXPRESSION, stack);
+            return freeAndReturn(true, stack);
 
         default:
-            printf("ERROR");
+
             return freeAndReturn(false, stack);
         }
     }

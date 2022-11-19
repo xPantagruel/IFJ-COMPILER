@@ -1,3 +1,5 @@
+#ifndef FRAMES_H
+#define FRAMES_H
 #include <string.h>  // size_t
 #include <stdbool.h> // bool
 #include <stdint.h>
@@ -31,4 +33,7 @@ Frame *eraseFrame(Frame *frame);
 
 void eraseFrameStack(FrameStack *stack);
 
+void printFrameStack(FrameStack *stack);
+
 FrameStack *initFrameStack();
+#endif

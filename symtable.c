@@ -1,6 +1,7 @@
-#ifndef SYMTABLE_H
-#define SYMTABLE_H
+
 #include "symtable.h"
+
+htab_t *symTable;
 
 // funkcia na vytvorenie hashu pre určitý kľúč
 size_t htab_hash_function(htab_key_t str)
@@ -161,18 +162,18 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
     // ak sa na indexe nenacháza žiaden uložený kľúč
     if (t->ptr_arr[index] == NULL)
     {
-        t->ptr_arr[index] = malloc(sizeof(htab_item_t));
+        t->ptr_arr[index] = calloc(1, sizeof(htab_item_t));
         if (t->ptr_arr[index] == NULL)
         {
             return NULL;
         }
-        t->ptr_arr[index]->pair = malloc(sizeof(htab_pair_t));
+        t->ptr_arr[index]->pair = calloc(1, sizeof(htab_pair_t));
         if (t->ptr_arr[index]->pair == NULL)
         {
             return NULL;
         }
         // skopirovanie kľúča
-        str = malloc(strlen(key) * sizeof(htab_key_t));
+        str = malloc((strlen(key) + 1) * sizeof(char));
         if (str == NULL)
         {
             return NULL;
@@ -181,7 +182,6 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
         str[strlen(key)] = '\0';
 
         t->ptr_arr[index]->pair->key = str;
-        t->ptr_arr[index]->next = NULL;
         t->size = t->size + 1;
         return t->ptr_arr[index]->pair;
         // ak sa na indexe náchádza uložený kľúč
@@ -214,6 +214,7 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
                     str = malloc(strlen(key) * sizeof(htab_key_t));
                     if (str == NULL)
                     {
+
                         return NULL;
                     }
                     strcpy(str, key);
@@ -221,37 +222,37 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
                     tmp->next->pair->key = str;
                     tmp->next->next = NULL;
                     t->size = t->size + 1;
+
                     return tmp->next->pair;
                 }
             }
         }
     }
+
     return NULL;
 }
 
-int htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount)
+htab_pair_t *htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount)
 {
     htab_pair_t *pair = htab_lookup_add(t, name);
     if (pair->function || pair->variable)
     {
-        return 1;
+        return NULL;
     }
 
     pair->function = calloc(1, sizeof(htab_function_t));
-    if (!pair->function)
-    {
-        return 2;
-    }
-    pair->function->name = calloc(strlen(name), sizeof(char));
+
+    pair->function->name = calloc(strlen(name) + 1, sizeof(char));
     if (!pair->function->name)
     {
-        return 2;
+        return NULL;
     }
+
     strcpy(pair->function->name, name);
     pair->function->params = params;
     pair->function->paramCount = paramCount;
     pair->function->returnType = returnType;
-    return 0;
+    return pair;
 }
 
 int htab_erase_function(htab_function_t *f, int paramCount)
@@ -264,33 +265,53 @@ int htab_erase_function(htab_function_t *f, int paramCount)
 
     free(f->name);
     free(f->returnType->name);
+    free(f->returnType);
     return 0;
 }
 
-int htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum VarType type, bool canBeNull)
+htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum VarType type)
 {
     htab_pair_t *pair = htab_lookup_add(t, name);
     if (pair->function || pair->variable)
     {
-        return 1;
+        return NULL;
     }
 
     pair->variable = calloc(1, sizeof(htab_variable_t));
     if (!pair->variable)
     {
-        return 2;
+        // ERROR(99)
+        return NULL;
     }
 
-    pair->variable->name = calloc(strlen(name), sizeof(char));
+    pair->variable->name = calloc(strlen(name) + 1, sizeof(char));
     if (!pair->variable->name)
     {
-        return 2;
+        // ERROR(99)
+        return NULL;
     }
 
+    strcpy(pair->variable->name, name);
     pair->variable->frame = frame;
     pair->variable->t = type;
-    pair->variable->canBeNull = canBeNull;
-    return 0;
+    return pair;
+}
+
+function_param_t *htab_add_parameter(htab_function_t *function)
+{
+
+    function->params = realloc(function->params, (function->paramCount + 1) * sizeof(function_param_t));
+
+    function->params[function->paramCount] = calloc(1, sizeof(function_param_t));
+    function->paramCount++;
+
+    return function->params[function->paramCount - 1];
+}
+
+function_param_t *htab_add_return_type(htab_function_t *function)
+{
+    function->returnType = calloc(1, sizeof(function_param_t));
+    return function->returnType;
 }
 
 int htab_erase_variable(htab_variable_t *v)
@@ -300,42 +321,84 @@ int htab_erase_variable(htab_variable_t *v)
     return 1;
 }
 
-
-void htab_print(htab_t * t)
+void htab_print_variable(htab_variable_t *var)
 {
+    if (var->name)
+        printf("variable: %s\n", var->name);
+    if (var->t != -1)
+    {
+        printf("type: %d\n", var->t);
+    }
+    if (var->frame && var->frame->name)
+        printf("frame: %s\n", var->frame->name);
+}
+void htab_print_function(htab_function_t *func)
+{
+    printf("function: %s\n", func->name);
+    if (func->paramCount > 0)
+    {
+        printf("params:\n");
+    }
 
+    for (int i = 0; i < func->paramCount; i++)
+    {
+        if (func->params[i]->name != NULL)
+        {
+            printf("\t•name: %s\n", func->params[i]->name);
+        }
+
+        printf("\t•type: %d\n", func->params[i]->t);
+        printf("\t•can be null?: %d\n\n", func->params[i]->canBeNull);
+    }
+    if (func->returnType)
+    {
+        printf("return type: %d\n", func->returnType->t);
+    }
+}
+
+htab_pair_t *htab_search(htab_t *t, htab_key_t key)
+{
+    size_t index = htab_hash_function(key) % htab_bucket_count(t);
+    htab_item_t *tmp = t->ptr_arr[index];
+    while (tmp)
+    {
+        if (strcmp(tmp->pair->key, key) == 0)
+        {
+            return tmp->pair;
+        }
+    }
+    return NULL;
+}
+
+void htab_print(htab_t *t)
+{
     for (int i = 0; i < SYMTABLE_SIZE; i++)
     {
-     
-    htab_item_t *item = t->ptr_arr[i];
-    if (item)
-    {
-        printf("-----\n");  
-        while (item){
-            printf("key: %s\n", item->pair->key);
-            if (item->pair->function)
+
+        htab_item_t *item = t->ptr_arr[i];
+        if (item)
+        {
+            printf("----------\n");
+            while (item)
             {
-                printf("function: %s\n", item->pair->function->name);
+                printf("key: %s\n", item->pair->key);
+                if (item->pair->function)
+                {
+                    htab_print_function(item->pair->function);
+                }
+                if (item->pair->variable)
+                {
+                    htab_print_variable(item->pair->variable);
+                }
+                item = item->next;
             }
-            if (item->pair->variable)
+            printf("----------\n\n");
             {
-                printf("variable: %s\n", item->pair->variable);
+                /* code */
             }
-            item = item->next;
         }
-        printf("-----\n"); 
-    {
-        /* code */
     }
-    }
-    
-    
-    
-    
-    }
-    
 }
 
 // TODO ZMENIT htab_pair STRUKTURU ABY VYHOVOVALA
 // TODO komentare
-#endif

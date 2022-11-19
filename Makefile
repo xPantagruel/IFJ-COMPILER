@@ -6,8 +6,11 @@ all: parser
 run: parser
 	./parser
 
+copy:
+	sshpass -p ${pass} scp -r /home/xpetri25/School/IFJ/IFJ xpetri25@merlin.fit.vutbr.cz:/homes/eva/xp/xpetri25/ifj
+
 memcheck: parser
-	valgrind --leak-check=full --track-origins=yes ./parser < testFile.txt
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./parser < testFile.txt
 
 parser: parser.o scanner.o bottomUp.o stack.o symtable.o frames.o code_generation.o
 	$(CC) $(CFLAGS) parser.o scanner.o bottomUp.o stack.o symtable.o frames.o code_generation.o -o parser

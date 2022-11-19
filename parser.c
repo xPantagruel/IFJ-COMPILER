@@ -13,7 +13,13 @@
 
 #include "bottomUp.h"
 #include "parser.h"
+#include "symtable.h"
+#include "frames.h"
 #include "code_generation.h"
+
+FrameStack *frameStack;
+htab_pair_t *currentSymbol;
+int functionStatus = -1;
 
 Expression *initExpression()
 {
@@ -38,7 +44,7 @@ void dtorExpression(Expression *exp)
 
 void addTokenToExpression(Expression *exp, Token *token)
 {
-    exp->tokenArray = realloc(exp->tokenArray, (exp->arrayLen + 1) * sizeof(Token*));
+    exp->tokenArray = realloc(exp->tokenArray, (exp->arrayLen + 1) * sizeof(Token *));
 
     if (exp->tokenArray == NULL) // realloc failed
     {
@@ -59,7 +65,8 @@ bool function_declaration(Token *token)
 
     dtorToken(token);
     token = getToken();
-    if (function_call(token) == 0)
+
+    if (function_call(token, true) == 0)
     {                 // FUNCTION <function_call>
         return false; // missing function name
     }
@@ -75,6 +82,15 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> : <type>
         return false; // wrong type
     }
+    else
+    {
+        function_param_t *param = htab_add_return_type(currentSymbol->function);
+        param->t = token->t;
+        // FUNCTION ADDED TO SYMTABLE
+        currentSymbol = NULL;
+        functionStatus = -1;
+    }
+
     dtorToken(token);
     token = getToken();
     if (token->t != L_CPAR)
@@ -184,10 +200,28 @@ int params(Token *token)
     }
     else if (type(token) == 1)
     { // <type>
+        function_param_t *param;
+        if (currentSymbol)
+        {
+            param = htab_add_parameter(currentSymbol->function);
+            param->t = token->t;
+            if (token->val[0] == '?')
+            {
+                param->canBeNull = true;
+            }
+        }
+
         dtorToken(token);
+
         token = getToken();
         if (token->t == VAR_ID || token->t == STRING || token->t == FLOAT || token->t == INT)
         { //<type> VAR_ID OR <type> STRING OR <type> INT/FLOAT
+            if (currentSymbol)
+            {
+                param->name = calloc(sizeof(token->val) + 1, sizeof(char));
+                strcpy(param->name, token->val);
+            }
+
             dtorToken(token);
             token = getToken();
             if (params_n(token) == 1)
@@ -244,9 +278,21 @@ int params_n(Token *token)
 int expression(Token *token)
 {
     Expression *exp = initExpression();
-
-    while (token->t != SEMICOL && token->t != R_PAR)
+    int count = 0;
+    while (token->t != SEMICOL && (token->t != R_PAR || count != 0))
     { // getting all tokens in expression
+
+        if (token->t == L_PAR)
+            count++;
+        if (token->t == R_PAR)
+        {
+            count--;
+        }
+        if (count < 0)
+        {
+            // error
+        }
+
         addTokenToExpression(exp, token);
         token = getToken();
     }
@@ -260,8 +306,25 @@ int expression(Token *token)
         ungetc(')', stdin);
     }
 
-    if (bottomUp(exp))
+    if (exp->arrayLen == 1)
     {
+        if (currentSymbol)
+        {
+            currentSymbol->variable->t = exp->tokenArray[0]->t;
+        }
+
+        return 1;
+    }
+
+    int resultType;
+
+    if (bottomUp(exp, &resultType))
+    {
+        if (currentSymbol)
+        {
+            currentSymbol->variable->t = resultType;
+        }
+
         dtorExpression(exp);
         return 1;
     }
@@ -375,10 +438,21 @@ int condition(Token *token)
     }
 }
 
-int function_call(Token *token)
+int function_call(Token *token, bool isDeclaration)
 {
     if (token->t == ID)
     { // ID
+
+        if (isDeclaration)
+        {
+            currentSymbol = htab_add_function(symTable, token->val, NULL, NULL, 0);
+        }
+
+        if (!currentSymbol)
+        {
+            // function exists;
+        }
+
         dtorToken(token);
         token = getToken();
         if (token->t == L_PAR)
@@ -387,7 +461,8 @@ int function_call(Token *token)
             token = getToken();
             if (params(token))
             { // ID ( <params>
-                dtorToken(token);
+
+                // dtorToken(token);
                 token = getToken();
                 if (token->t == R_PAR)
                 { // ID ( <params> )
@@ -426,7 +501,7 @@ int while_rule(Token *token)
             token = getToken();
             if (expression(token) == 1)
             { // while ( <expression>
-                //dtorToken(token);
+                // dtorToken(token);
                 token = getToken();
                 if (token->t == R_PAR)
                 { // while ( <expression> )
@@ -434,6 +509,7 @@ int while_rule(Token *token)
                     token = getToken();
                     if (token->t == L_CPAR)
                     { // while ( <expression> ) {
+                        // pushFrame(frameStack, "while");
                         dtorToken(token);
                         token = getToken();
                         if (statement(token))
@@ -442,6 +518,8 @@ int while_rule(Token *token)
                             token = getToken();
                             if (token->t == R_CPAR)
                             { // while ( <expression> ) { <statement> }
+                                // Frame *tmpFrame = popFrame(frameStack);
+                                // eraseFrame(tmpFrame);
                                 iAmInConditionWhileFunRule = 0;
                                 return 1;
                             }
@@ -499,7 +577,7 @@ int var_rule(Token *token)
     }
     else if (token->t == ID)
     { // <var_rule> (<function_call> (ID))
-        if (function_call(token) == 1)
+        if (function_call(token, false) == 1)
         { // <var_rule> (<function_call>)
             return 1;
         }
@@ -509,7 +587,7 @@ int var_rule(Token *token)
         }
     }
     else
-    {   
+    {
         return 2;
     }
 }
@@ -538,7 +616,8 @@ int statement(Token *token)
     }
     else if (token->t == VAR_ID)
     { // VAR_ID
-        //dtorToken(token);
+        currentSymbol = htab_add_variable(symTable, token->val, peekFrame(frameStack), -1);
+        dtorToken(token);
         token = getToken();
         if (token->t == EQ)
         { // VAR_ID =
@@ -556,11 +635,19 @@ int statement(Token *token)
                 {
                     addCharToToken(token->val[i], tmp);
                 }
-
+                char *tmpStr = calloc(token->valLen + 1, sizeof(char));
+                strcpy(tmpStr, token->val);
                 dtorToken(token);
                 token = getToken();
                 if (token->t == SEMICOL)
                 { // VAR_ID = VAR_ID;
+                    htab_pair_t *pair = htab_search(symTable, tmpStr);
+                    if (pair && pair->variable)
+                    {
+                        currentSymbol->variable->t = pair->variable->t;
+                    }
+
+                    free(tmpStr);
                     dtorToken(tmp);
                     dtorToken(token);
                     token = getToken();
@@ -783,7 +870,7 @@ int statement(Token *token)
     }
     else if (token->t == ID)
     { // <function_call> (ID)
-        if (function_call(token) == 1)
+        if (function_call(token, false) == 1)
         { // <function_call>
             dtorToken(token);
             token = getToken();
@@ -822,22 +909,29 @@ int statement(Token *token)
 
 int main()
 {
+    symTable = htab_init(SYMTABLE_SIZE);
+    frameStack = initFrameStack();
+    currentSymbol = NULL;
     // Example how parser can be called.
-    DLL_Init(listCodeGen);
+    DLL_Init(listCodeGen); //todo
 
     Token *token = getToken();
     if (prog(token))
     {
         dtorToken(token);
-        if (generatedString != NULL) {
+        // htab_print(symTable);
+        // printFrameStack(frameStack);
+        if (generatedString != NULL)
+        {
             free(generatedString);
         }
         return 0; // exit code 0
     }
     else
     {
-        dtorToken(token);
-        if (generatedString != NULL) {
+        // dtorToken(token);
+        if (generatedString != NULL)
+        {
             free(generatedString);
         }
         exit(2);

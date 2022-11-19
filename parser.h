@@ -150,7 +150,7 @@ int while_rule(Token *token);
                2 no rule was matched -> we maybe can use other rule
                0 error in syntax
  */
-int function_call(Token *token);
+int function_call(Token *token, bool isDeclaration);
 
 /**
  * @brief Implementation of rules:  <type> -> FLOAT_TYPE

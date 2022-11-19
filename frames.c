@@ -10,8 +10,8 @@ FrameStack *initFrameStack()
 
 void pushFrame(FrameStack *stack, const char *name)
 {
-    Frame *frame = malloc(sizeof(frame));
-    frame->name = calloc(strlen(name), sizeof(char));
+    Frame *frame = malloc(sizeof(Frame));
+    frame->name = calloc(strlen(name) + 1, sizeof(char));
     strcpy(frame->name, name);
     frame->parent = stack->current;
     stack->current = frame;
@@ -19,7 +19,7 @@ void pushFrame(FrameStack *stack, const char *name)
 
 Frame *popFrame(FrameStack *stack)
 {
-    if (strcmp(stack->current->name, GLOBAL_FRAME_NAME))
+    if (strcmp(stack->current->name, GLOBAL_FRAME_NAME) != 0)
     {
         Frame *pop = stack->current;
         stack->current = stack->current->parent;
@@ -50,8 +50,7 @@ Frame *findFrame(FrameStack *stack, const char *name)
 Frame *eraseFrame(Frame *frame)
 {
     Frame *parent = frame->parent;
-    free(frame->name);
-    free(frame);
+    frame = NULL;
     return parent;
 }
 
@@ -63,4 +62,25 @@ void eraseFrameStack(FrameStack *stack)
         current = eraseFrame(current);
     }
     free(stack);
+}
+
+void printFrameStack(FrameStack *stack)
+{
+    printf("==========\n");
+    printf("FRAMESTACK:\n\n");
+    Frame *tmp = stack->current;
+    while (tmp)
+    {
+        printf("name: %s\n", tmp->name);
+        if (tmp->parent)
+        {
+            printf("parent: %s\n", tmp->parent->name);
+            printf(" ↓\n");
+        }
+        else
+            printf("\n");
+
+        tmp = tmp->parent;
+    }
+    printf("==========\n");
 }

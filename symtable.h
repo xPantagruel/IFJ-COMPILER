@@ -1,15 +1,20 @@
+#ifndef SYMTABLE_H
+#define SYMTABLE_H
 #include <string.h>  // size_t
 #include <stdbool.h> // bool
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "frames.h"
+
 #define SYMTABLE_SIZE 100
 
 enum VarType
 {
-    INT_PARAM,
-    STRING_PARAM
+    FLOAT_PARAM = 16,
+    INT_PARAM = 19,
+    STRING_PARAM = 22,
 };
 
 // Tabulka:
@@ -23,6 +28,7 @@ typedef struct function_param function_param_t;
 typedef struct htab_function htab_function_t;
 typedef struct htab_variable htab_variable_t;
 
+extern htab_t *symTable;
 // Dvojice dat v tabulce:
 typedef struct htab_pair
 {
@@ -56,7 +62,7 @@ typedef struct htab_function
 typedef struct htab_variable
 {
     char *name;
-    frame_t *frame;
+    Frame *frame;
     enum VarType t;
     bool canBeNull;
 } htab_variable_t;
@@ -80,8 +86,11 @@ size_t htab_bucket_count(const htab_t *t); // velikost pole
 
 htab_pair_t *htab_find(htab_t *t, htab_key_t key); // hledání
 htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key);
-int htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount);
-int htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum VarType type, bool canBeNull);
+htab_pair_t *htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount);
+function_param_t *htab_add_parameter(htab_function_t *function);
+function_param_t *htab_add_return_type(htab_function_t *function);
+htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum VarType type);
+htab_pair_t *htab_search(htab_t *t, htab_key_t key);
 int htab_erase_function(htab_function_t *f, int paramCount);
 int htab_erase_variable(htab_variable_t *v);
 
@@ -89,3 +98,4 @@ bool htab_erase(htab_t *t, htab_key_t key); // ruší zadaný záznam
 void htab_print(htab_t *t);
 void htab_clear(htab_t *t); // ruší všechny záznamy
 void htab_free(htab_t *t);  // destruktor tabulky
+#endif

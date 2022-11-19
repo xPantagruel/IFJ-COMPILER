@@ -5,6 +5,7 @@
 #include "scanner.h"
 #include "stack.h"
 #include "parser.h"
+#include "symtable.h"
 #include <stdbool.h>
 #include <string.h>
 
@@ -12,11 +13,14 @@ enum termType
 {
     MULT_DIV,
     PLUS_MINUS,
+    CONCAT,
     COMPARE,
     EQUALS,
     L_BRACKET,
     R_BRACKET,
-    IDENTIFIER,
+    I_INT,
+    I_FLOAT,
+    I_STRING,
     TOP_BOTTOM,
     EXPRESSION,
 };
@@ -42,6 +46,8 @@ bool ruleIdentifier(Term *t);
 
 bool rulePlusMinus(Term *t1, Term *operator, Term * t2);
 
+bool ruleConcat(Term *t1, Term *operator, Term * t2);
+
 bool ruleMultDiv(Term *t1, Term *operator, Term * t2);
 
 bool ruleBracket(Term *leftBracket, Term *t1, Term *rightBracket);
@@ -50,6 +56,6 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2);
 
 bool ruleEquals(Term *t1, Term *operator, Term * t2);
 
-bool bottomUp(Expression *exp);
+bool bottomUp(Expression *exp, int *resultType);
 
 #endif
