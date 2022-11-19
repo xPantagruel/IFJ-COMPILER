@@ -137,8 +137,24 @@ void pushStorage(int frameStr, char *frame);
  */
 void pushWithoutDeleting(int frameStr, char *frame);
 
+/**
+ * @brief Function which converts int to float if needed.
+ * 
+ * @param frameStr  0 -> generatedString
+                    1 -> inFunctionString
+                    2 -> allFunctionsString
+ * @param frame  GF/TF/LF
+ * 
+ * @return int 1 -> both are floats or 0 -> both are ints
+ */
 int convertToSameType(int frameStr, char *frame);
 
-void rand_str(char *dest, size_t length);
+/**
+ * @brief Function which generates random string.
+ * 
+ * @param dest destination where new string will be saved
+ * @param length number of chars generated
+ */
+void randStr(char *dest, size_t length);
 
 /*** End of code_generation.h ***/

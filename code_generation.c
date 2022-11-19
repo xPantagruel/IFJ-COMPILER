@@ -617,7 +617,7 @@ void pushWithoutDeleting(int frameStr, char *frame) {
     addToString(frameStr, "\n");
 }
 
-void rand_str(char *dest, size_t length) {
+void randStr(char *dest, size_t length) {
     char charset[] = 
                      "abcdefghijklmnopqrstuvwxyz"
                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -630,8 +630,8 @@ void rand_str(char *dest, size_t length) {
 }
 
 int convertToSameType(int frameStr, char *frame) {
-    if (strchr(storage[storageLen-2], '.')) { // first string
-        if (!strchr(storage[storageLen-1], '.')) {
+    if (strchr(storage[storageLen-2], '.')) { // compare first string with second
+        if (!strchr(storage[storageLen-1], '.')) { 
             addToString(frameStr, "INT2FLOAT ");
             addToString(frameStr, frame);
             addToString(frameStr, storage[storageLen-1]);
@@ -642,7 +642,7 @@ int convertToSameType(int frameStr, char *frame) {
         return 1;
     }
 
-    if (strchr(storage[storageLen-1], '.')) {
+    if (strchr(storage[storageLen-1], '.')) { // compare second string with first
         if (!strchr(storage[storageLen-2], '.')) {
             addToString(frameStr, "INT2FLOAT ");
             addToString(frameStr, frame);
@@ -770,15 +770,26 @@ void codeGeneration(Token *token) {
                     }
                     break;
                 case SLASH:
-                    //todo idiv
-                    if (eqSymbolFound) {
-                        addToString(frameStr, "DIV");
-                        threeAddress(frameStr, frame);
+                    if (floatOrInt) {
+                        if (eqSymbolFound) {
+                            addToString(frameStr, "DIV");
+                            threeAddress(frameStr, frame);
+                        } else {
+                            pushStorage(frameStr, frame);
+                            addToString(frameStr, "DIVS\n");
+                            addToString(frameStr, "PUSHS int@0\n");
+                            addToString(frameStr, "LTS\n");
+                        }
                     } else {
-                        pushStorage(frameStr, frame);
-                        addToString(frameStr, "DIVS\n");
-                        addToString(frameStr, "PUSHS int@0\n");
-                        addToString(frameStr, "LTS\n");
+                        if (eqSymbolFound) {
+                            addToString(frameStr, "IDIV");
+                            threeAddress(frameStr, frame);
+                        } else {
+                            pushStorage(frameStr, frame);
+                            addToString(frameStr, "IDIVS\n");
+                            addToString(frameStr, "PUSHS int@0\n");
+                            addToString(frameStr, "LTS\n");
+                        }
                     }
                     break;
                 case MUL:
@@ -850,8 +861,8 @@ void codeGeneration(Token *token) {
                     break;
 
                 case LESS_EQ:
-                    rand_str(randomVar1, 10);
-                    rand_str(randomVar2, 10);
+                    randStr(randomVar1, 10);
+                    randStr(randomVar2, 10);
 
                     addToString(frameStr, "DEFVAR");
                     addToString(frameStr, frame);
@@ -949,8 +960,8 @@ void codeGeneration(Token *token) {
                     }
                     break;
                 case MORE_EQ:
-                    rand_str(randomVar1, 10);
-                    rand_str(randomVar2, 10);
+                    randStr(randomVar1, 10);
+                    randStr(randomVar2, 10);
 
                     addToString(frameStr, "DEFVAR");
                     addToString(frameStr, frame);
@@ -1239,10 +1250,7 @@ void codeGeneration(Token *token) {
     }
 }
 
-//todo remove todos
-//todo escape seq -> niektore nemaju byt premenene
-//todo prejst zadanie znova
+//todo escape seq -> niektore nemaju byt premenene 000-032, 035,092 v tvare \xyz
 //todo pridat do parsru volanie codeGeneration
 //todo remove zo scanneru
 //todo test an merlin + interpret
-//todo komentare na nove veci
