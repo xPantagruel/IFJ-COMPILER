@@ -59,16 +59,14 @@ void getProlog()
 
 void dtorToken(Token *token)
 {
-    if (token != NULL && token->val != NULL)
+    if (token && token->val != NULL)
     {
         free(token->val);
-        token->val = NULL;
     }
 
-    if (token != NULL)
+    if (token)
     {
         free(token);
-        token = NULL;
     }
 }
 
@@ -272,7 +270,7 @@ int checkClosingProlog()
 void addQuestionMark(Token *token)
 {
     memmove(token->val + 1, token->val, strlen(token->val) + 1);
-    token->val[0] = '?';
+    *token->val = '?';
 }
 
 void error(int errID, Token *token)
@@ -470,7 +468,19 @@ Token *getToken()
                         }
                         break;
                     default: // other chars
-                        addCharToToken(c, token);
+                        if ((0 <= c && c <= 32) || c == 35 || c == 92)
+                        {
+                            addCharToToken('\\', token);
+                            char snum[3];
+                            sprintf(snum, "%d", c);
+                            addCharToToken('0', token);
+                            addCharToToken(snum[0], token);
+                            addCharToToken(snum[1], token);
+                        }
+                        else
+                        {
+                            addCharToToken(c, token);
+                        }
                         break;
                     }
                     break;

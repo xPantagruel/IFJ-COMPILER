@@ -11,9 +11,51 @@
  */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include "scanner.h"
+
+/** Prvek dvousměrně vázaného seznamu. */
+typedef struct DLLElement {
+	/** Užitečná data. */
+	char *data;
+	/** Ukazatel na předcházející prvek seznamu. */
+	struct DLLElement *previousElement;
+	/** Ukazatel na následující prvek seznamu. */
+	struct DLLElement *nextElement;
+} *DLLElementPtr;
+
+/** Dvousměrně vázaný seznam. */
+typedef struct {
+	/** Ukazatel na první prvek seznamu. */
+	DLLElementPtr firstElement;
+	/** Ukazatel na aktuální prvek seznamu. */
+	DLLElementPtr activeElement;
+	/** Ukazatel na posledni prvek seznamu. */
+	DLLElementPtr lastElement;
+} DLList;
+
+void DLL_Init( DLList *list );
+
+void DLL_Dispose( DLList *list );
+
+void DLL_InsertFirst( DLList *list, char* data );
+
+/** stored while cond and normal condition */
+static DLList *listCodeGen = NULL;
+
+/** string name of function*/
+static char *functionName = NULL;
+
+/** int if in if body*/
+static int inIf = false;
+
+/** int if in else body*/
+static int inElse = false;
+
+/** int if in While body*/
+static int inWhile = false;
 
 /** String for global frame -> 0 */
 static char *generatedString = NULL;
@@ -23,6 +65,9 @@ static char *inFunctionString = NULL;
 
 /** String which will be printed -> 2 */
 static char *allFunctionsString = NULL; 
+
+/** Condition/While condition asm code */
+static char *whileIfString = NULL;
 
 /** Auxiliary variable to know if we are in function */
 static int IAmInFunction = 0;
@@ -48,6 +93,7 @@ static enum type operator = NOT_DEFINED;
  * @param str 0 -> generatedString
               1 -> inFunctionString
               2 -> allFunctionsString
+              3 -> whileIfString
  * @param newStr pointer to string which will be appended
  */
 void addToString(int str, char *newStr);
@@ -105,6 +151,16 @@ void checkStorage();
 void threeAddress(int frameStr, char *frame);
 
 /**
+ * @brief Same as threeAddress function but without calling remove functions at the end.
+ * 
+ * @param frameStr  0 -> generatedString
+                    1 -> inFunctionString
+                    2 -> allFunctionsString
+ * @param frame  GF/TF/LF
+ */
+void threeAddressWithoutRemove(int frameStr, char *frame);
+
+/**
  * @brief Function which generates code which pushes vars to stack.
  * 
  * @param frameStr  0 -> generatedString
@@ -123,5 +179,33 @@ void pushStorage(int frameStr, char *frame);
  * @param frame  GF/TF/LF
  */
 void pushWithoutDeleting(int frameStr, char *frame);
+
+/**
+ * @brief Function which converts int to float if needed.
+ * 
+ * @param frameStr  0 -> generatedString
+                    1 -> inFunctionString
+                    2 -> allFunctionsString
+ * @param frame  GF/TF/LF
+ */
+void convertToSameType(int frameStr, char *frame);
+
+/**
+ * @brief Function which generates random string.
+ * 
+ * @param dest destination where new string will be saved
+ * @param length number of chars generated
+ */
+void randStr(char *dest, size_t length);
+
+/**
+ * @brief Creating instructions for dividing.
+ * 
+ * @param frameStr  0 -> generatedString
+                    1 -> inFunctionString
+                    2 -> allFunctionsString
+ * @param frame  GF/TF/LF
+ */
+void divIdiv(int frameStr, char* frame);
 
 /*** End of code_generation.h ***/

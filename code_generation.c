@@ -11,6 +11,67 @@
  */
 #include "code_generation.h"
 
+
+/**
+ * Provede inicializaci seznamu list před jeho prvním použitím (tzn. žádná
+ * z následujících funkcí nebude volána nad neinicializovaným seznamem).
+ * Tato inicializace se nikdy nebude provádět nad již inicializovaným seznamem,
+ * a proto tuto možnost neošetřujte.
+ * Vždy předpokládejte, že neinicializované proměnné mají nedefinovanou hodnotu.
+ *
+ * @param list Ukazatel na strukturu dvousměrně vázaného seznamu
+ */
+void DLL_Init( DLList *list ) {
+    list = malloc(sizeof(DLList));
+    if (list == NULL) {
+        exit(99);
+    }
+	list->firstElement = NULL;
+	list->lastElement = NULL;
+	list->activeElement = NULL;
+}
+
+void DLL_Dispose( DLList *list ) {
+	while (list->firstElement != NULL) { //removing first element until first element will be NULL
+		//the code below is just copied DLL_DeleteFirst function
+		DLLElementPtr tmp = list->firstElement;
+
+		if (list->firstElement == list->activeElement) { //checking if first element is active
+			list->activeElement = NULL;
+		}
+
+		if (list->firstElement == list->lastElement) { //checking if the first element is also the last element
+			list->lastElement = NULL;
+		}
+
+		list->firstElement = list->firstElement->nextElement;
+		if (list->firstElement != NULL) {
+			list->firstElement->previousElement = NULL;
+		}
+		free(tmp);
+	}
+}
+
+void DLL_InsertFirst( DLList *list, char* data ) {
+	DLLElementPtr new_element = malloc(sizeof(struct DLLElement));
+	if (new_element == NULL) {
+		exit(99);
+		return;
+	}
+
+	new_element->data = data;
+	new_element->nextElement = list->firstElement;
+	new_element->previousElement = NULL;
+	if (list->firstElement != NULL) { //if list isn't empty
+		list->firstElement->previousElement = new_element;
+	}
+
+	list->firstElement = new_element;
+	if (list->lastElement == NULL) { //if list was empty -> we need to set last element too
+	 	list->lastElement = list->firstElement;
+	}
+	
+}
 //todo zkontrolovat v zadani špatného formátu a navratove hodnoty
 //function reads() : ?string
 void READS(){
@@ -398,29 +459,29 @@ void CHR(){
     // DOT,          // .               --
     // MUL,          // *               --
     // EQ,           // =               --
-    // INT,          // 123e-1          -- //todo typ
-    // FLOAT,        // 1.32e+32        -- //todo typ
+    // INT,          // 123e-1          --
+    // FLOAT,        // 1.32e+32        -- 
     // THREE_EQ,     // ===             --
     // LESS,         // <               --
     // MORE,         // >               --
     // LESS_EQ,      // <=              --
     // MORE_EQ,      // >=              --
     // NOT_EQ,       // !==             --
-    // STRING,       // "string \x1F"   -- //todo typ??
+    // STRING,       // "string \x1F"   -- 
 
     //MATEJ
-    // FUNCTION,     // function
-    // ID,           // write, reads..
-    // COMMA,        // ,
-    // COLON         // :
-    // IF,           // if
-    // ELSE,         // else
-    // INT_TYPE,     // int
-    // NULL_KEYWORD, // null
-    // RETURN,       // return
-    // STRING_TYPE,  // string
-    // FLOAT_TYPE,   // float
-    // VOID,         // void
+    // FUNCTION,     // function        
+    // ID,           // write, reads..  --DONE NOT TESTED
+    // COMMA,        // ,               --   TODO popisane pri case comma
+    // COLON         // :               --DONE NOT TESTED ->only empty case nothing to be done here
+    // IF,           // if                  --FUCK UP if i have if else and nested if else is fucked up becouse i need to store somewhere names of labels
+    // ELSE,         // else                --FUCK UP
+    // INT_TYPE,     // int             --DONE NOT TESTED ->only empty case nothing to be done here
+    // NULL_KEYWORD, // null            --DONE NOT TESTED added CASE next to VAR_ID
+    // RETURN,       // return          
+    // STRING_TYPE,  // string          --DONE NOT TESTED ->only empty case nothing to be done here
+    // FLOAT_TYPE,   // float           --DONE NOT TESTED ->only empty case nothing to be done here
+    // VOID,         // void            --DONE NOT TESTED ->only empty case nothing to be done here
     // WHILE,        // while
 
 
@@ -465,6 +526,17 @@ void addToString(int str, char *newStr)
                 exit(99);
             }
             strcat(allFunctionsString, newStr);
+        } else if (str == 3) { // listCodeGen->firstElement->data
+            if (whileIfString == NULL) {
+                whileIfString = calloc(strlen(newStr) + 1, sizeof(char)); 
+            } else {
+                whileIfString = realloc(whileIfString, (strlen(whileIfString) + strlen(newStr) + 1)*sizeof(char));
+            }
+
+            if (whileIfString == NULL) {
+                exit(99);
+            }
+            strcat(whileIfString, newStr);
         }
     }
 }
@@ -575,6 +647,28 @@ void threeAddress(int frameStr, char *frame) {
     removeOperator();
 } 
 
+void threeAddressWithoutRemove(int frameStr, char* frame) {
+    if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
+        addToString(frameStr, frame);
+    } else {
+        addToString(frameStr, " ");
+    }
+    addToString(frameStr, storage[0]);
+    if (storage[1] != NULL && storage[1][0] == '-') { // if first letter is '-' -> it is variable
+        addToString(frameStr, frame);
+    } else {
+        addToString(frameStr, " ");
+    }
+    addToString(frameStr, storage[1]);
+    if (storage[2] != NULL && storage[2][0] == '-') { // if first letter is '-' -> it is variable
+        addToString(frameStr, frame);
+    } else {
+        addToString(frameStr, " ");
+    }
+    addToString(frameStr, storage[2]);
+    addToString(frameStr, "\n");
+}
+
 void pushStorage(int frameStr, char *frame) {
     addToString(frameStr, "PUSHS");
     if (storage[0] != NULL && storage[0][0] == '-') { // if first letter is '-' -> it is variable
@@ -617,10 +711,218 @@ void pushWithoutDeleting(int frameStr, char *frame) {
     addToString(frameStr, "\n");
 }
 
+void randStr(char *dest, size_t length) {
+    char charset[] = 
+                     "abcdefghijklmnopqrstuvwxyz"
+                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    while (length-- > 0) {
+        size_t index = (double) rand() / RAND_MAX * (sizeof charset - 1);
+        *dest++ = charset[index];
+    }
+    *dest = '\0';
+}
+
+void convertToSameType(int frameStr, char *frame) {
+    char tmp1[11];
+    char tmp2[11];
+
+    char neqLabel[11];
+    char checkTypeLabel[11];
+    char checkTypeEnd[11];
+
+    char neqEqLabel[11];
+    char neqNeqLabel[11];
+
+    randStr(tmp1, 10);
+    randStr(tmp2, 10);
+    randStr(neqLabel, 10);
+    randStr(neqEqLabel, 10);
+    randStr(neqNeqLabel, 10);
+    randStr(checkTypeLabel, 10);
+    randStr(checkTypeEnd, 10);
+    
+    addToString(frameStr, "LABEL ");
+    addToString(frameStr, checkTypeLabel);
+    addToString(frameStr, "\n");
+    addToString(frameStr, "DEFVAR ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "DEFVAR ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp2);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "TYPE ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen-1]);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "TYPE ");
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp2);
+    addToString(frameStr, frame);
+    addToString(frameStr, storage[storageLen-2]);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "JUMPIFNEQ ");
+    addToString(frameStr, neqLabel);
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp2);
+    addToString(frameStr, frame);
+    addToString(frameStr, tmp1);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "JUMP ");
+    addToString(frameStr, checkTypeEnd);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL "); //neq
+    addToString(frameStr, neqLabel);
+    addToString(frameStr, "\n");
+        addToString(frameStr, "JUMPIFEQ ");
+        addToString(frameStr, neqEqLabel); //create
+        addToString(frameStr, " string@float");
+        addToString(frameStr, frame);
+        addToString(frameStr, tmp1);
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "JUMPIFNEQ ");
+        addToString(frameStr, neqNeqLabel); //create
+        addToString(frameStr, " string@float");
+        addToString(frameStr, frame);
+        addToString(frameStr, tmp1);
+        addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL "); //neqEq
+    addToString(frameStr, neqEqLabel);
+    addToString(frameStr, "\n");
+        addToString(frameStr, "INT2FLOAT ");
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-1]);
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-1]);
+        addToString(frameStr, "\n");
+        
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, checkTypeEnd);
+        addToString(frameStr, "\n");
+
+
+    addToString(frameStr, "LABEL "); //neqNeq
+    addToString(frameStr, neqNeqLabel);
+    addToString(frameStr, "\n");
+        addToString(frameStr, "INT2FLOAT ");
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-2]);
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen-2]);
+        addToString(frameStr, "\n");
+        
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, checkTypeEnd);
+        addToString(frameStr, "\n");
+
+    addToString(frameStr, "LABEL ");
+    addToString(frameStr, checkTypeEnd);
+    addToString(frameStr, "\n");
+}
+
+void divIdiv(int frameStr, char* frame) {
+    char tmp1[11];
+    char endLabel[11];
+    char startLabel[11];
+    char eqLabel[11];
+    char neqLabel[11];
+
+    randStr(tmp1, 10);
+    randStr(startLabel, 10);
+    randStr(endLabel, 10);
+    randStr(eqLabel, 10);
+
+    addToString(frameStr, "LABEL "); //start 
+    addToString(frameStr, startLabel);
+    addToString(frameStr, "\n");
+            addToString(frameStr, "DEFVAR ");
+            addToString(frameStr, frame);
+            addToString(frameStr, tmp1);
+            addToString(frameStr, "\n");
+
+            addToString(frameStr, "TYPE ");
+            addToString(frameStr, frame);
+            addToString(frameStr, tmp1); // result in tmp1
+            addToString(frameStr, frame);
+            addToString(frameStr, storage[storageLen-1]);
+            addToString(frameStr, "\n");
+             
+            addToString(frameStr, "JUMPIFEQ ");
+            addToString(frameStr, eqLabel);
+            addToString(frameStr, frame);
+            addToString(frameStr, tmp1);
+            addToString(frameStr, " string@float");
+            addToString(frameStr, "\n");
+
+            addToString(frameStr, "JUMPIFNEQ ");
+            addToString(frameStr, neqLabel);
+            addToString(frameStr, frame);
+            addToString(frameStr, tmp1);
+            addToString(frameStr, " string@float");
+            addToString(frameStr, "\n");
+
+    
+    addToString(frameStr, "LABEL "); //eq
+    addToString(frameStr, eqLabel);
+    addToString(frameStr, "\n");
+        
+        if (eqSymbolFound) {
+            addToString(frameStr, "DIV");
+            threeAddress(frameStr, frame);
+        } else {
+            pushStorage(frameStr, frame);
+            addToString(frameStr, "DIVS\n");
+            addToString(frameStr, "PUSHS int@0\n");
+            addToString(frameStr, "LTS\n");
+        }
+
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, endLabel);
+        addToString(frameStr, "\n");
+    
+    addToString(frameStr, "LABEL "); //neq
+    addToString(frameStr, eqLabel);
+    addToString(frameStr, "\n");
+
+        if (eqSymbolFound) {
+            addToString(frameStr, "IDIV");
+            threeAddressWithoutRemove(frameStr, frame);
+        } else {
+            pushStorage(frameStr, frame);
+            addToString(frameStr, "IDIVS\n");
+            addToString(frameStr, "PUSHS int@0\n");
+            addToString(frameStr, "LTS\n");
+        }
+
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, endLabel);
+        addToString(frameStr, "\n");
+         
+    addToString(frameStr, "LABEL "); //end 
+    addToString(frameStr, endLabel);
+    addToString(frameStr, "\n");
+}
+
 void codeGeneration(Token *token) {
     int defined = 0; // auxiliary variable to know if variable was defined or not
     int frameStr = 0; // generatedString
     char frame[5]; // string of actual frame LF/GF/TF
+
+    // variables used to create random names
+    char randomVar1[11];
+    char randomVar2[11];
 
     // checking if we are in function -> chaning frame
     if (IAmInFunction) {
@@ -642,22 +944,17 @@ void codeGeneration(Token *token) {
 
     case EOF_T: 
         // end of file -> we want to print generated code
+        addToString(2, ".IFJcode22\n");
         addToString(2, generatedString); //merge
        
         if (generatedString != NULL) {
              //free(generatedString); 
         }
-
-        printf("\n---\n"); //todo
         printf("%s\n", allFunctionsString);
         break;
 
     case VAR_ID: case INT: case FLOAT:
-        //todo typy
         // setting prefix
-
-        //dosiel mi parameter -> dam na stack 
-
         if (token->t == VAR_ID) { // variable -> GF@-var1
             strcpy(var, "-"); 
             strcat(var, token->val);
@@ -707,6 +1004,7 @@ void codeGeneration(Token *token) {
 
         // if operator was set (it means that in storage we have at least 2 items)
         if (operator != NOT_DEFINED) {
+            convertToSameType(frameStr, frame);
             switch(operator) {
                 case PLUS:
                     if (eqSymbolFound) { // $var = $var1 + 2;
@@ -715,8 +1013,13 @@ void codeGeneration(Token *token) {
                     } else { // $var1 + 2 (without '=' -> it means that we are for example in condition, so we store result to stack)
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "ADDS\n");
-                        addToString(frameStr, "PUSHS int@1\n");
-                        addToString(frameStr, "ANDS\n");
+                        addToString(frameStr, "PUSHS int@0\n");
+                        addToString(frameStr, "LTS\n"); 
+
+                        pushStorage(3, frame);
+                        addToString(3, "ADDS\n");
+                        addToString(3, "PUSHS int@0\n");
+                        addToString(3, "LTS\n"); 
                     }
                     break;
                 case MINUS:
@@ -726,22 +1029,18 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "SUBS\n");
-                        addToString(frameStr, "PUSHS int@1\n");
-                        addToString(frameStr, "ANDS\n");
+                        addToString(frameStr, "PUSHS int@0\n");
+                        addToString(frameStr, "LTS\n");
+
+                        pushStorage(3, frame);
+                        addToString(3, "SUBS\n");
+                        addToString(3, "PUSHS int@0\n");
+                        addToString(3, "LTS\n");
                     }
                     break;
                 case SLASH:
-                    //todo idiv
-                    if (eqSymbolFound) {
-                        addToString(frameStr, "DIV");
-                        threeAddress(frameStr, frame);
-                    } else {
-                        pushStorage(frameStr, frame);
-                        addToString(frameStr, "DIVS\n");
-                        addToString(frameStr, "PUSHS int@1\n");
-                        addToString(frameStr, "ANDS\n");
-                    }
-                    break;
+                    divIdiv(frameStr, frame);
+                break;
                 case MUL:
                     if (eqSymbolFound) {
                         addToString(frameStr, "MUL");
@@ -749,8 +1048,13 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "MULS\n");
-                        addToString(frameStr, "PUSHS int@1\n");
-                        addToString(frameStr, "ANDS\n");
+                        addToString(frameStr, "PUSHS int@0\n");
+                        addToString(frameStr, "LTS\n");
+
+                        pushStorage(3, frame);
+                        addToString(3, "MULS\n");
+                        addToString(3, "PUSHS int@0\n");
+                        addToString(3, "LTS\n");
                     }
                     break;
                 case DOT:
@@ -764,6 +1068,9 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "EQS\n");  
+
+                        pushStorage(3, frame);
+                        addToString(3, "EQS\n");  
                     }
                     break;
                 case LESS:
@@ -773,6 +1080,9 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "LTS\n");  
+
+                        pushStorage(3, frame);
+                        addToString(3, "LTS\n");  
                     }
                     break;
                 case MORE:
@@ -782,6 +1092,9 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "GTS\n");  
+
+                        pushStorage(3, frame);
+                        addToString(3, "GTS\n"); 
                     }
                     break;
                 case NOT_EQ:
@@ -807,24 +1120,31 @@ void codeGeneration(Token *token) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "EQS\n");
                         addToString(frameStr, "NOTS\n");  
+
+                        pushStorage(3, frame);
+                        addToString(3, "EQS\n");
+                        addToString(3, "NOTS\n");
                     }
                     break;
 
                 case LESS_EQ:
+                    randStr(randomVar1, 10);
+                    randStr(randomVar2, 10);
+
                     addToString(frameStr, "DEFVAR");
                     addToString(frameStr, frame);
-                    addToString(frameStr, "_aux1");
+                    addToString(frameStr, randomVar1);
                     addToString(frameStr, "\n");
 
                     addToString(frameStr, "DEFVAR");
                     addToString(frameStr, frame);
-                    addToString(frameStr, "_aux2");
+                    addToString(frameStr, randomVar2);
                     addToString(frameStr, "\n");
 
                     if (eqSymbolFound) {
                         addToString(frameStr, "LT"); //LESS
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         if (storage[1] != NULL && storage[1][0] == '-') {
                             addToString(frameStr, frame);
                         } else {
@@ -841,7 +1161,7 @@ void codeGeneration(Token *token) {
 
                         addToString(frameStr, "EQ"); //EQ
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         if (storage[1] != NULL && storage[1][0] == '-') {
                             addToString(frameStr, frame);
                         } else {
@@ -864,9 +1184,9 @@ void codeGeneration(Token *token) {
                         }
                         addToString(frameStr, storage[0]);
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         addToString(frameStr, "\n");
                                    
                         removeLastFromStorage();
@@ -879,25 +1199,55 @@ void codeGeneration(Token *token) {
                         addToString(frameStr, "LTS\n"); //LESS
                         addToString(frameStr, "POPS"); //STORE
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1\n");
+                        addToString(frameStr, randomVar1);
+                        addToString(frameStr, "\n");
 
                         pushWithoutDeleting(frameStr, frame);
 
                         addToString(frameStr, "EQS\n"); //EQ
                         addToString(frameStr, "POPS"); //STORE
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2\n");
+                        addToString(frameStr, randomVar2);
+                        addToString(frameStr, "\n");
 
                         addToString(frameStr, "PUSHS");
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         addToString(frameStr, "\n");
                         addToString(frameStr, "PUSHS");
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         addToString(frameStr, "\n");
 
                         addToString(frameStr, "ORS\n"); //OR
+
+                        //---
+                        pushWithoutDeleting(3, frame);
+
+                        addToString(3, "LTS\n"); //LESS
+                        addToString(3, "POPS"); //STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
+
+                        pushWithoutDeleting(3, frame);
+
+                        addToString(3, "EQS\n"); //EQ
+                        addToString(3, "POPS"); //STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
+
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
+
+                        addToString(3, "ORS\n"); //OR
 
                         removeLastFromStorage();
                         removeLastFromStorage();
@@ -905,20 +1255,23 @@ void codeGeneration(Token *token) {
                     }
                     break;
                 case MORE_EQ:
+                    randStr(randomVar1, 10);
+                    randStr(randomVar2, 10);
+
                     addToString(frameStr, "DEFVAR");
                     addToString(frameStr, frame);
-                    addToString(frameStr, "_aux1");
+                    addToString(frameStr, randomVar1);
                     addToString(frameStr, "\n");
 
                     addToString(frameStr, "DEFVAR");
                     addToString(frameStr, frame);
-                    addToString(frameStr, "_aux2");
+                    addToString(frameStr, randomVar2);
                     addToString(frameStr, "\n");
 
                     if (eqSymbolFound) {
                         addToString(frameStr, "GT"); //MORE
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         if (storage[1] != NULL && storage[1][0] == '-') {
                             addToString(frameStr, frame);
                         } else {
@@ -935,7 +1288,7 @@ void codeGeneration(Token *token) {
 
                         addToString(frameStr, "EQ"); //EQ
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         if (storage[1] != NULL && storage[1][0] == '-') {
                             addToString(frameStr, frame);
                         } else {
@@ -958,9 +1311,9 @@ void codeGeneration(Token *token) {
                         }
                         addToString(frameStr, storage[0]);
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         addToString(frameStr, "\n");
                                    
                         removeLastFromStorage();
@@ -973,25 +1326,56 @@ void codeGeneration(Token *token) {
                         addToString(frameStr, "GTS\n"); //MORE
                         addToString(frameStr, "POPS"); //STORE
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1\n");
+                        addToString(frameStr, randomVar1);
+                        addToString(frameStr, "\n");
 
                         pushWithoutDeleting(frameStr, frame);
 
                         addToString(frameStr, "EQS\n"); //EQ
                         addToString(frameStr, "POPS"); //STORE
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2\n");
+                        addToString(frameStr, randomVar2);
+                        addToString(frameStr, "\n");
 
                         addToString(frameStr, "PUSHS");
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux1");
+                        addToString(frameStr, randomVar1);
                         addToString(frameStr, "\n");
                         addToString(frameStr, "PUSHS");
                         addToString(frameStr, frame);
-                        addToString(frameStr, "_aux2");
+                        addToString(frameStr, randomVar2);
                         addToString(frameStr, "\n");
 
                         addToString(frameStr, "ORS\n"); //OR
+
+                        // --- 
+
+                        pushWithoutDeleting(3, frame);
+
+                        addToString(3, "GTS\n"); //MORE
+                        addToString(3, "POPS"); //STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
+
+                        pushWithoutDeleting(3, frame);
+
+                        addToString(3, "EQS\n"); //EQ
+                        addToString(3, "POPS"); //STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
+
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
+
+                        addToString(3, "ORS\n"); //OR
                         
                         removeLastFromStorage();
                         removeLastFromStorage();
@@ -1009,6 +1393,47 @@ void codeGeneration(Token *token) {
 
     case L_CPAR:
         cparCounter++;
+
+        // if (inIf)
+        // {
+        //     addToString(frameStr, "DEFVAR ");
+        //     if (IAmInFunction)
+        //     {
+        //         addToString(frameStr, "LF@ ");
+        //     }else{
+        //         addToString(frameStr, "GF@ ");
+        //     }
+        //     addToString(frameStr, "if");
+        //     int RndStr=rand_str();
+        //     addToString(frameStr, RndStr); // DEFVAR GF@ifRndStr | LF@ifRndStr
+        //     addToString(frameStr, "\n");
+            
+        //     addToString(frameStr, "POP ");
+
+        //                 addToString(frameStr, "DEFVAR ");
+        //     if (IAmInFunction)
+        //     {
+        //         addToString(frameStr, "LF@ ");
+        //     }else{
+        //         addToString(frameStr, "GF@ ");
+        //     }
+        //     addToString(frameStr, "if");
+        //     addToString(frameStr, RndStr); // POP GF@ifRndStr | LF@ifRndStr
+
+        //     addToString(frameStr, "JUMPIFEQ ELSE");
+        //     addToString(frameStr, RndStr); // JUMPIFEQ ELSERndStr
+        //     addToString(frameStr, "true"); // JUMPIFEQ ELSERndStr true 
+        //     if (IAmInFunction)
+        //     {
+        //         addToString(frameStr, "LF@ ");
+        //     }else{
+        //         addToString(frameStr, "GF@ ");
+        //     }
+
+        //     addToString(frameStr, RndStr); // JUMPIFEQ ELSERndStr true GF@ifRndStr/LF@ifRndStr
+        //     addToString(frameStr, "\n");
+        // }
+        
         break;
 
     case R_CPAR:
@@ -1020,6 +1445,18 @@ void codeGeneration(Token *token) {
             IAmInFunction = 0;
             addToString(2, inFunctionString);
             free(inFunctionString);
+        } else {
+            //not function
+            if (whileIfString != NULL) { // not else {}
+                DLL_InsertFirst(listCodeGen, NULL);
+                listCodeGen->firstElement->data = malloc(sizeof(char)*(strlen(whileIfString)+1));
+                if (listCodeGen->firstElement->data == NULL) {
+                    exit(99);
+                }
+                strcpy(listCodeGen->firstElement->data, whileIfString);
+                free(whileIfString);
+                whileIfString = NULL;
+            }
         }
         resetGlobalValues();
         break;
@@ -1039,9 +1476,21 @@ void codeGeneration(Token *token) {
             }
             addToString(frameStr, storage[0]);
             addToString(frameStr, "\n");
-            addToString(frameStr, "PUSHS int@1\n");
-            addToString(frameStr, "ANDS\n");
+            addToString(frameStr, "PUSHS int@0\n");
+            addToString(frameStr, "LTS\n");
             removeLastFromStorage();
+        }
+
+        if(IAmInFunction){
+            addToString(frameStr,"CALL $");
+            addToString(frameStr, functionName);
+            addToString(frameStr, "\n");
+            
+            if(functionName != NULL)
+            {            
+                free(functionName);
+                functionName=NULL;
+            }
         }
 
         resetGlobalValues();
@@ -1105,14 +1554,52 @@ void codeGeneration(Token *token) {
 
         break;
 
+    case ID:
+        if (IAmInFunction) {
+            if (functionName == NULL) {
+                functionName = malloc(strlen(token->val) + 1);
+                strcpy(functionName, token->val);
+            } else {
+                functionName = realloc(functionName, strlen(token->val) + 1);
+                strcpy(functionName, token->val);
+            }
+        }
+        break;
+
+    case COMMA:    
+        // todo push last from storage storage[storageLen-1] (var1)
+        // removeLastFromStorage();
+        // pozor na posledny parameter -> nebude comma
+        break; 
+
+    case COLON:
+        break;
+    case WHILE:
+
+//  while(x==1)
+//      {
+//  //Do something
+//      }
+// The same loop in assembler:
+
+//         jmp loop1   ; Jump to condition first
+// cloop1  nop         ; Execute the content of the loop
+// loop1   cmp ax,1    ; Check the condition
+//         je cloop1   ; Jump to content of the loop if met
+        break;
+    case RETURN:
+        break;
+    case IF:
+        if(inIf == false)
+        {
+            inIf = true;
+        }
+        break;
     default:
         break;
     }
 }
 
-//todo remove todos
-//todo escape seq -> niektore nemaju byt premenene
-//todo prejst zadanie znova
 //todo pridat do parsru volanie codeGeneration
 //todo remove zo scanneru
 //todo test an merlin + interpret
