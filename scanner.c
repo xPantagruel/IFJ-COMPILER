@@ -26,6 +26,19 @@ void getProlog()
     {
         c = getchar();
 
+        if (c == '/') { //skip comment in prolog
+             c = getchar();
+             if (c == '/') {
+                 skipLineComment();
+                 continue;
+             } else if (c == '*') {
+                 skipBlockComment(tokenInit());
+                 continue;
+             } else {
+                 exit(2);
+             }
+         }
+
         if (c == '\n')
         { // counting on which line from stdin we are
             row++;
@@ -37,10 +50,6 @@ void getProlog()
             pos++;
             prologString[pos] = '\0';
             spaceCounter++;
-        }
-        else if (isspace(c) && spaceCounter == 1)
-        { // after <?php can be only one space or  \n or tab
-            exit(1);
         }
 
         if (!isspace(c))
@@ -90,7 +99,7 @@ void changeLastChar(int c, Token *token)
 void addCharToToken(int c, Token *token)
 {
     char tmp[] = {c, '\0'}; // creating "string" so we can use strncat
-
+    
     if (token && token->val == NULL)
     {
         token->val = calloc(2, sizeof(char));
@@ -131,7 +140,6 @@ void addCharToToken(int c, Token *token)
             token->val = strncat(token->val, tmp, 1);
         }
     }
-
     token->valLen = token->valLen + 1;
 }
 
@@ -204,6 +212,7 @@ int skipLineComment()
     }
     if (c == '\n')
     {
+        ungetc(c, stdin);
         row++;
     }
 

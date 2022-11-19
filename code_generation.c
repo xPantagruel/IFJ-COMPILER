@@ -21,38 +21,38 @@
  *
  * @param list Ukazatel na strukturu dvousměrně vázaného seznamu
  */
-void DLL_Init( DLList *list ) {
-    list = malloc(sizeof(DLList));
-    if (list == NULL) {
+void DLL_Init() {
+    listCodeGen = malloc(sizeof(DLList));
+    if (listCodeGen == NULL) {
         exit(99);
     }
-	list->firstElement = NULL;
-	list->lastElement = NULL;
-	list->activeElement = NULL;
+	listCodeGen->firstElement = NULL;
+	listCodeGen->lastElement = NULL;
+	listCodeGen->activeElement = NULL;
 }
 
-void DLL_Dispose( DLList *list ) {
-	while (list->firstElement != NULL) { //removing first element until first element will be NULL
+void DLL_Dispose() {
+	while (listCodeGen->firstElement != NULL) { //removing first element until first element will be NULL
 		//the code below is just copied DLL_DeleteFirst function
-		DLLElementPtr tmp = list->firstElement;
+		DLLElementPtr tmp = listCodeGen->firstElement;
 
-		if (list->firstElement == list->activeElement) { //checking if first element is active
-			list->activeElement = NULL;
+		if (listCodeGen->firstElement == listCodeGen->activeElement) { //checking if first element is active
+			listCodeGen->activeElement = NULL;
 		}
 
-		if (list->firstElement == list->lastElement) { //checking if the first element is also the last element
-			list->lastElement = NULL;
+		if (listCodeGen->firstElement == listCodeGen->lastElement) { //checking if the first element is also the last element
+			listCodeGen->lastElement = NULL;
 		}
 
-		list->firstElement = list->firstElement->nextElement;
-		if (list->firstElement != NULL) {
-			list->firstElement->previousElement = NULL;
+		listCodeGen->firstElement = listCodeGen->firstElement->nextElement;
+		if (listCodeGen->firstElement != NULL) {
+			listCodeGen->firstElement->previousElement = NULL;
 		}
 		free(tmp);
 	}
 }
 
-void DLL_InsertFirst( DLList *list, char* data ) {
+void DLL_InsertFirst(char* data ) {
 	DLLElementPtr new_element = malloc(sizeof(struct DLLElement));
 	if (new_element == NULL) {
 		exit(99);
@@ -60,15 +60,15 @@ void DLL_InsertFirst( DLList *list, char* data ) {
 	}
 
 	new_element->data = data;
-	new_element->nextElement = list->firstElement;
+	new_element->nextElement = listCodeGen->firstElement;
 	new_element->previousElement = NULL;
-	if (list->firstElement != NULL) { //if list isn't empty
-		list->firstElement->previousElement = new_element;
+	if (listCodeGen->firstElement != NULL) { //if list isn't empty
+		listCodeGen->firstElement->previousElement = new_element;
 	}
 
-	list->firstElement = new_element;
-	if (list->lastElement == NULL) { //if list was empty -> we need to set last element too
-	 	list->lastElement = list->firstElement;
+	listCodeGen->firstElement = new_element;
+	if (listCodeGen->lastElement == NULL) { //if list was empty -> we need to set last element too
+	 	listCodeGen->lastElement = listCodeGen->firstElement;
 	}
 	
 }
@@ -1453,7 +1453,7 @@ void codeGeneration(Token *token) {
         } else {
             //not function
             if (whileIfString != NULL) { // not else {}
-                DLL_InsertFirst(listCodeGen, NULL);
+                DLL_InsertFirst(NULL);
                 listCodeGen->firstElement->data = malloc(sizeof(char)*(strlen(whileIfString)+1));
                 if (listCodeGen->firstElement->data == NULL) {
                     exit(99);

@@ -913,7 +913,7 @@ int main()
     frameStack = initFrameStack();
     currentSymbol = NULL;
     // Example how parser can be called.
-    DLL_Init(listCodeGen); //todo
+    DLL_Init();
 
     Token *token = getToken();
     if (prog(token))
