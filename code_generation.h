@@ -36,11 +36,11 @@ typedef struct {
 	DLLElementPtr lastElement;
 } DLList;
 
-void DLL_Init();
+void DLL_Init(int num);
 
-void DLL_Dispose();
+void DLL_Dispose(int num);
 
-void DLL_InsertFirst(char* data );
+void DLL_InsertFirst(int num, char* data );
 
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
