@@ -22,6 +22,10 @@
  * @param list Ukazatel na strukturu dvousměrně vázaného seznamu
  */
 void DLL_Init( DLList *list ) {
+    list = malloc(sizeof(DLList));
+    if (list == NULL) {
+        exit(99);
+    }
 	list->firstElement = NULL;
 	list->lastElement = NULL;
 	list->activeElement = NULL;
