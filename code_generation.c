@@ -629,133 +629,31 @@ void rand_str(char *dest, size_t length) {
     *dest = '\0';
 }
 
-void convertToSameType(int frameStr, char *frame) {
-    //pri add az eqs
+int convertToSameType(int frameStr, char *frame) {
+    if (strchr(storage[storageLen-2], '.')) { // first string
+        if (!strchr(storage[storageLen-1], '.')) {
+            addToString(frameStr, "INT2FLOAT ");
+            addToString(frameStr, frame);
+            addToString(frameStr, storage[storageLen-1]);
+            addToString(frameStr, frame);
+            addToString(frameStr, storage[storageLen-1]);
+            addToString(frameStr, "\n");
+        }
+        return 1;
+    }
 
-    // create tmpvariable1
-    // create tmpvariable2
-    // create tmpvariable3
-    // type do tmp1 storage[0]
-    // type do tmp2 storrage[1]
-    // EQ tmp3 tmp1 tmp2
-    
-    //not eq
-        // EQ string@float tmp1
-            //eq
-                //convert storage[1](nazovpremennej) to float
-            //not eq
-                //convert storage[0](nazovpremennej) to float 
-            //return 1
-    //eq
-        //zisti ci su float
-            //ano -> return 1
-        //nie -> return 0 
-    char tmp1[11];
-    char tmp2[11];
-
-    char neqLabel[11];
-    char checkTypeLabel[11];
-    char checkTypeEnd[11];
-
-    char neqEqLabel[11];
-    char neqNeqLabel[11];
-
-    rand_str(tmp1, 10);
-    rand_str(tmp2, 10);
-    rand_str(neqLabel, 10);
-    rand_str(neqEqLabel, 10);
-    rand_str(neqNeqLabel, 10);
-    rand_str(checkTypeLabel, 10);
-    rand_str(checkTypeEnd, 10);
-    
-    addToString(frameStr, "LABEL ");
-    addToString(frameStr, checkTypeLabel);
-    addToString(frameStr, "\n");
-    addToString(frameStr, "DEFVAR ");
-    addToString(frameStr, frame);
-    addToString(frameStr, tmp1);
-    addToString(frameStr, "\n");
-
-    addToString(frameStr, "DEFVAR ");
-    addToString(frameStr, frame);
-    addToString(frameStr, tmp2);
-    addToString(frameStr, "\n");
-
-    addToString(frameStr, "TYPE ");
-    addToString(frameStr, frame);
-    addToString(frameStr, tmp1);
-    addToString(frameStr, frame);
-    addToString(frameStr, storage[storageLen-1]);
-    addToString(frameStr, "\n");
-
-    addToString(frameStr, "TYPE ");
-    addToString(frameStr, frame);
-    addToString(frameStr, tmp2);
-    addToString(frameStr, frame);
-    addToString(frameStr, storage[storageLen-2]);
-    addToString(frameStr, "\n");
-
-    addToString(frameStr, "JUMPIFNEQ ");
-    addToString(frameStr, neqLabel);
-    addToString(frameStr, frame);
-    addToString(frameStr, tmp2);
-    addToString(frameStr, frame);
-    addToString(frameStr, tmp1);
-    addToString(frameStr, "\n");
-
-    addToString(frameStr, "JUMP ");
-    addToString(frameStr, checkTypeEnd);
-    addToString(frameStr, "\n");
-
-    addToString(frameStr, "LABEL "); //neq
-    addToString(frameStr, neqLabel);
-    addToString(frameStr, "\n");
-        addToString(frameStr, "JUMPIFEQ ");
-        addToString(frameStr, neqEqLabel); //create
-        addToString(frameStr, " string@float");
-        addToString(frameStr, frame);
-        addToString(frameStr, tmp1);
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "JUMPIFNEQ ");
-        addToString(frameStr, neqNeqLabel); //create
-        addToString(frameStr, " string@float");
-        addToString(frameStr, frame);
-        addToString(frameStr, tmp1);
-        addToString(frameStr, "\n");
-
-    addToString(frameStr, "LABEL "); //neqEq
-    addToString(frameStr, neqEqLabel);
-    addToString(frameStr, "\n");
-        addToString(frameStr, "INT2FLOAT ");
-        addToString(frameStr, frame);
-        addToString(frameStr, storage[storageLen-1]);
-        addToString(frameStr, frame);
-        addToString(frameStr, storage[storageLen-1]);
-        addToString(frameStr, "\n");
-        
-        addToString(frameStr, "JUMP ");
-        addToString(frameStr, checkTypeEnd);
-        addToString(frameStr, "\n");
-
-
-    addToString(frameStr, "LABEL "); //neqNeq
-    addToString(frameStr, neqNeqLabel);
-    addToString(frameStr, "\n");
-        addToString(frameStr, "INT2FLOAT ");
-        addToString(frameStr, frame);
-        addToString(frameStr, storage[storageLen-2]);
-        addToString(frameStr, frame);
-        addToString(frameStr, storage[storageLen-2]);
-        addToString(frameStr, "\n");
-        
-        addToString(frameStr, "JUMP ");
-        addToString(frameStr, checkTypeEnd);
-        addToString(frameStr, "\n");
-
-    addToString(frameStr, "LABEL ");
-    addToString(frameStr, checkTypeEnd);
-    addToString(frameStr, "\n");
+    if (strchr(storage[storageLen-1], '.')) {
+        if (!strchr(storage[storageLen-2], '.')) {
+            addToString(frameStr, "INT2FLOAT ");
+            addToString(frameStr, frame);
+            addToString(frameStr, storage[storageLen-2]);
+            addToString(frameStr, frame);
+            addToString(frameStr, storage[storageLen-2]);
+            addToString(frameStr, "\n");
+        }
+        return 1;
+    }
+    return 0;
 }
 
 void codeGeneration(Token *token) {
@@ -847,7 +745,7 @@ void codeGeneration(Token *token) {
 
         // if operator was set (it means that in storage we have at least 2 items)
         if (operator != NOT_DEFINED) {
-            convertToSameType(frameStr, frame);
+            int floatOrInt = convertToSameType(frameStr, frame);
             switch(operator) {
                 case PLUS:
                     if (eqSymbolFound) { // $var = $var1 + 2;
