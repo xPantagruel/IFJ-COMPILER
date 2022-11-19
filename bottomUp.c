@@ -169,7 +169,14 @@ bool reduce(Stack *stack)
             }
             else if (term->childTerms[0]->type == I_INT || term->childTerms[2]->type == I_INT)
             {
-                term->type = I_INT;
+                if (term->childTerms[1]->value && term->childTerms[1]->value[0] == '/')
+                {
+                    term->type = I_FLOAT;
+                }
+                else
+                {
+                    term->type = I_INT;
+                }
             }
             else if (term->childTerms[0]->type == I_STRING && term->childTerms[2]->type == I_STRING)
             {
@@ -517,7 +524,6 @@ bool bottomUp(Expression *exp, int *resultType)
             default:
                 break;
             }
-
             return freeAndReturn(true, stack);
 
         default:
