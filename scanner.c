@@ -455,7 +455,16 @@ Token *getToken()
                                     }
                                     break;
                                 default: // other chars
-                                    addCharToToken(c, token);
+                                    if ((0 <= c && c <= 32) || c == 35 || c == 92) {
+                                        addCharToToken('\\', token);
+                                        char snum[3];
+                                        sprintf(snum, "%d", c);
+                                        addCharToToken('0', token);
+                                        addCharToToken(snum[0], token);
+                                        addCharToToken(snum[1], token);
+                                    } else {
+                                        addCharToToken(c, token);
+                                    }
                                     break;
                                 }
                                 break;
@@ -487,7 +496,7 @@ Token *getToken()
                         actualState = GET_HEX_S;
                         unGetC(c);
                     } else {
-                        addCharToToken(c, token);
+                        addCharToToken(c, token); 
                     }
                     break;
             }

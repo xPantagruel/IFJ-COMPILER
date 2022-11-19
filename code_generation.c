@@ -1417,7 +1417,6 @@ void codeGeneration(Token *token) {
     }
 }
 
-//todo escape seq -> niektore nemaju byt premenene 000-032, 035,092 v tvare \xyz
 //todo pridat do parsru volanie codeGeneration
 //todo remove zo scanneru
 //todo test an merlin + interpret
