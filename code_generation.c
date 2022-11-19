@@ -20,19 +20,24 @@
  *
  * @param list Ukazatel na strukturu dvousměrně vázaného seznamu
  */
-<<<<<<< Updated upstream
-void DLL_Init(int num) {
-    if (num == 0) {
+void DLL_Init(int num)
+{
+    if (num == 0)
+    {
         listCodeGen = malloc(sizeof(DLList));
-        if (listCodeGen == NULL) {
+        if (listCodeGen == NULL)
+        {
             exit(99);
         }
         listCodeGen->firstElement = NULL;
         listCodeGen->lastElement = NULL;
         listCodeGen->activeElement = NULL;
-    } else if (num == 1) {
+    }
+    else if (num == 1)
+    {
         listIfLabels = malloc(sizeof(DLList));
-        if (listIfLabels == NULL) {
+        if (listIfLabels == NULL)
+        {
             exit(99);
         }
         listIfLabels->firstElement = NULL;
@@ -41,41 +46,53 @@ void DLL_Init(int num) {
     }
 }
 
-void DLL_Dispose(int num) {
-    if (num == 0) {
-        while (listCodeGen->firstElement != NULL) { //removing first element until first element will be NULL
-            //the code below is just copied DLL_DeleteFirst function
+void DLL_Dispose(int num)
+{
+    if (num == 0)
+    {
+        while (listCodeGen->firstElement != NULL)
+        { // removing first element until first element will be NULL
+            // the code below is just copied DLL_DeleteFirst function
             DLLElementPtr tmp = listCodeGen->firstElement;
 
-            if (listCodeGen->firstElement == listCodeGen->activeElement) { //checking if first element is active
+            if (listCodeGen->firstElement == listCodeGen->activeElement)
+            { // checking if first element is active
                 listCodeGen->activeElement = NULL;
             }
 
-            if (listCodeGen->firstElement == listCodeGen->lastElement) { //checking if the first element is also the last element
+            if (listCodeGen->firstElement == listCodeGen->lastElement)
+            { // checking if the first element is also the last element
                 listCodeGen->lastElement = NULL;
             }
 
             listCodeGen->firstElement = listCodeGen->firstElement->nextElement;
-            if (listCodeGen->firstElement != NULL) {
+            if (listCodeGen->firstElement != NULL)
+            {
                 listCodeGen->firstElement->previousElement = NULL;
             }
             free(tmp);
         }
-    } else if (num == 1) {
-        while (listIfLabels->firstElement != NULL) { //removing first element until first element will be NULL
-            //the code below is just copied DLL_DeleteFirst function
+    }
+    else if (num == 1)
+    {
+        while (listIfLabels->firstElement != NULL)
+        { // removing first element until first element will be NULL
+            // the code below is just copied DLL_DeleteFirst function
             DLLElementPtr tmp = listIfLabels->firstElement;
 
-            if (listIfLabels->firstElement == listIfLabels->activeElement) { //checking if first element is active
+            if (listIfLabels->firstElement == listIfLabels->activeElement)
+            { // checking if first element is active
                 listCodeGen->activeElement = NULL;
             }
 
-            if (listIfLabels->firstElement == listIfLabels->lastElement) { //checking if the first element is also the last element
+            if (listIfLabels->firstElement == listIfLabels->lastElement)
+            { // checking if the first element is also the last element
                 listIfLabels->lastElement = NULL;
             }
 
             listIfLabels->firstElement = listIfLabels->firstElement->nextElement;
-            if (listIfLabels->firstElement != NULL) {
+            if (listIfLabels->firstElement != NULL)
+            {
                 listIfLabels->firstElement->previousElement = NULL;
             }
             free(tmp);
@@ -83,78 +100,7 @@ void DLL_Dispose(int num) {
     }
 }
 
-void DLL_InsertFirst(int num,char* data ) {
-    DLLElementPtr new_element = malloc(sizeof(struct DLLElement));
-    if (new_element == NULL) {
-        exit(99);
-        return;
-    }
-    if (num == 0) {
-        new_element->data = data;
-        new_element->nextElement = listCodeGen->firstElement;
-        new_element->previousElement = NULL;
-        if (listCodeGen->firstElement != NULL) { //if list isn't empty
-            listCodeGen->firstElement->previousElement = new_element;
-        }
-
-        listCodeGen->firstElement = new_element;
-        if (listCodeGen->lastElement == NULL) { //if list was empty -> we need to set last element too
-            listCodeGen->lastElement = listCodeGen->firstElement;
-        }
-    } else if (num == 1) {
-        new_element->data = data;
-        new_element->nextElement = listIfLabels->firstElement;
-        new_element->previousElement = NULL;
-        if (listIfLabels->firstElement != NULL) { //if list isn't empty
-            listIfLabels->firstElement->previousElement = new_element;
-        }
-
-        listIfLabels->firstElement = new_element;
-        if (listIfLabels->lastElement == NULL) { //if list was empty -> we need to set last element too
-            listIfLabels->lastElement = listIfLabels->firstElement;
-        }
-    }
-	
-=======
-void DLL_Init(DLList *list)
-{
-    list = malloc(sizeof(DLList));
-    if (list == NULL)
-    {
-        exit(99);
-    }
-    list->firstElement = NULL;
-    list->lastElement = NULL;
-    list->activeElement = NULL;
-}
-
-void DLL_Dispose(DLList *list)
-{
-    while (list->firstElement != NULL)
-    { // removing first element until first element will be NULL
-        // the code below is just copied DLL_DeleteFirst function
-        DLLElementPtr tmp = list->firstElement;
-
-        if (list->firstElement == list->activeElement)
-        { // checking if first element is active
-            list->activeElement = NULL;
-        }
-
-        if (list->firstElement == list->lastElement)
-        { // checking if the first element is also the last element
-            list->lastElement = NULL;
-        }
-
-        list->firstElement = list->firstElement->nextElement;
-        if (list->firstElement != NULL)
-        {
-            list->firstElement->previousElement = NULL;
-        }
-        free(tmp);
-    }
-}
-
-void DLL_InsertFirst(DLList *list, char *data)
+void DLL_InsertFirst(int num, char *data)
 {
     DLLElementPtr new_element = malloc(sizeof(struct DLLElement));
     if (new_element == NULL)
@@ -162,21 +108,38 @@ void DLL_InsertFirst(DLList *list, char *data)
         exit(99);
         return;
     }
+    if (num == 0)
+    {
+        new_element->data = data;
+        new_element->nextElement = listCodeGen->firstElement;
+        new_element->previousElement = NULL;
+        if (listCodeGen->firstElement != NULL)
+        { // if list isn't empty
+            listCodeGen->firstElement->previousElement = new_element;
+        }
 
-    new_element->data = data;
-    new_element->nextElement = list->firstElement;
-    new_element->previousElement = NULL;
-    if (list->firstElement != NULL)
-    { // if list isn't empty
-        list->firstElement->previousElement = new_element;
+        listCodeGen->firstElement = new_element;
+        if (listCodeGen->lastElement == NULL)
+        { // if list was empty -> we need to set last element too
+            listCodeGen->lastElement = listCodeGen->firstElement;
+        }
     }
+    else if (num == 1)
+    {
+        new_element->data = data;
+        new_element->nextElement = listIfLabels->firstElement;
+        new_element->previousElement = NULL;
+        if (listIfLabels->firstElement != NULL)
+        { // if list isn't empty
+            listIfLabels->firstElement->previousElement = new_element;
+        }
 
-    list->firstElement = new_element;
-    if (list->lastElement == NULL)
-    { // if list was empty -> we need to set last element too
-        list->lastElement = list->firstElement;
+        listIfLabels->firstElement = new_element;
+        if (listIfLabels->lastElement == NULL)
+        { // if list was empty -> we need to set last element too
+            listIfLabels->lastElement = listIfLabels->firstElement;
+        }
     }
->>>>>>> Stashed changes
 }
 // todo zkontrolovat v zadani špatného formátu a navratove hodnoty
 // function reads() : ?string
@@ -1744,25 +1707,16 @@ void codeGeneration(Token *token)
             IAmInFunction = 0;
             addToString(2, inFunctionString);
             free(inFunctionString);
-<<<<<<< Updated upstream
-        } else {
-            //not function
-            if (whileIfString != NULL) { // not else {}
-                DLL_InsertFirst(0 ,NULL);
-                listCodeGen->firstElement->data = malloc(sizeof(char)*(strlen(whileIfString)+1));
-                if (listCodeGen->firstElement->data == NULL) {
-=======
         }
         else
         {
             // not function
             if (whileIfString != NULL)
             { // not else {}
-                DLL_InsertFirst(listCodeGen, NULL);
+                DLL_InsertFirst(0, NULL);
                 listCodeGen->firstElement->data = malloc(sizeof(char) * (strlen(whileIfString) + 1));
                 if (listCodeGen->firstElement->data == NULL)
                 {
->>>>>>> Stashed changes
                     exit(99);
                 }
                 strcpy(listCodeGen->firstElement->data, whileIfString);
@@ -1894,13 +1848,8 @@ void codeGeneration(Token *token)
         }
         break;
 
-<<<<<<< Updated upstream
-    case COMMA:    
-        pushStorage(storage[storageLen-1], frame);
-=======
     case COMMA:
-        // pushStorage(storage[storageLen-1], frameStr, frame);
->>>>>>> Stashed changes
+        pushStorage(storage[storageLen - 1], frame);
         removeLastFromStorage();
         // todo push last from storage storage[storageLen-1] (var1)
         // removeLastFromStorage();
@@ -1918,12 +1867,11 @@ void codeGeneration(Token *token)
         break;
     case IF:
 
-<<<<<<< Updated upstream
-        //todo segfault
-        // inIf += 1;
-        // addToString(frameStr, "JUMP $IFCOND");
-        // addToString(frameStr, GetUniqueName());
-        // addToString(frameStr, "\n");
+        // todo segfault
+        //  inIf += 1;
+        //  addToString(frameStr, "JUMP $IFCOND");
+        //  addToString(frameStr, GetUniqueName());
+        //  addToString(frameStr, "\n");
 
         // //store in listIfLabels IFCOND and GetUniqueName() value
         // DLL_InsertFirst(1 , NULL);
@@ -1933,7 +1881,7 @@ void codeGeneration(Token *token)
         // }
         // strcpy(listIfLabels->firstElement->data, "IFCOND");
         // strcat(listIfLabels->firstElement->data, UniqueName);
-        
+
         // addToString(frameStr, "LABEL $STARTIF");
         // addToString(frameStr, UniqueName);
         // addToString(frameStr, "\n");
@@ -1946,45 +1894,16 @@ void codeGeneration(Token *token)
         // }
         // strcpy(listIfLabels->firstElement->data, "STARTIF");
         // strcat(listIfLabels->firstElement->data, UniqueName);
-        
-        //todo nechyba ti tu break; ??
-=======
-        // store in listIfLabels IFCOND and GetUniqueName() value
-        DLL_InsertFirst(listIfLabels, NULL);
-        listIfLabels->firstElement->data = malloc(sizeof(char) * (strlen("IFCOND") + strlen(UniqueName) + 1));
-        if (listIfLabels->firstElement->data == NULL)
-        {
-            exit(99);
-        }
-        strcpy(listIfLabels->firstElement->data, "IFCOND");
-        strcat(listIfLabels->firstElement->data, UniqueName);
 
-        addToString(frameStr, "LABEL $STARTIF");
-        addToString(frameStr, UniqueName);
-        addToString(frameStr, "\n");
-
-        // store in listIfLabels STARTIF and UniqueName value
-        DLL_InsertFirst(listIfLabels, NULL);
-        listIfLabels->firstElement->data = malloc(sizeof(char) * (strlen("STARTIF") + strlen(UniqueName) + 1));
-        if (listIfLabels->firstElement->data == NULL)
-        {
-            exit(99);
-        }
-        strcpy(listIfLabels->firstElement->data, "STARTIF");
-        strcat(listIfLabels->firstElement->data, UniqueName);
->>>>>>> Stashed changes
+        // todo nechyba ti tu break; ??
 
     case ELSE:
-    //todo segfault
-        // addToString(frameStr, "LABEL ");
-        // addToString(frameStr, listIfLabels->firstElement->nextElement->data);
-        // addToString(frameStr, "\n");
+        // todo segfault
+        //  addToString(frameStr, "LABEL ");
+        //  addToString(frameStr, listIfLabels->firstElement->nextElement->data);
+        //  addToString(frameStr, "\n");
         break;
 
-<<<<<<< Updated upstream
-=======
-        break;
->>>>>>> Stashed changes
     default:
         break;
     }

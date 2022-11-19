@@ -6,6 +6,7 @@
 #include "stack.h"
 #include "parser.h"
 #include "symtable.h"
+#include "code_generation.h"
 #include <stdbool.h>
 #include <string.h>
 

@@ -1,13 +1,15 @@
+#ifndef CODEGEN_H
+#define CODEGEN_H
 /**
  * @file code_generation.h
- * 
+ *
  * @author Martin Kubička (xkubic45)
  * @author Matěj Macek (xmacek27)
  * @author Dominik Petřík (xpetri25)
  * @author Lukáš Zítko (xzitko00)
- * 
+ *
  * @brief  Decleration of code generation functions and built-in functions
- * 
+ *
  */
 
 #include <stdio.h>
@@ -17,30 +19,32 @@
 #include "scanner.h"
 
 /** Prvek dvousměrně vázaného seznamu. */
-typedef struct DLLElement {
-	/** Užitečná data. */
-	char *data;
-	/** Ukazatel na předcházející prvek seznamu. */
-	struct DLLElement *previousElement;
-	/** Ukazatel na následující prvek seznamu. */
-	struct DLLElement *nextElement;
-} *DLLElementPtr;
+typedef struct DLLElement
+{
+    /** Užitečná data. */
+    char *data;
+    /** Ukazatel na předcházející prvek seznamu. */
+    struct DLLElement *previousElement;
+    /** Ukazatel na následující prvek seznamu. */
+    struct DLLElement *nextElement;
+} * DLLElementPtr;
 
 /** Dvousměrně vázaný seznam. */
-typedef struct {
-	/** Ukazatel na první prvek seznamu. */
-	DLLElementPtr firstElement;
-	/** Ukazatel na aktuální prvek seznamu. */
-	DLLElementPtr activeElement;
-	/** Ukazatel na posledni prvek seznamu. */
-	DLLElementPtr lastElement;
+typedef struct
+{
+    /** Ukazatel na první prvek seznamu. */
+    DLLElementPtr firstElement;
+    /** Ukazatel na aktuální prvek seznamu. */
+    DLLElementPtr activeElement;
+    /** Ukazatel na posledni prvek seznamu. */
+    DLLElementPtr lastElement;
 } DLList;
 
 void DLL_Init(int num);
 
 void DLL_Dispose(int num);
 
-void DLL_InsertFirst(int num, char* data );
+void DLL_InsertFirst(int num, char *data);
 
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
@@ -73,7 +77,7 @@ static char *generatedString = NULL;
 static char *inFunctionString = NULL;
 
 /** String which will be printed -> 2 */
-static char *allFunctionsString = NULL; 
+static char *allFunctionsString = NULL;
 
 /** Condition/While condition asm code */
 static char *whileIfString = NULL;
@@ -94,11 +98,11 @@ static int eqSymbolFound = 0;
 static char **storage = NULL;
 
 /** Actual operator in expression */
-static enum type operator = NOT_DEFINED;
+static enum type operator= NOT_DEFINED;
 
 /**
  * @brief Function which append newStr to str.
- * 
+ *
  * @param str 0 -> generatedString
               1 -> inFunctionString
               2 -> allFunctionsString
@@ -109,15 +113,15 @@ void addToString(int str, char *newStr);
 
 /**
  * @brief "Main" function in code_generation.
- * 
+ *
  * @param token token
  */
 void codeGeneration(Token *token);
 
 /**
  * @brief Function which we use to store values to storage.
- * 
- * @param val value which will be stored to storage. 
+ *
+ * @param val value which will be stored to storage.
  */
 void store(char *val);
 
@@ -128,7 +132,7 @@ void removeLastFromStorage();
 
 /**
  * @brief Function which set operator global variable.
- * 
+ *
  * @param t operator type
  */
 void addToOperator(enum type t);
@@ -151,7 +155,7 @@ void checkStorage();
 
 /**
  * @brief Function which generates three address code.
- * 
+ *
  * @param frameStr  0 -> generatedString
                     1 -> inFunctionString
                     2 -> allFunctionsString
@@ -161,7 +165,7 @@ void threeAddress(int frameStr, char *frame);
 
 /**
  * @brief Same as threeAddress function but without calling remove functions at the end.
- * 
+ *
  * @param frameStr  0 -> generatedString
                     1 -> inFunctionString
                     2 -> allFunctionsString
@@ -171,7 +175,7 @@ void threeAddressWithoutRemove(int frameStr, char *frame);
 
 /**
  * @brief Function which generates code which pushes vars to stack.
- * 
+ *
  * @param frameStr  0 -> generatedString
                     1 -> inFunctionString
                     2 -> allFunctionsString
@@ -181,7 +185,7 @@ void pushStorage(int frameStr, char *frame);
 
 /**
  * @brief Same as pushStorage function but without deleting storage at the end.
- * 
+ *
  * @param frameStr  0 -> generatedString
                     1 -> inFunctionString
                     2 -> allFunctionsString
@@ -191,7 +195,7 @@ void pushWithoutDeleting(int frameStr, char *frame);
 
 /**
  * @brief Function which converts int to float if needed.
- * 
+ *
  * @param frameStr  0 -> generatedString
                     1 -> inFunctionString
                     2 -> allFunctionsString
@@ -201,7 +205,7 @@ void convertToSameType(int frameStr, char *frame);
 
 /**
  * @brief Function which generates random string.
- * 
+ *
  * @param dest destination where new string will be saved
  * @param length number of chars generated
  */
@@ -209,12 +213,13 @@ void randStr(char *dest, size_t length);
 
 /**
  * @brief Creating instructions for dividing.
- * 
+ *
  * @param frameStr  0 -> generatedString
                     1 -> inFunctionString
                     2 -> allFunctionsString
  * @param frame  GF/TF/LF
  */
-void divIdiv(int frameStr, char* frame);
+void divIdiv(int frameStr, char *frame);
 
 /*** End of code_generation.h ***/
+#endif
