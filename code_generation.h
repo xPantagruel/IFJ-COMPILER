@@ -45,17 +45,26 @@ void DLL_InsertFirst( DLList *list, char* data );
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
 
+/** stored while cond and normal condition */
+static DLList *listIfLabels = NULL;
+
 /** string name of function*/
 static char *functionName = NULL;
 
+/** int to get unique names of var, labels, function, ...*/
+static int UniqueName = 0;
+
+/** bool if in if body*/
+static bool Return = 0;
+
 /** int if in if body*/
-static int inIf = false;
+static int inIf = 0;
 
 /** int if in else body*/
-static int inElse = false;
+static int inElse = 0;
 
 /** int if in While body*/
-static int inWhile = false;
+static int inWhile = 0;
 
 /** String for global frame -> 0 */
 static char *generatedString = NULL;
