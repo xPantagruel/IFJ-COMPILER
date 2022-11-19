@@ -823,6 +823,8 @@ int statement(Token *token)
 int main()
 {
     // Example how parser can be called.
+    DLL_Init(listCodeGen);
+
     Token *token = getToken();
     if (prog(token))
     {

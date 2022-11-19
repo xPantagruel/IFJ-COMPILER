@@ -36,6 +36,15 @@ typedef struct {
 	DLLElementPtr lastElement;
 } DLList;
 
+void DLL_Init( DLList *list );
+
+void DLL_Dispose( DLList *list );
+
+void DLL_InsertFirst( DLList *list, char* data );
+
+/** stored while cond and normal condition */
+static DLList *listCodeGen = NULL;
+
 /** string name of function*/
 static char *functionName = NULL;
 
@@ -56,6 +65,9 @@ static char *inFunctionString = NULL;
 
 /** String which will be printed -> 2 */
 static char *allFunctionsString = NULL; 
+
+/** Condition/While condition asm code */
+static char *whileIfString = NULL;
 
 /** Auxiliary variable to know if we are in function */
 static int IAmInFunction = 0;
@@ -81,6 +93,7 @@ static enum type operator = NOT_DEFINED;
  * @param str 0 -> generatedString
               1 -> inFunctionString
               2 -> allFunctionsString
+              3 -> whileIfString
  * @param newStr pointer to string which will be appended
  */
 void addToString(int str, char *newStr);

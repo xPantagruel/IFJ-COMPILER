@@ -51,7 +51,7 @@ void DLL_Dispose( DLList *list ) {
 void DLL_InsertFirst( DLList *list, char* data ) {
 	DLLElementPtr new_element = malloc(sizeof(struct DLLElement));
 	if (new_element == NULL) {
-		DLL_Error();
+		exit(99);
 		return;
 	}
 
@@ -468,7 +468,7 @@ void CHR(){
     //MATEJ
     // FUNCTION,     // function        
     // ID,           // write, reads..  --DONE NOT TESTED
-    // COMMA,        // ,               --DONE NOT TESTED ->only empty case nothing to be done here
+    // COMMA,        // ,               --   TODO popisane pri case comma
     // COLON         // :               --DONE NOT TESTED ->only empty case nothing to be done here
     // IF,           // if                  --FUCK UP if i have if else and nested if else is fucked up becouse i need to store somewhere names of labels
     // ELSE,         // else                --FUCK UP
@@ -522,6 +522,17 @@ void addToString(int str, char *newStr)
                 exit(99);
             }
             strcat(allFunctionsString, newStr);
+        } else if (str == 3) { // listCodeGen->firstElement->data
+            if (whileIfString == NULL) {
+                whileIfString = calloc(strlen(newStr) + 1, sizeof(char)); 
+            } else {
+                whileIfString = realloc(whileIfString, (strlen(whileIfString) + strlen(newStr) + 1)*sizeof(char));
+            }
+
+            if (whileIfString == NULL) {
+                exit(99);
+            }
+            strcat(whileIfString, newStr);
         }
     }
 }
@@ -1000,6 +1011,11 @@ void codeGeneration(Token *token) {
                         addToString(frameStr, "ADDS\n");
                         addToString(frameStr, "PUSHS int@0\n");
                         addToString(frameStr, "LTS\n"); 
+
+                        pushStorage(3, frame);
+                        addToString(3, "ADDS\n");
+                        addToString(3, "PUSHS int@0\n");
+                        addToString(3, "LTS\n"); 
                     }
                     break;
                 case MINUS:
@@ -1011,6 +1027,11 @@ void codeGeneration(Token *token) {
                         addToString(frameStr, "SUBS\n");
                         addToString(frameStr, "PUSHS int@0\n");
                         addToString(frameStr, "LTS\n");
+
+                        pushStorage(3, frame);
+                        addToString(3, "SUBS\n");
+                        addToString(3, "PUSHS int@0\n");
+                        addToString(3, "LTS\n");
                     }
                     break;
                 case SLASH:
@@ -1025,6 +1046,11 @@ void codeGeneration(Token *token) {
                         addToString(frameStr, "MULS\n");
                         addToString(frameStr, "PUSHS int@0\n");
                         addToString(frameStr, "LTS\n");
+
+                        pushStorage(3, frame);
+                        addToString(3, "MULS\n");
+                        addToString(3, "PUSHS int@0\n");
+                        addToString(3, "LTS\n");
                     }
                     break;
                 case DOT:
@@ -1038,6 +1064,9 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "EQS\n");  
+
+                        pushStorage(3, frame);
+                        addToString(3, "EQS\n");  
                     }
                     break;
                 case LESS:
@@ -1047,6 +1076,9 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "LTS\n");  
+
+                        pushStorage(3, frame);
+                        addToString(3, "LTS\n");  
                     }
                     break;
                 case MORE:
@@ -1056,6 +1088,9 @@ void codeGeneration(Token *token) {
                     } else {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "GTS\n");  
+
+                        pushStorage(3, frame);
+                        addToString(3, "GTS\n"); 
                     }
                     break;
                 case NOT_EQ:
@@ -1081,6 +1116,10 @@ void codeGeneration(Token *token) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "EQS\n");
                         addToString(frameStr, "NOTS\n");  
+
+                        pushStorage(3, frame);
+                        addToString(3, "EQS\n");
+                        addToString(3, "NOTS\n");
                     }
                     break;
 
@@ -1177,6 +1216,34 @@ void codeGeneration(Token *token) {
                         addToString(frameStr, "\n");
 
                         addToString(frameStr, "ORS\n"); //OR
+
+                        //---
+                        pushWithoutDeleting(3, frame);
+
+                        addToString(3, "LTS\n"); //LESS
+                        addToString(3, "POPS"); //STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
+
+                        pushWithoutDeleting(3, frame);
+
+                        addToString(3, "EQS\n"); //EQ
+                        addToString(3, "POPS"); //STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
+
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
+
+                        addToString(3, "ORS\n"); //OR
 
                         removeLastFromStorage();
                         removeLastFromStorage();
@@ -1276,6 +1343,35 @@ void codeGeneration(Token *token) {
                         addToString(frameStr, "\n");
 
                         addToString(frameStr, "ORS\n"); //OR
+
+                        // --- 
+
+                        pushWithoutDeleting(3, frame);
+
+                        addToString(3, "GTS\n"); //MORE
+                        addToString(3, "POPS"); //STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
+
+                        pushWithoutDeleting(3, frame);
+
+                        addToString(3, "EQS\n"); //EQ
+                        addToString(3, "POPS"); //STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
+
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
+
+                        addToString(3, "ORS\n"); //OR
                         
                         removeLastFromStorage();
                         removeLastFromStorage();
@@ -1345,6 +1441,18 @@ void codeGeneration(Token *token) {
             IAmInFunction = 0;
             addToString(2, inFunctionString);
             free(inFunctionString);
+        } else {
+            //not function
+            if (whileIfString != NULL) { // not else {}
+                DLL_InsertFirst(listCodeGen, NULL);
+                listCodeGen->firstElement->data = malloc(sizeof(char)*(strlen(whileIfString)+1));
+                if (listCodeGen->firstElement->data == NULL) {
+                    exit(99);
+                }
+                strcpy(listCodeGen->firstElement->data, whileIfString);
+                free(whileIfString);
+                whileIfString = NULL;
+            }
         }
         resetGlobalValues();
         break;
@@ -1455,6 +1563,9 @@ void codeGeneration(Token *token) {
         break;
 
     case COMMA:    
+        // todo push last from storage storage[storageLen-1] (var1)
+        // removeLastFromStorage();
+        // pozor na posledny parameter -> nebude comma
         break; 
 
     case COLON:
