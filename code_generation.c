@@ -44,7 +44,7 @@ void DLL_Init(int num)
         listIfLabels->lastElement = NULL;
         listIfLabels->activeElement = NULL;
     }
-    else if (num == 1)
+    else if (num == 2)
     {
         listWhileLabels = malloc(sizeof(DLList));
         if (listWhileLabels == NULL)
