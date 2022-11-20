@@ -1068,7 +1068,7 @@ Token *getToken()
             // end of switch by actualState
         }
     }
-
+    
     return token;
 }
 /*** End of scanner.c ***/
