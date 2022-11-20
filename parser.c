@@ -327,6 +327,7 @@ int expression(Token *token)
 
     if (exp->arrayLen == 1)
     {
+        codeGeneration(exp->tokenArray[0]);
         if (currentSymbol)
         {
             currentSymbol->variable->t = exp->tokenArray[0]->t;
