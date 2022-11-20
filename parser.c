@@ -20,17 +20,6 @@
 htab_pair_t *currentSymbol;
 int functionStatus = -1;
 
-void freeAndExit(int code, char *message)
-{
-    htab_free(symTable);
-    eraseFrameStack(frameStack);
-    if (message)
-    {
-        fprintf(stdout, message);
-    }
-    exit(code);
-}
-
 Expression *initExpression()
 {
     Expression *exp = calloc(1, sizeof(Expression));
@@ -966,7 +955,7 @@ int main()
     DLL_Init(0);
     DLL_Init(1);
     DLL_Init(2);
-    
+
     Token *token = getToken();
     if (prog(token))
     {

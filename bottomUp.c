@@ -470,7 +470,7 @@ bool bottomUp(Expression *exp, int *resultType)
             else
             {
 
-                freeAndExit(5, "Variable is undefined");
+                FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, exp->tokenArray[currentExpPos]->val);
             }
         }
         else
