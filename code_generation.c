@@ -245,6 +245,7 @@ void READS()
     addToString(0, "CREATEFRAME\n");
     addToString(0, "PUSHFRAME\n");
     addToString(0, "DEFVAR LF@VarReadS\n");
+    addToString(0, "POP LF@VarReadS\n");
     addToString(0, "READ LF@VarReadS string\n");
     addToString(0, "POPFRAME\n");
     addToString(0, "RETURN\n");
@@ -258,6 +259,7 @@ void READI()
     addToString(0, "CREATEFRAME\n");
     addToString(0, "PUSHFRAME\n");
     addToString(0, "DEFVAR LF@VarReadI\n");
+    addToString(0, "POP LF@VarReadI\n");
     addToString(0, "READ LF@VarReadI int\n");
     addToString(0, "POPFRAME\n");
     addToString(0, "RETURN\n");
@@ -271,6 +273,7 @@ void READF()
     addToString(0, "CREATEFRAME\n");
     addToString(0, "PUSHFRAME\n");
     addToString(0, "DEFVAR LF@VarReadF\n");
+    addToString(0, "POP LF@VarReadF\n");
     addToString(0, "READ LF@VarReadF float\n");
     addToString(0, "POPFRAME\n");
     addToString(0, "RETURN\n");
@@ -286,6 +289,7 @@ void WRITE()
     addToString(0, "CREATEFRAME\n");
     addToString(0, "PUSHFRAME\n");
     addToString(0, "DEFVAR LF@VarWrite\n");
+    addToString(0, "POP LF@VarWrite\n");
     addToString(0, "DEFVAR LF@VarType\n");
 
     // zjistit typ a zapis do VarType
@@ -333,6 +337,7 @@ void FLOATVAL()
     addToString(0, "CREATEFRAME\n");
     addToString(0, "PUSHFRAME\n");
     addToString(0, "DEFVAR LF@VarFloatval\n");
+    addToString(0, "POP LF@VarFloatval\n");
     addToString(0, "INT2FLOAT LF@VarFloatval LF@VarFloatval\n"); // konvert na float
     addToString(0, "WRITE LF@VarWrite\n");                       // vypise na vystup
 
@@ -348,6 +353,7 @@ void INTVAL()
     addToString(0, "CREATEFRAME\n");
     addToString(0, "PUSHFRAME\n");
     addToString(0, "DEFVAR LF@VarIntval\n");
+    addToString(0, "POP LF@VarIntval\n");
     addToString(0, "FLOAT2INT LF@VarIntval LF@VarIntval\n"); // konvert na int
     addToString(0, "WRITE LF@VarWrite\n");                   // vypise na vystup
 
@@ -362,6 +368,7 @@ void STRVAL()
     addToString(0, "CREATEFRAME\n");
     addToString(0, "PUSHFRAME\n");
     addToString(0, "DEFVAR LF@VarStrval\n");
+    addToString(0, "POP LF@VarStrval\n");
     addToString(0, "DEFVAR LF@VarType\n");
 
     // zjistit typ a zapis do VarType
@@ -391,6 +398,7 @@ void STRLEN()
     addToString(0, "CREATEFRAME\n");
     addToString(0, "PUSHFRAME\n");
     addToString(0, "DEFVAR LF@VarStrlen\n");
+    addToString(0, "POP LF@VarStrlen\n");
     addToString(0, "DEFVAR LF@Length\n");
     addToString(0, "STRLEN LF@Length LF@VarStrlen\n");
     addToString(0, "WRITE LF@Length\n"); // vypise na vystup
@@ -410,6 +418,7 @@ void ORD()
     addToString(0, "CREATEFRAME\n");
     addToString(0, "PUSHFRAME\n");
     addToString(0, "DEFVAR LF@VarOrd\n");
+    addToString(0, "POP LF@VarOrd\n");
     addToString(0, "DEFVAR LF@Length\n");
     addToString(0, "STRLEN LF@Length LF@VarOrd\n");
 
@@ -433,7 +442,7 @@ void CHR()
     addToString(0, "CREATEFRAME\n");
     addToString(0, "PUSHFRAME\n");
     addToString(0, "DEFVAR LF@VarChr\n");
-
+    addToString(0, "POP LF@VarChr\n");
     addToString(0, "POPFRAME\n");
     addToString(0, "RETURN\n");
 }
