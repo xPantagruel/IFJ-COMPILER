@@ -1858,10 +1858,53 @@ void codeGeneration(Token *token)
 
         addToString(frameStr, "JUMPIFEQ ");
         addToString(frameStr, listWhileLabels->firstElement->data);
-        addToString(frameStr, "true");//JUMPIFEQ LOOPBODY UNIQUENAME true
+        AddLForFG(frame,IAmInFunction);
+        addToString(frameStr, "CONDVAR");
+        addToString(frameStr, UniqueVarName);
+        addToString(frameStr, " true");//JUMPIFEQ LOOPBODY UNIQUENAME true
         addToString(frameStr, "\n");
 
         DLL_DeleteFirst(1);
+        DLL_DeleteFirst(3);
+        DLL_DeleteFirst(3);
+        DLL_DeleteFirst(3);
+    }
+
+    if(inIf !=0){//jsem za else vetvi
+        inIf -= 1;
+        GetUniqueVarName();
+        addToString(frameStr, "LABEL $");
+        addToString(frameStr, listIfLabels->firstElement->previousElement->previousElement->data);//LABEL IFCOND UniqueName
+        addToString(frameStr, "\n");
+
+        //add from listCodeGen condition and delete it after
+        addToString(frameStr, listCodeGen->firstElement->data);//add condition
+
+        addToString(frameStr,"DEFVAR ");
+        AddLForFG(frame,IAmInFunction);
+        addToString(frameStr,"CONDVAR");
+        addToString(frameStr, UniqueVarName);// DEFVAR GF/LF@CONDVAR UniqueName
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "POPS ");
+        AddLForFG(frame,IAmInFunction);
+        addToString(frameStr,"CONDVAR");
+        addToString(frameStr, UniqueVarName);//POPS GF/LF@CONDVAR UniqueName
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "JUMPIFEQ ");
+        addToString(frameStr, listWhileLabels->firstElement->previousElement->data);
+        AddLForFG(frame,IAmInFunction);
+        addToString(frameStr, "CONDVAR");
+        addToString(frameStr, UniqueVarName);
+        addToString(frameStr, " true");//JUMPIFEQ STARTIF UNIQUENAME true
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "LABEL $");
+        addToString(frameStr, listIfLabels->firstElement->data);//LABEL ELSE UniqueName
+
+        DLL_DeleteFirst(1);
+        DLL_DeleteFirst(3);
         DLL_DeleteFirst(3);
         DLL_DeleteFirst(3);
         DLL_DeleteFirst(3);
@@ -2035,7 +2078,7 @@ void codeGeneration(Token *token)
         //create char *string with name WHILESTART UniqueName
         NumberOfDigets=GetNumberOfDigets();
         WhileNames = malloc(sizeof(char) * (strlen("WHILESTART") + NumberOfDigets));
-        strcpy(WhileNames, "WHILESTART ");
+        strcpy(WhileNames, "WHILESTART");
         strcat(WhileNames, UniqueName);
         
         //push string to DLL
@@ -2073,7 +2116,54 @@ void codeGeneration(Token *token)
         Return = true;
         break;
     case IF:
+        inIf +=1;
+        GetUniqueName();//ziskani noveho jmena pro while
 
+        //create char *string with name ELSE UniqueName
+        NumberOfDigets=GetNumberOfDigets();
+        WhileNames = malloc(sizeof(char) * (strlen("ELSE") + NumberOfDigets));
+        strcpy(WhileNames, "ELSE");
+        strcat(WhileNames, UniqueName);
+
+        //create char *string with name IFCOND UniqueName
+        NumberOfDigets=GetNumberOfDigets();
+        WhileNames = malloc(sizeof(char) * (strlen("IFCOND") + NumberOfDigets));
+        strcpy(WhileNames, "IFCOND");
+        strcat(WhileNames, UniqueName);
+
+        //push string to DLL
+        DLL_InsertFirst(1, WhileNames);
+        free(WhileNames);
+
+        //create char *string with name STARTIF UniqueName
+        NumberOfDigets=GetNumberOfDigets();
+        WhileNames = malloc(sizeof(char) * (strlen("STARTIF") + NumberOfDigets));
+        strcpy(WhileNames, "STARTIF");
+        strcat(WhileNames, UniqueName);
+
+        //push string to DLL
+        DLL_InsertFirst(1, WhileNames);
+        free(WhileNames);
+
+        //create char *string with name AFTERELSE UniqueName
+        NumberOfDigets=GetNumberOfDigets();
+        WhileNames = malloc(sizeof(char) * (strlen("AFTERELSE") + NumberOfDigets));
+        strcpy(WhileNames, "AFTERELSE");
+        strcat(WhileNames, UniqueName);
+
+        //push string to DLL
+        DLL_InsertFirst(1, WhileNames);
+        free(WhileNames);
+
+        addToString(frameStr, "JUMP");
+        addToString(frameStr, listIfLabels->firstElement->previousElement->previousElement->data);//JUMP IFCOND
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "LABEL $");
+        addToString(frameStr, listIfLabels->firstElement->previousElement->data);//LABEL $STARTIF
+        addToString(frameStr, "\n");
+
+        break;
         // todo segfault
         //  inIf += 1;
         //  addToString(frameStr, "JUMP $IFCOND");
@@ -2105,10 +2195,9 @@ void codeGeneration(Token *token)
         // todo nechyba ti tu break; ??
 
     case ELSE:
-        // todo segfault
-        //  addToString(frameStr, "LABEL ");
-        //  addToString(frameStr, listIfLabels->firstElement->nextElement->data);
-        //  addToString(frameStr, "\n");
+         addToString(frameStr, "LABEL ");
+         addToString(frameStr, listIfLabels->firstElement->previousElement->previousElement->previousElement->data);
+         addToString(frameStr, "\n");
         break;
 
     default:
