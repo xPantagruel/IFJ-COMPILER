@@ -11,7 +11,6 @@
  * @date 2022-10-08
  */
 
-#include "code_generation.h" //todo
 #include "scanner.h"
 
 void getProlog()
@@ -1070,7 +1069,6 @@ Token *getToken()
         }
     }
 
-    codeGeneration(token); // todo
     return token;
 }
 /*** End of scanner.c ***/
