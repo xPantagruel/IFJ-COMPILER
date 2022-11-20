@@ -45,11 +45,11 @@ Expression *initExpression()
 
 void dtorExpression(Expression *exp)
 {
-    for (int i = 0; i < exp->arrayLen; i++)
-    {
-        dtorToken(exp->tokenArray[i]);
-    }
-    free(exp);
+    // for (int i = 0; i < exp->arrayLen; i++)
+    // {
+    //     dtorToken(exp->tokenArray[i]);
+    // }
+    // free(exp);
 }
 
 void addTokenToExpression(Expression *exp, Token *token)
@@ -660,9 +660,9 @@ int statement(Token *token)
             codeGeneration(token);
             dtorToken(token);
             token = getToken();
+
             if (token->t == VAR_ID)
             { // VAR_ID = VAR_ID
-
                 // if token == var_id -> can be <expression>
                 // storing previous token
                 Token *tmp = tokenInit();
