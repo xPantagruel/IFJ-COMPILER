@@ -103,7 +103,7 @@ void DLL_DeleteFirst( int num) {
             }
             free(tmp);
 	    }
-        else if(num == 1)
+        else if(num == 2)
         {
             if (listWhileLabels->firstElement != NULL) 
             {
