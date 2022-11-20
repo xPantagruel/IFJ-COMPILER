@@ -965,7 +965,8 @@ int main()
     // Example how parser can be called.
     DLL_Init(0);
     DLL_Init(1);
-
+    DLL_Init(2);
+    
     Token *token = getToken();
     if (prog(token))
     {
