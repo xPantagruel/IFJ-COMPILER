@@ -17,9 +17,19 @@
 #include "frames.h"
 #include "code_generation.h"
 
-FrameStack *frameStack;
 htab_pair_t *currentSymbol;
 int functionStatus = -1;
+
+void freeAndExit(int code, char *message)
+{
+    htab_free(symTable);
+    eraseFrameStack(frameStack);
+    if (message)
+    {
+        fprintf(stdout, message);
+    }
+    exit(code);
+}
 
 Expression *initExpression()
 {

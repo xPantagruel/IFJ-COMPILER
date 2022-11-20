@@ -113,6 +113,15 @@ bool htab_erase(htab_t *t, htab_key_t key)
                 {
                     htab_item_t *store = t->ptr_arr[index];
                     t->ptr_arr[index] = tmp->next;
+                    if (store->pair->function)
+                    {
+                        htab_erase_function(store->pair->function, store->pair->function->paramCount);
+                    }
+                    if (store->pair->variable)
+                    {
+                        htab_erase_variable(store->pair->variable);
+                    }
+
                     free((char *)store->pair->key);
                     free(store->pair);
                     free(store);
@@ -123,6 +132,15 @@ bool htab_erase(htab_t *t, htab_key_t key)
                     if (tmp->next == NULL)
                     {
                         previous->next = NULL;
+
+                        if (tmp->pair->function)
+                        {
+                            htab_erase_function(tmp->pair->function, tmp->pair->function->paramCount);
+                        }
+                        if (tmp->pair->variable)
+                        {
+                            htab_erase_variable(tmp->pair->variable);
+                        }
                         free((char *)tmp->pair->key);
                         free(tmp->pair);
                         free(tmp);
@@ -132,6 +150,15 @@ bool htab_erase(htab_t *t, htab_key_t key)
                     {
                         htab_item_t *store = tmp;
                         previous->next = tmp->next;
+
+                        if (store->pair->function)
+                        {
+                            htab_erase_function(store->pair->function, store->pair->function->paramCount);
+                        }
+                        if (store->pair->variable)
+                        {
+                            htab_erase_variable(store->pair->variable);
+                        }
                         free((char *)store->pair->key);
                         free(store->pair);
                         free(store);
@@ -266,6 +293,7 @@ int htab_erase_function(htab_function_t *f, int paramCount)
     free(f->name);
     free(f->returnType->name);
     free(f->returnType);
+    f = NULL;
     return 0;
 }
 

@@ -476,7 +476,8 @@ bool bottomUp(Expression *exp, int *resultType)
             }
             else
             {
-                return freeAndReturn(false, stack);
+
+                freeAndExit(5, "Variable is undefined");
             }
         }
         else

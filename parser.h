@@ -201,6 +201,8 @@ int params_n(Token *token);
  */
 void pushTokenToStdin(Token *token);
 
+void freeAndExit(int code, char *message);
+
 #endif
 
 /*** End of parser.h ***/
