@@ -1,5 +1,7 @@
 #include "frames.h"
 
+FrameStack *frameStack;
+
 FrameStack *initFrameStack()
 {
     FrameStack *stack = malloc(sizeof(FrameStack));

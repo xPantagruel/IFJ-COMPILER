@@ -9,6 +9,9 @@
 #define GLOBAL_FRAME_NAME "global"
 
 typedef struct frame Frame;
+typedef struct frameStack FrameStack;
+
+extern FrameStack *frameStack;
 
 typedef struct frame
 {

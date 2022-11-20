@@ -3,4 +3,4 @@ declare(strict_types=1);
 
 
 
-while(1!==1){}
+$a = 7 + $b;

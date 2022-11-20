@@ -2097,7 +2097,3 @@ void codeGeneration(Token *token)
         break;
     }
 }
-
-// todo pridat do parsru volanie codeGeneration
-// todo remove zo scanneru
-// todo test an merlin + interpret
