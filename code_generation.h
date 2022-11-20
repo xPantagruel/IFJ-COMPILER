@@ -40,15 +40,13 @@ typedef struct
     DLLElementPtr lastElement;
 } DLList;
 
-void DLL_DeleteFirst( DLList *list )
+void DLL_DeleteFirst( int num);
 
 void DLL_Init(int num);
 
 void DLL_Dispose(int num);
 
 void DLL_InsertFirst(int num, char *data);
-
-void DLL_InsertFirst2( DLList *list, int data )
 
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
