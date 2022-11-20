@@ -40,23 +40,33 @@ typedef struct
     DLLElementPtr lastElement;
 } DLList;
 
+void DLL_DeleteFirst( DLList *list )
+
 void DLL_Init(int num);
 
 void DLL_Dispose(int num);
 
 void DLL_InsertFirst(int num, char *data);
 
+void DLL_InsertFirst2( DLList *list, int data )
+
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
 
-/** stored while cond and normal condition */
+/** stored condition labels */
 static DLList *listIfLabels = NULL;
+
+/** stored while labels */
+static DLList *listWhileLabels = NULL;
 
 /** string name of function*/
 static char *functionName = NULL;
 
 /** int to get unique names of var, labels, function, ...*/
 static int UniqueName = 0;
+
+/** int to get unique names of var, labels, function, ...*/
+static int UniqueVarName = 0;
 
 /** bool if in if body*/
 static bool Return = 0;

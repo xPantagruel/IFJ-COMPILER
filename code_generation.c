@@ -44,6 +44,86 @@ void DLL_Init(int num)
         listIfLabels->lastElement = NULL;
         listIfLabels->activeElement = NULL;
     }
+    else if (num == 1)
+    {
+        listWhileLabels = malloc(sizeof(DLList));
+        if (listWhileLabels == NULL)
+        {
+            exit(99);
+        }
+        listWhileLabels->firstElement = NULL;
+        listWhileLabels->lastElement = NULL;
+        listWhileLabels->activeElement = NULL;
+    }
+}
+
+/**
+ * Zruší první prvek seznamu list.
+ * Pokud byl první prvek aktivní, aktivita se ztrácí.
+ * Pokud byl seznam list prázdný, nic se neděje.
+ *
+ * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
+ */
+void DLL_DeleteFirst( int num) {
+    if (num == 0)
+    {	
+        if (listCodeGen->firstElement != NULL) {
+		DLLElementPtr tmp = listCodeGen->firstElement;
+
+		if (listCodeGen->firstElement == listCodeGen->activeElement) { //checking if first element is active
+			listCodeGen->activeElement = NULL;
+		}
+
+		if (listCodeGen->firstElement == listCodeGen->lastElement) { //checking if the first element is also the last element
+			listCodeGen->lastElement = NULL;
+		}
+
+		listCodeGen->firstElement = listCodeGen->firstElement->nextElement;
+		if (listCodeGen->firstElement != NULL) {
+			listCodeGen->firstElement->previousElement = NULL;
+		}
+		free(tmp);
+	    }
+    }else if(num == 1)
+        if (listIfLabels->firstElement != NULL) 
+        {
+            DLLElementPtr tmp = listIfLabels->firstElement;
+
+            if (listIfLabels->firstElement == listIfLabels->activeElement) { //checking if first element is active
+                listIfLabels->activeElement = NULL;
+            }
+
+            if (listIfLabels->firstElement == listIfLabels->lastElement) { //checking if the first element is also the last element
+                listIfLabels->lastElement = NULL;
+            }
+
+            listIfLabels->firstElement = listIfLabels->firstElement->nextElement;
+            if (listIfLabels->firstElement != NULL) {
+                listIfLabels->firstElement->previousElement = NULL;
+            }
+            free(tmp);
+	    }
+        else if(num == 1)
+        {
+            if (listWhileLabels->firstElement != NULL) 
+            {
+                DLLElementPtr tmp = listWhileLabels->firstElement;
+
+                if (listWhileLabels->firstElement == listWhileLabels->activeElement) { //checking if first element is active
+                    listWhileLabels->activeElement = NULL;
+                }
+
+                if (listWhileLabels->firstElement == listWhileLabels->lastElement) { //checking if the first element is also the last element
+                    listWhileLabels->lastElement = NULL;
+                }
+
+                listWhileLabels->firstElement = listWhileLabels->firstElement->nextElement;
+                if (listWhileLabels->firstElement != NULL) {
+                    listWhileLabels->firstElement->previousElement = NULL;
+                }
+                free(tmp);
+            }
+        }
 }
 
 void DLL_Dispose(int num)
@@ -138,6 +218,22 @@ void DLL_InsertFirst(int num, char *data)
         if (listIfLabels->lastElement == NULL)
         { // if list was empty -> we need to set last element too
             listIfLabels->lastElement = listIfLabels->firstElement;
+        }
+    }
+    else if(num ==2)
+    {
+        new_element->data = data;
+        new_element->nextElement = listWhileLabels->firstElement;
+        new_element->previousElement = NULL;
+        if (listWhileLabels->firstElement != NULL)
+        { // if list isn't empty
+            listWhileLabels->firstElement->previousElement = new_element;
+        }
+
+        listWhileLabels->firstElement = new_element;
+        if (listWhileLabels->lastElement == NULL)
+        { // if list was empty -> we need to set last element too
+            listWhileLabels->lastElement = listWhileLabels->firstElement;
         }
     }
 }
@@ -570,6 +666,24 @@ int GetUniqueName()
     UniqueName++;
     return UniqueName;
 }
+
+int GetUniqueVarName()
+{
+    UniqueVarName++;
+    return UniqueVarName;
+}
+
+
+AddLForFG(int frameStr,int IAmInFunction){
+    if (IAmInFunction)
+    {
+        addToString(frameStr, "LF@ ");
+    }
+    else{
+        addToString(frameStr, "LF@ ");
+    }
+}
+
 
 void addToString(int str, char *newStr)
 {
@@ -1697,6 +1811,46 @@ void codeGeneration(Token *token)
         break;
 
     case R_CPAR:
+
+//----------ADD BY MATEJ---------------------
+    if(inWhile !=0){
+        inWhile -= 1;
+        GetUniqueVarName();
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, listWhileLabels->firstElement->previousElement->previousElement->data);//LABEL WHILESTART UniqueName
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "LABEL $");
+        addToString(frameStr, listWhileLabels->firstElement->previousElement->data);//LABEL $LOOPCOND UniqueName
+        addToString(frameStr, "\n");
+
+        //add from listCodeGen condition and delete it after
+        addToString(frameStr, listCodeGen->firstElement->data);//add condition
+        addToString(frameStr,"DEFVAR ");
+        AddLForFG(frame,IAmInFunction);
+        addToString(frameStr,"CONDVAR");
+        addToString(frameStr, UniqueVarName);// DEFVAR GF/LF@CONDVAR UniqueName
+        addToString(frameStr, "\n");
+
+
+        addToString(frameStr, "POPS ");
+        AddLForFG(frame,IAmInFunction);
+        addToString(frameStr,"CONDVAR");
+        addToString(frameStr, UniqueVarName);//POPS GF/LF@CONDVAR UniqueName
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "JUMPIFEQ ");
+        addToString(frameStr, listWhileLabels->firstElement->data);
+        addToString(frameStr, "true");//JUMPIFEQ LOOPBODY UNIQUENAME true
+        addToString(frameStr, "\n");
+
+        DLL_DeleteFirst(1);
+        DLL_DeleteFirst(3);
+        DLL_DeleteFirst(3);
+        DLL_DeleteFirst(3);
+    }
+//-------------------------------------------
+
         checkStorage();
         if (cparCounter)
         {
@@ -1859,7 +2013,42 @@ void codeGeneration(Token *token)
     case COLON:
         break;
     case WHILE:
-        // inWhile +=1;
+        inWhile +=1;
+        GetUniqueName();//ziskani noveho jmena pro while
+
+        //create char *string with name WHILESTART UniqueName
+        char *whileStart = malloc(sizeof(char) * (strlen("WHILESTART") + strlen(UniqueName) + 1));
+        strcpy(whileStart, "WHILESTART ");
+        strcat(whileStart, UniqueName);
+        //push string to DLL
+        DLL_InsertFirst(2, whileStart);
+        free(whileStart);
+
+        //create char *string with name LOOPCOND UniqueName
+        char *loopCond = malloc(sizeof(char) * (strlen("LOOPCOND") + strlen(UniqueName) + 1));
+        strcpy(loopCond, "LOOPCOND");
+        strcat(loopCond, UniqueName);
+        DLL_InsertFirst(2, loopCond);
+        free(loopCond);
+        
+        //create char *string with name $LOOPBODY UniqueName
+        char *loopBody = malloc(sizeof(char) * (strlen("LOOPBODY") + strlen(UniqueName) + 1));
+        strcpy(loopBody, "LOOPBODY");
+        strcat(loopBody, UniqueName);
+        DLL_InsertFirst(2, loopCond);
+        free(loopBody);
+
+        addToString(frameStr, "LABEL $");
+        addToString(frameStr,listWhileLabels->firstElement->previousElement->previousElement->data);//LABEL $WHILESTARTNUM
+        addToString(frameStr, "\n");
+        
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr,listWhileLabels->firstElement->previousElement->data);//JUMP LOOPCONDNUM
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "LABEL $");
+        addToString(frameStr,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
+        addToString(frameStr, "\n");
 
         break;
     case RETURN:
