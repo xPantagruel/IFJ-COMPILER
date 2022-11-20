@@ -2164,36 +2164,6 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         break;
-        // todo segfault
-        //  inIf += 1;
-        //  addToString(frameStr, "JUMP $IFCOND");
-        //  addToString(frameStr, GetUniqueName());
-        //  addToString(frameStr, "\n");
-
-        // //store in listIfLabels IFCOND and GetUniqueName() value
-        // DLL_InsertFirst(1 , NULL);
-        // listIfLabels->firstElement->data = malloc(sizeof(char)*(strlen("IFCOND")+strlen(UniqueName)+1));
-        // if (listIfLabels->firstElement->data == NULL) {
-        //     exit(99);
-        // }
-        // strcpy(listIfLabels->firstElement->data, "IFCOND");
-        // strcat(listIfLabels->firstElement->data, UniqueName);
-
-        // addToString(frameStr, "LABEL $STARTIF");
-        // addToString(frameStr, UniqueName);
-        // addToString(frameStr, "\n");
-
-        // //store in listIfLabels STARTIF and UniqueName value
-        // DLL_InsertFirst(1, NULL);
-        // listIfLabels->firstElement->data = malloc(sizeof(char)*(strlen("STARTIF")+strlen(UniqueName)+1));
-        // if (listIfLabels->firstElement->data == NULL) {
-        //     exit(99);
-        // }
-        // strcpy(listIfLabels->firstElement->data, "STARTIF");
-        // strcat(listIfLabels->firstElement->data, UniqueName);
-
-        // todo nechyba ti tu break; ??
-
     case ELSE:
          addToString(frameStr, "LABEL ");
          addToString(frameStr, listIfLabels->firstElement->previousElement->previousElement->previousElement->data);
