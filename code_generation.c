@@ -1212,6 +1212,7 @@ void divIdiv(int frameStr, char *frame)
 
 void codeGeneration(Token *token)
 {
+    char *WhileNames =NULL;//purpose->to store the name of the while labels to list
     int defined = 0;  // auxiliary variable to know if variable was defined or not
     int frameStr = 0; // generatedString
     char frame[5];    // string of actual frame LF/GF/TF
@@ -2024,28 +2025,28 @@ void codeGeneration(Token *token)
     case WHILE:
         inWhile +=1;
         GetUniqueName();//ziskani noveho jmena pro while
-
         //create char *string with name WHILESTART UniqueName
-        char *whileStart = malloc(sizeof(char) * (strlen("WHILESTART") + strlen(UniqueName) + 1));
-        strcpy(whileStart, "WHILESTART ");
-        strcat(whileStart, UniqueName);
+        WhileNames = malloc(sizeof(char) * (strlen("WHILESTART") + strlen(UniqueName) + 1));
+        strcpy(WhileNames, "WHILESTART ");
+        strcat(WhileNames, UniqueName);
+        
         //push string to DLL
-        DLL_InsertFirst(2, whileStart);
-        free(whileStart);
+        DLL_InsertFirst(2, WhileNames);
+        free(WhileNames);
 
         //create char *string with name LOOPCOND UniqueName
-        char *loopCond = malloc(sizeof(char) * (strlen("LOOPCOND") + strlen(UniqueName) + 1));
-        strcpy(loopCond, "LOOPCOND");
-        strcat(loopCond, UniqueName);
-        DLL_InsertFirst(2, loopCond);
-        free(loopCond);
+        WhileNames = malloc(sizeof(char) * (strlen("WhileNames") + strlen(UniqueName) + 1));
+        strcpy(WhileNames, "LOOPCOND");
+        strcat(WhileNames, UniqueName);
+        DLL_InsertFirst(2, WhileNames);
+        free(WhileNames);
         
         //create char *string with name $LOOPBODY UniqueName
-        char *loopBody = malloc(sizeof(char) * (strlen("LOOPBODY") + strlen(UniqueName) + 1));
-        strcpy(loopBody, "LOOPBODY");
-        strcat(loopBody, UniqueName);
-        DLL_InsertFirst(2, loopCond);
-        free(loopBody);
+        WhileNames = malloc(sizeof(char) * (strlen("LOOPBODY") + strlen(UniqueName) + 1));
+        strcpy(WhileNames, "LOOPBODY");
+        strcat(WhileNames, UniqueName);
+        DLL_InsertFirst(2, WhileNames);
+        free(WhileNames);
 
         addToString(frameStr, "LABEL $");
         addToString(frameStr,listWhileLabels->firstElement->previousElement->previousElement->data);//LABEL $WHILESTARTNUM
