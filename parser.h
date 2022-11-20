@@ -14,6 +14,32 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#define ERROR_1_LEXICAL
+#define ERROR_2_SYNTACTIC
+#define ERROR_3_FUNCTION_NOT_DEFINED
+#define ERROR_4_FUNCTION_INCORRECT_CALL
+#define ERROR_5_VARIABLE_NOT_DEFINED "Variable %s not defined\n"
+#define ERROR_6_FUNCTION_INCORRECT_RETURN
+#define ERROR_7_INCOMPATIBLE_TYPE
+#define ERROR_8_OTHER_SEMANTIC
+#define ERROR_99_INTERNAL_ERROR
+/**
+ * @brief Frees global resources, prints status message, exits with code
+ *
+ * @param code error code
+ * @param token predefined status message, pass NULL when no message needed
+ * @param object name(must be string) of variable/function/lexeme where error occured, pass NULL when no object
+ */
+#define FREE_EXIT(code, message, object)      \
+    htab_free(symTable);                      \
+    eraseFrameStack(frameStack);              \
+    if ((!object))                            \
+        object = "";                          \
+    if ((message))                            \
+        fprintf(stdout, (message), (object)); \
+    \ 
+    exit(code);
+
 #include "scanner.h"
 #include <stdbool.h>
 
@@ -200,8 +226,6 @@ int params_n(Token *token);
  * @param token pointer to token
  */
 void pushTokenToStdin(Token *token);
-
-void freeAndExit(int code, char *message);
 
 #endif
 
