@@ -670,18 +670,24 @@ void CHR()
 //  WHILE,        // while
 
 // function add in UniqueName +1 its for purpose of not having same name of function and variable
-int GetUniqueName()
+void GetUniqueName()
 {
-    UniqueName++;
-    return UniqueName;
+    UniqueName+=1;
 }
 
-int GetUniqueVarName()
+void GetUniqueVarName()
 {
-    UniqueVarName++;
-    return UniqueVarName;
+    UniqueVarName+=1;
 }
 
+int GetNumberOfDigets(){
+    int n = UniqueName;
+    int count = 0;
+    do {
+    n /= 10;
+    ++count;
+  } while (n != 0);
+}
 
 AddLForFG(int frameStr,int IAmInFunction){
     if (IAmInFunction)
@@ -1212,6 +1218,7 @@ void divIdiv(int frameStr, char *frame)
 
 void codeGeneration(Token *token)
 {
+    int NumberOfDigets=0;
     char *WhileNames =NULL;//purpose->to store the name of the while labels to list
     int defined = 0;  // auxiliary variable to know if variable was defined or not
     int frameStr = 0; // generatedString
@@ -2026,7 +2033,8 @@ void codeGeneration(Token *token)
         inWhile +=1;
         GetUniqueName();//ziskani noveho jmena pro while
         //create char *string with name WHILESTART UniqueName
-        WhileNames = malloc(sizeof(char) * (strlen("WHILESTART") + strlen(UniqueName) + 1));
+        NumberOfDigets=GetNumberOfDigets();
+        WhileNames = malloc(sizeof(char) * (strlen("WHILESTART") + NumberOfDigets));
         strcpy(WhileNames, "WHILESTART ");
         strcat(WhileNames, UniqueName);
         
@@ -2035,14 +2043,14 @@ void codeGeneration(Token *token)
         free(WhileNames);
 
         //create char *string with name LOOPCOND UniqueName
-        WhileNames = malloc(sizeof(char) * (strlen("WhileNames") + strlen(UniqueName) + 1));
+        WhileNames = malloc(sizeof(char) * (strlen("WhileNames") + NumberOfDigets));
         strcpy(WhileNames, "LOOPCOND");
         strcat(WhileNames, UniqueName);
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
         
         //create char *string with name $LOOPBODY UniqueName
-        WhileNames = malloc(sizeof(char) * (strlen("LOOPBODY") + strlen(UniqueName) + 1));
+        WhileNames = malloc(sizeof(char) * (strlen("LOOPBODY") + NumberOfDigets));
         strcpy(WhileNames, "LOOPBODY");
         strcat(WhileNames, UniqueName);
         DLL_InsertFirst(2, WhileNames);

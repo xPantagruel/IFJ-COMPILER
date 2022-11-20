@@ -48,6 +48,11 @@ void DLL_Dispose(int num);
 
 void DLL_InsertFirst(int num, char *data);
 
+int GetNumberOfDigets();
+
+void GetUniqueVarName();
+
+void GetUniqueName();
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
 
