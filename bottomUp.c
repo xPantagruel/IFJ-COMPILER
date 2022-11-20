@@ -107,7 +107,7 @@ int convertTokenToTermType(int type)
     }
 }
 
-Term *initTerm(char *value, int type)
+Term *initTerm(char *value, int type, Token *originalToken)
 {
     Term *t = calloc(1, sizeof(Term));
     if (value)
@@ -116,7 +116,7 @@ Term *initTerm(char *value, int type)
         strcpy(t->value, value);
         t->termLen = strlen(value);
     }
-
+    t->originalToken = originalToken;
     t->isStop = false;
 
     t->type = type;
@@ -153,7 +153,7 @@ bool reduce(Stack *stack)
         Term *term;
         StackNode *stackNode;
 
-        term = initTerm(termCount == 1 ? terms[0]->value : NULL, EXPRESSION);
+        term = initTerm(termCount == 1 ? terms[0]->value : NULL, EXPRESSION, NULL);
         stackNode = initNode(term);
         for (int i = 0; i < termCount; i++)
             term->childTerms[i] = terms[i];
@@ -184,20 +184,12 @@ bool reduce(Stack *stack)
             }
             for (int i = 0; i < termCount; i++)
             {
-                if (term->childTerms[i]->value && term->childTerms[i]->type != L_BRACKET && term->childTerms[i]->type != R_BRACKET)
+                if (term->childTerms[i]->originalToken && term->childTerms[i]->value && term->childTerms[i]->type != L_BRACKET && term->childTerms[i]->type != R_BRACKET)
                 {
-                    /* printf("%s ", term->childTerms[i]->value); */
-                    Token *t = tokenInit();
 
-                    for (int j = 0; j < strlen(term->childTerms[i]->value); j++)
-                    {
-                        addCharToToken(term->childTerms[i]->value[j], t);
-                    }
-
-                    codeGeneration(t);
+                    codeGeneration(term->childTerms[i]->originalToken);
                 }
             }
-            printf("\n");
         }
         else
         {
@@ -450,7 +442,7 @@ bool bottomUp(Expression *exp, int *resultType)
     *resultType = NULL;
     int currentExpPos = 0;
 
-    Term *startTerm = initTerm("$", TOP_BOTTOM);
+    Term *startTerm = initTerm("$", TOP_BOTTOM, NULL);
     Token *endToken = tokenInit();
     addCharToToken('$', endToken);
     endToken->t = -1;
@@ -498,7 +490,7 @@ bool bottomUp(Expression *exp, int *resultType)
         switch (precedenceTable[termType][expType])
         {
         case '<':
-            newTerm = initTerm(exp->tokenArray[currentExpPos]->val, expType);
+            newTerm = initTerm(exp->tokenArray[currentExpPos]->val, expType, exp->tokenArray[currentExpPos]);
             newStackNode = initNode(newTerm);
 
             push(stack, newStackNode);
@@ -519,7 +511,7 @@ bool bottomUp(Expression *exp, int *resultType)
             break; // TODO throw error when false
 
         case '=':
-            newTerm = initTerm(exp->tokenArray[currentExpPos]->val, expType);
+            newTerm = initTerm(exp->tokenArray[currentExpPos]->val, expType, exp->tokenArray[currentExpPos]);
             newStackNode = initNode(newTerm);
             push(stack, newStackNode);
             currentExpPos++;

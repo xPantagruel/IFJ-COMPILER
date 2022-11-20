@@ -33,9 +33,10 @@ typedef struct term
     Term *childTerms[3];
     int termLen;
     bool isStop;
+    Token *originalToken;
 } Term;
 
-Term *initTerm(char *value, int type);
+Term *initTerm(char *value, int type, Token *originalToken);
 
 int convertTokenToTermType(int type);
 
