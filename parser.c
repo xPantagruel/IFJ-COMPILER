@@ -477,15 +477,15 @@ int function_call(Token *token, bool isDeclaration)
     if (token->t == ID)
     { // ID
 
-        /* if (isDeclaration)
+        if (isDeclaration)
         {
             currentSymbol = htab_add_function(symTable, token->val, NULL, NULL, 0);
-            if (!currentSymbol)
+            /* if (!currentSymbol)
             {
                 FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, token->val);
-            }
+            } */
         }
-        else
+        /* else
         {
             htab_pair_t *currentSymbol = htab_search(symTable, token->val);
             if (!currentSymbol || !(currentSymbol->function))

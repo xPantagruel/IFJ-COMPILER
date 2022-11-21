@@ -1917,8 +1917,6 @@ void codeGeneration(Token *token)
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
 
-        printf("--------- %s\n", listWhileLabels->firstElement->data);
-
         //create char *string with name LOOPCOND UniqueName
         WhileNames = malloc(sizeof(char) * (strlen("LOOPCOND") + NumberOfDigets+1));
         strcpy(WhileNames, "LOOPCOND");
@@ -1964,7 +1962,7 @@ void codeGeneration(Token *token)
         sprintf(TmpWhileAndIf, "%d", UniqueName);
         strcat(WhileNames, TmpWhileAndIf);
 
-        DLL_InsertFirst(2, WhileNames);
+        DLL_InsertFirst(1, WhileNames);
         free(WhileNames);
 
         //create char *string with name IFCOND UniqueName
