@@ -40,6 +40,9 @@ typedef struct
     DLLElementPtr lastElement;
 } DLList;
 
+
+void AddLForFG(int frameStr,int IAmInFunction);
+
 void DLL_DeleteFirst( int num);
 
 void DLL_Init(int num);
