@@ -40,6 +40,8 @@ typedef struct
     DLLElementPtr lastElement;
 } DLList;
 
+void AddLForFG(int frameStr, int IAmInFunction);
+
 void DLL_DeleteFirst(int num);
 
 void DLL_Init(int num);
@@ -48,6 +50,11 @@ void DLL_Dispose(int num);
 
 void DLL_InsertFirst(int num, char *data);
 
+int GetNumberOfDigets();
+
+void GetUniqueVarName();
+
+void GetUniqueName();
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
 
@@ -71,9 +78,6 @@ static bool Return = 0;
 
 /** int if in if body*/
 static int inIf = 0;
-
-/** int if in else body*/
-static int inElse = 0;
 
 /** int if in While body*/
 static int inWhile = 0;
@@ -229,5 +233,6 @@ void randStr(char *dest, size_t length);
  */
 void divIdiv(int frameStr, char *frame);
 
-/*** End of code_generation.h ***/
 #endif
+
+/*** End of code_generation.h ***/

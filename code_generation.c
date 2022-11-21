@@ -84,7 +84,7 @@ void DLL_DeleteFirst( int num) {
 		}
 		free(tmp);
 	    }
-    }else if(num == 1)
+    }else if(num == 1) {
         if (listIfLabels->firstElement != NULL) 
         {
             DLLElementPtr tmp = listIfLabels->firstElement;
@@ -124,6 +124,7 @@ void DLL_DeleteFirst( int num) {
                 free(tmp);
             }
         }
+    }
 }
 
 void DLL_Dispose(int num)
@@ -447,188 +448,6 @@ void CHR()
     addToString(0, "RETURN\n");
 }
 
-// /**
-//  * Built-in function READS
-//  *
-//  *
-//  */
-// #define READS \
-//     "LABEL reads \n" \
-//     "PUSHFRAME \n" \
-//     "DEFVAR LF@_ret \n" \
-//     "READ LF@_ret string \n" \
-//     "POPFRAME \n" \
-//     "RETURN\n"
-
-// /**
-//  * Built-in function READI
-//  *
-//  */
-// #define READI \
-//     "LABEL readi \n" \
-//     "PUSHFRAME \n" \
-//     "DEFVAR LF@_ret \n" \
-//     "READ LF@_ret int \n" \
-//     "POPFRAME \n" \
-//     "RETURN\n"
-// /**
-//  * Built-in function READF
-//  *
-//  */
-// #define READF \
-//     "LABEL readf \n" \
-//     "PUSHFRAME \n" \
-//     "DEFVAR LF@_ret \n" \
-//     "READ LF@_ret float \n" \
-//     "POPFRAME \n" \
-//     "RETURN\n"
-
-// /**
-//  * Built-in function WRITE
-//  *
-//  */
-// #define WRITE \
-//     "LABEL write \n" \
-//     "PUSHFRAME \n" \
-//     "DEFVAR LF@_arg \n" \
-//     "POPS LF@_arg \n" \
-//     "DEFVAR LF@_temp \n" \
-//     "DEFVAR LF@_i \n" \
-//     "MOVE LF@_i int@0 \n" \
-//     "LABEL WHILE \n" \
-//     "JUMPIFEQ EXIT LF@_i LF@_arg \n" \
-//     "POPS LF@_temp \n" \
-//     "WRITE LF@_temp \n" \ 
-//     "ADD LF@_i LF@_i int@1 \n" \ 
-//     "JUMP WHILE \n" \
-//     "LABEL EXIT \n" \
-//     "POPFRAME \n" \
-//     "RETURN\n"
-
-// /**
-//  * Built-in function FLOATVAL, INTVAL, STRVAL
-//  *
-//  * Part of bonus task STRNUM, not necessary rn
-//  *
-//  */
-
-// /**
-//  * Built-in function STRLEN
-//  *
-//  */
-// #define STRLEN \
-//     "LABEL strlen \n" \
-//     "PUSHFRAME \n" \
-//     "DEFVAR LF@_ret \n" \
-//     "STRLEN LF@_ret LF@%0 \n" \
-//     "POPFRAME \n" \
-//     "RETURN\n"
-
-// /**
-//  * Built-in function SUBSTRING
-//  *
-//  *
-//  */
-// #define SUBSTRING \
-// "LABEL substr \n" \
-// "PUSHFRAME \n" \
-// "DEFVAR LF@_ret \n" \
-// "MOVE LF@_ret string \n" \
-// "DEFVAR LF@_length_str \n" \
-// "CREATEFRAME \n" \
-// "DEFVAR TF%0 \n "\
-// "MOVE TF@%0 LF@%0 \n" \
-// "CALL $length \n" \
-// "MOVE LF@_length_str TF@%_ret \n" \
-// "DEFVAR LF@_ret_cond \n" \
-// "LT LF@_ret_cond LF@_length_str int@0 \n" \
-// "JUMPIFEQ substr$return LF@_ret_cond bool@true \n" \
-// "EQ LF@_ret_cond LF@_length_str int@0 \n" \
-// "JUMPIFEQ substr$return LF@_ret_cond bool@true \n" \
-// "LT LF@_ret_cond LF@%1 int@0 \n" \
-// "JUMPIFEQ substr$return LF@_ret_cond bool@true \n" \
-// "EQ LF@_ret_cond LF@%1 int@0 \n" \
-// "JUMPIFEQ substr$return LF@_ret_cond bool@true \n" \
-// "GT LF@_rt_cond LF@%1 LF@_length_str \n" \
-// "JUMPIFEQ substr$return LF@_ret_cond bool@true \n" \
-// "EQ LF@_ret_cond LF@%2 int@0 \n" \
-// "JUMPIFEQ substr$return LF@_ret_cond bool@true \n" \
-// "DEFVAR LF@_max_n \n" \
-// "MOVE LF@_max_n LF@_length_str \n" \
-// "SUB LF@_max_n LF@_max_n LF@%1 \n" \
-// "ADD LF@_max_n LF@_max_n int@1 \n" \
-// "DEFVAR LF@_edit_n_cond \n" \
-// "LT LF@_edit_n_cond LF@%2 int@0 \n" \
-// "JUMPIFEQ substr$edit_n LF@_edit_n_cond bool@true \n" \
-// "GT LF@_edit_n_cond LF@%2 LF@_max_n \n" \
-// "JUMPIFEQ substr$edit_n LF@_edit_n_cond bool@true \n" \
-// "JUMP substr$process \n" \
-// "LABEL substr$edit_n \n" \
-// "MOVE LF@%2 LF@_max_n \n" \
-// "LABEL substr$process \n" \
-// "DEFVAR LF@_index \n" \
-// "MOVE LF@_index LF@%1 \n" \
-// "SUB LF@_index LF@_index int@1 \n" \
-// "DEFVAR LF@_char \n" \
-// "MOVE LF@_process_loop_cond \n" \
-// "LABEL sbstr$process_loop \n" \
-// "GETCHAR LF@_char LF@%0 LF@_index \n" \
-// "CONCAT LF@%_retval LF@%_retval LF@_char \n" \
-// "ADD LF@_index LF@_index int@1 \n" \
-// "SUB LF@%2 LF@%2 int@1 \n" \
-// "GT LF@_process_loop_cond LF@%2 int@0 \n" \
-// "JUMPIFEQ substr$process_loop LF@_process_loop_cond bool@true \n" \
-// "LABEL substr$return \n" \
-// "POPFRAME \n" \
-// "RETURN \n" \
-
-
-// /**
-//  * Built-in function ORD
-//  *
-//  */
-// #define ORD \
-// "LABEL ord \n" \
-// "PUSHFRAME \n" \
-// "DEFVAR LF@_retval \n" \
-// "MOVE LF@%_retval int@0 \n" \
-// "DEFVAR LF@_cond_length \n" \
-// "LT LF@_cond_length LF@%1 int@1 \n" \
-// "JUMPIFEQ ord$return LF@_cond_length bool@true \n" \
-// "DEFVAR LF@_length_str \n" \
-// "CREATEFRAME \n" \
-// "DEFVAR TF@%0 \n" \
-// "MOVE TF@%0 LF@%0 \n" \
-// "CALL length \n" \
-// "MOVE LF@_length_str TF@%_retval \n" \
-// "GT LF@_cond_length LF@%1 LF@_length_str \n" \
-// "JUMPIFEQ ord$return LF@_cond_length bool@true \n" \
-// "SUB LF@%1 LF@%1 int@1 \n" \
-// "STRI2INT LF@%_retval LF@%0 LF@%1 \n" \
-// "LABEL ord$return \n" \
-// "POPFRAME \n" \
-// "RETURN \n" \
-
-// /**
-//  * Built-in function CHR
-//  *
-//  */
-// #define CHR \
-// "LABEL chr \n" \
-// "PUSHFRAME \n" \
-// "DEFVAR LF@%_ret \n" \
-// "MOVE LF@%_ret string@ \n" \
-// "DEFVAR LF@_cond_range \n" \
-// "LT LF@_cond_range LF@%0 int@0 \n" \
-// "JUMPIFEQ chr$return LF@_cond_range bool@true \n" \
-// "GT LF@_cond_range LF@%0 int@255 \n" \
-// "JUMPIFEQ chr$return LF@_cond_range bool@true \n" \
-// "INT2CHAR LF@%_ret LF@%0 \n" \
-// "LABEL chr$return \n" \
-// "POPFRAME \n" \
-// "RETURN\n" \
-
-
 // MARTIN
 //  NOT_DEFINED,  // initial type    --
 //  VAR_ID,       // $variable       --      TODO check return == 1 and we have to push var to stack
@@ -670,26 +489,34 @@ void CHR()
 //  WHILE,        // while
 
 // function add in UniqueName +1 its for purpose of not having same name of function and variable
-int GetUniqueName()
+void GetUniqueName()
 {
-    UniqueName++;
-    return UniqueName;
+    UniqueName+=1;
 }
 
-int GetUniqueVarName()
+void GetUniqueVarName()
 {
-    UniqueVarName++;
-    return UniqueVarName;
+    UniqueVarName+=1;
 }
 
+int GetNumberOfDigets(){
+    int n = UniqueName;
+    int count = 0;
+    do {
+    n /= 10;
+    ++count;
+  } while (n != 0);
 
-AddLForFG(int frameStr,int IAmInFunction){
+  return count;
+}
+
+void AddLForFG(int frameStr,int IAmInFunction){
     if (IAmInFunction)
     {
         addToString(frameStr, "LF@ ");
     }
     else{
-        addToString(frameStr, "LF@ ");
+        addToString(frameStr, "GF@ ");
     }
 }
 
@@ -1212,6 +1039,8 @@ void divIdiv(int frameStr, char *frame)
 
 void codeGeneration(Token *token)
 {
+    char TmpWhileAndIf[256];
+    int NumberOfDigets=0;
     char *WhileNames =NULL;//purpose->to store the name of the while labels to list
     int defined = 0;  // auxiliary variable to know if variable was defined or not
     int frameStr = 0; // generatedString
@@ -1837,24 +1666,73 @@ void codeGeneration(Token *token)
         //add from listCodeGen condition and delete it after
         addToString(frameStr, listCodeGen->firstElement->data);//add condition
         addToString(frameStr,"DEFVAR ");
-        AddLForFG(frame,IAmInFunction);
+        AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr,"CONDVAR");
-        addToString(frameStr, UniqueVarName);// DEFVAR GF/LF@CONDVAR UniqueName
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
         addToString(frameStr, "\n");
 
 
         addToString(frameStr, "POPS ");
-        AddLForFG(frame,IAmInFunction);
+        AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr,"CONDVAR");
-        addToString(frameStr, UniqueVarName);//POPS GF/LF@CONDVAR UniqueName
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMPIFEQ ");
         addToString(frameStr, listWhileLabels->firstElement->data);
-        addToString(frameStr, "true");//JUMPIFEQ LOOPBODY UNIQUENAME true
+        AddLForFG(frameStr,IAmInFunction);
+        addToString(frameStr, "CONDVAR");
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);
+        addToString(frameStr, " true");//JUMPIFEQ LOOPBODY UNIQUENAME true
         addToString(frameStr, "\n");
 
         DLL_DeleteFirst(1);
+        DLL_DeleteFirst(3);
+        DLL_DeleteFirst(3);
+        DLL_DeleteFirst(3);
+    }
+
+    if(inIf !=0){//jsem za else vetvi
+        inIf -= 1;
+        GetUniqueVarName();
+        addToString(frameStr, "LABEL $");
+        addToString(frameStr, listIfLabels->firstElement->previousElement->previousElement->data);//LABEL IFCOND UniqueName
+        addToString(frameStr, "\n");
+
+        //add from listCodeGen condition and delete it after
+        addToString(frameStr, listCodeGen->firstElement->data);//add condition
+
+        addToString(frameStr,"DEFVAR ");
+        AddLForFG(frameStr,IAmInFunction);
+        addToString(frameStr,"CONDVAR");
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "POPS ");
+        AddLForFG(frameStr,IAmInFunction);
+        addToString(frameStr,"CONDVAR");
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "JUMPIFEQ ");
+        addToString(frameStr, listWhileLabels->firstElement->previousElement->data);
+        AddLForFG(frameStr,IAmInFunction);
+        addToString(frameStr, "CONDVAR");
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);
+        addToString(frameStr, " true");//JUMPIFEQ STARTIF UNIQUENAME true
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "LABEL $");
+        addToString(frameStr, listIfLabels->firstElement->data);//LABEL ELSE UniqueName
+
+        DLL_DeleteFirst(1);
+        DLL_DeleteFirst(3);
         DLL_DeleteFirst(3);
         DLL_DeleteFirst(3);
         DLL_DeleteFirst(3);
@@ -2013,8 +1891,8 @@ void codeGeneration(Token *token)
         break;
 
     case COMMA:
-        pushStorage(storage[storageLen - 1], frame);
-        removeLastFromStorage();
+        // pushStorage(storage[storageLen - 1], frame);
+        // removeLastFromStorage();
         // todo push last from storage storage[storageLen-1] (var1)
         // removeLastFromStorage();
         // pozor na posledny parameter -> nebude comma
@@ -2026,34 +1904,40 @@ void codeGeneration(Token *token)
         inWhile +=1;
         GetUniqueName();//ziskani noveho jmena pro while
         //create char *string with name WHILESTART UniqueName
-        WhileNames = malloc(sizeof(char) * (strlen("WHILESTART") + strlen(UniqueName) + 1));
-        strcpy(WhileNames, "WHILESTART ");
-        strcat(WhileNames, UniqueName);
+        NumberOfDigets=GetNumberOfDigets();
+        WhileNames = malloc(sizeof(char) * (strlen("WHILESTART") + NumberOfDigets+1));
+        strcpy(WhileNames, "WHILESTART");
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
         
         //push string to DLL
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
 
         //create char *string with name LOOPCOND UniqueName
-        WhileNames = malloc(sizeof(char) * (strlen("WhileNames") + strlen(UniqueName) + 1));
+        WhileNames = malloc(sizeof(char) * (strlen("WhileNames") + NumberOfDigets+1));
         strcpy(WhileNames, "LOOPCOND");
-        strcat(WhileNames, UniqueName);
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
+
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
         
         //create char *string with name $LOOPBODY UniqueName
-        WhileNames = malloc(sizeof(char) * (strlen("LOOPBODY") + strlen(UniqueName) + 1));
+        WhileNames = malloc(sizeof(char) * (strlen("LOOPBODY") + NumberOfDigets+1));
         strcpy(WhileNames, "LOOPBODY");
-        strcat(WhileNames, UniqueName);
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
+
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr,listWhileLabels->firstElement->previousElement->previousElement->data);//LABEL $WHILESTARTNUM
+        addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
         addToString(frameStr, "\n");
         
         addToString(frameStr, "JUMP ");
-        addToString(frameStr,listWhileLabels->firstElement->previousElement->data);//JUMP LOOPCONDNUM
+        addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
@@ -2065,42 +1949,65 @@ void codeGeneration(Token *token)
         Return = true;
         break;
     case IF:
+        inIf +=1;
+        GetUniqueName();//ziskani noveho jmena pro while
 
-        // todo segfault
-        //  inIf += 1;
-        //  addToString(frameStr, "JUMP $IFCOND");
-        //  addToString(frameStr, GetUniqueName());
-        //  addToString(frameStr, "\n");
+        //create char *string with name ELSE UniqueName
+        NumberOfDigets=GetNumberOfDigets();
+        WhileNames = malloc(sizeof(char) * (strlen("ELSE") + NumberOfDigets));
+        strcpy(WhileNames, "ELSE");
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
 
-        // //store in listIfLabels IFCOND and GetUniqueName() value
-        // DLL_InsertFirst(1 , NULL);
-        // listIfLabels->firstElement->data = malloc(sizeof(char)*(strlen("IFCOND")+strlen(UniqueName)+1));
-        // if (listIfLabels->firstElement->data == NULL) {
-        //     exit(99);
-        // }
-        // strcpy(listIfLabels->firstElement->data, "IFCOND");
-        // strcat(listIfLabels->firstElement->data, UniqueName);
+        DLL_InsertFirst(2, WhileNames);
+        free(WhileNames);
 
-        // addToString(frameStr, "LABEL $STARTIF");
-        // addToString(frameStr, UniqueName);
-        // addToString(frameStr, "\n");
+        //create char *string with name IFCOND UniqueName
+        NumberOfDigets=GetNumberOfDigets();
+        WhileNames = malloc(sizeof(char) * (strlen("IFCOND") + NumberOfDigets));
+        strcpy(WhileNames, "IFCOND");
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
 
-        // //store in listIfLabels STARTIF and UniqueName value
-        // DLL_InsertFirst(1, NULL);
-        // listIfLabels->firstElement->data = malloc(sizeof(char)*(strlen("STARTIF")+strlen(UniqueName)+1));
-        // if (listIfLabels->firstElement->data == NULL) {
-        //     exit(99);
-        // }
-        // strcpy(listIfLabels->firstElement->data, "STARTIF");
-        // strcat(listIfLabels->firstElement->data, UniqueName);
+        //push string to DLL
+        DLL_InsertFirst(1, WhileNames);
+        free(WhileNames);
 
-        // todo nechyba ti tu break; ??
+        //create char *string with name STARTIF UniqueName
+        NumberOfDigets=GetNumberOfDigets();
+        WhileNames = malloc(sizeof(char) * (strlen("STARTIF") + NumberOfDigets));
+        strcpy(WhileNames, "STARTIF");
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
 
+        //push string to DLL
+        DLL_InsertFirst(1, WhileNames);
+        free(WhileNames);
+
+        //create char *string with name AFTERELSE UniqueName
+        NumberOfDigets=GetNumberOfDigets();
+        WhileNames = malloc(sizeof(char) * (strlen("AFTERELSE") + NumberOfDigets));
+        strcpy(WhileNames, "AFTERELSE");
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
+
+        //push string to DLL
+        DLL_InsertFirst(1, WhileNames);
+        free(WhileNames);
+
+        addToString(frameStr, "JUMP");
+        addToString(frameStr, listIfLabels->firstElement->previousElement->previousElement->data);//JUMP IFCOND
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "LABEL $");
+        addToString(frameStr, listIfLabels->firstElement->previousElement->data);//LABEL $STARTIF
+        addToString(frameStr, "\n");
+
+        break;
     case ELSE:
-        // todo segfault
-        //  addToString(frameStr, "LABEL ");
-        //  addToString(frameStr, listIfLabels->firstElement->nextElement->data);
-        //  addToString(frameStr, "\n");
+         addToString(frameStr, "LABEL ");
+         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
+         addToString(frameStr, "\n");
         break;
 
     default:
