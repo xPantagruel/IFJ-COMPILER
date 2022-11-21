@@ -1061,7 +1061,7 @@ void codeGeneration(Token *token)
     }
 
     // auxiliary variable for declarating new variables
-    char tmp[strlen(token->val) + strlen("DEFVAR GF@") + 1];
+    char *tmp = calloc(strlen(token->val) + strlen("DEFVAR GF@") + 1, sizeof(char));
     strcpy(tmp, "DEFVAR");
 
     // auxiliary variable which will be send to threeAddress function as newStr
@@ -1082,6 +1082,7 @@ void codeGeneration(Token *token)
             // free(generatedString);
         }
         printf("%s\n", allFunctionsString);
+        free(tmp);
         exit(0);
         break;
 
@@ -2016,4 +2017,6 @@ void codeGeneration(Token *token)
     default:
         break;
     }
+
+    free(tmp);
 }
