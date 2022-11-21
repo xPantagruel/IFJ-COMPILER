@@ -489,7 +489,7 @@ int function_call(Token *token, bool isDeclaration)
         else
         {
             htab_pair_t *currentlyChecked = htab_search(symTable, token->val);
-            if (!currentSymbol || !(currentSymbol->function))
+            if (!currentlyChecked || !(currentlyChecked->function))
             {
                 FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, token->val);
             }
@@ -976,10 +976,14 @@ int main()
     symTable = htab_init(SYMTABLE_SIZE);
     frameStack = initFrameStack();
     currentSymbol = NULL;
+    currentlyChecked = NULL;
     // Example how parser can be called.
     DLL_Init(0);
     DLL_Init(1);
     DLL_Init(2);
+
+    addBuiltInToSymtable();
+    htab_print(symTable);
 
     Token *token = getToken();
     if (prog(token))
