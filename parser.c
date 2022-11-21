@@ -34,6 +34,7 @@ Expression *initExpression()
 
 void dtorExpression(Expression *exp)
 {
+    (void)exp;
     // for (int i = 0; i < exp->arrayLen; i++)
     // {
     //     dtorToken(exp->tokenArray[i]);
