@@ -36,7 +36,7 @@
     if ((!object))\
         object = "";\
     if ((message)) \
-        fprintf(stdout, (message), (object));\ 
+        fprintf(stdout, (message), (object));\
     exit(code);
 
 #include "scanner.h"
