@@ -1061,11 +1061,11 @@ void codeGeneration(Token *token)
     }
 
     // auxiliary variable for declarating new variables
-    char *tmp = calloc(strlen(token->val) + strlen("DEFVAR GF@") + 1, sizeof(char));
+    char *tmp = calloc(strlen(token->val) + strlen("DEFVAR GF@") + 2, sizeof(char));
     strcpy(tmp, "DEFVAR");
 
     // auxiliary variable which will be send to threeAddress function as newStr
-    char *var = calloc(strlen(token->val) + strlen(" string@") + 1, sizeof(char)); // max lenght which can occur
+    char *var = calloc(strlen(token->val) + strlen(" string@") + 2, sizeof(char)); // max lenght which can occur
 
     switch (token->t)
     { // switch by token type
