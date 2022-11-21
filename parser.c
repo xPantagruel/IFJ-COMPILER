@@ -18,6 +18,7 @@
 #include "code_generation.h"
 
 htab_pair_t *currentSymbol;
+htab_pair_t *currentlyChecked;
 
 Expression *initExpression()
 {
@@ -181,17 +182,17 @@ int params(Token *token, int paramIndex)
     if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT)
     { // VAR_ID OR STRING OR INT/FLOAT
         codeGeneration(token);
-        /* if (currentSymbol)
+        if (currentlyChecked)
         {
-            if (currentSymbol->function->params[paramIndex]->t != token->t) // potencionalni error
+            if (currentlyChecked->function->params[paramIndex]->t != token->t) // potencionalni error
             {
-                FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentSymbol->function->name);
+                FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
             }
         }
         else
         {
-            FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, currentSymbol->function->name); // TODO: edit macro so no object can be passed
-        } */
+            FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, currentlyChecked->function->name); // TODO: edit macro so no object can be passed
+        }
 
         dtorToken(token);
         token = getToken();
@@ -209,7 +210,7 @@ int params(Token *token, int paramIndex)
         else if (params_n(token) == 2)
         { // epsilon
             ungetc(')', stdin);
-            if (currentSymbol->function->paramCount != paramIndex + 1)
+            if (currentlyChecked && currentlyChecked->function->paramCount != paramIndex + 1)
             {
                 FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentSymbol->function->name);
             }
@@ -480,19 +481,19 @@ int function_call(Token *token, bool isDeclaration)
         if (isDeclaration)
         {
             currentSymbol = htab_add_function(symTable, token->val, NULL, NULL, 0);
-            /* if (!currentSymbol)
+            if (!currentSymbol)
             {
                 FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, token->val);
-            } */
+            }
         }
-        /* else
+        else
         {
-            htab_pair_t *currentSymbol = htab_search(symTable, token->val);
+            htab_pair_t *currentlyChecked = htab_search(symTable, token->val);
             if (!currentSymbol || !(currentSymbol->function))
             {
                 FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, token->val);
             }
-        } */
+        }
 
         codeGeneration(token);
         dtorToken(token);

@@ -1,14 +1,9 @@
 <?php
 declare(strict_types=1);
 
-$z = "hello";
+$x = 1.0 * 1.0;
 
-function x(string $y):string
-{
-
-}
-
-x($z);
+write($x,"\n");
 
 
 
