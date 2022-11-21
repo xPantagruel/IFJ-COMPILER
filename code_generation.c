@@ -1915,7 +1915,7 @@ void codeGeneration(Token *token)
         free(WhileNames);
 
         //create char *string with name LOOPCOND UniqueName
-        WhileNames = malloc(sizeof(char) * (strlen("WhileNames") + NumberOfDigets+1));
+        WhileNames = malloc(sizeof(char) * (strlen("LOOPCOND") + NumberOfDigets+1));
         strcpy(WhileNames, "LOOPCOND");
         sprintf(TmpWhileAndIf, "%d", UniqueName);
         strcat(WhileNames, TmpWhileAndIf);
