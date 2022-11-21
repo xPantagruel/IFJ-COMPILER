@@ -11,6 +11,11 @@
  */
 #include "code_generation.h"
 
+//TODO
+// -add pops in functions 
+// -while nejdriv prijde token R_CPAR a pak teprve WHILE coz je problem pri generovani kodu WHILE zveda InWHile a podle ni se vykonava instrukce v R_CPAR
+// -//  COMMA,        // ,     --DONE CHECK IF ITS RIGH by tests
+
 /**
  * Provede inicializaci seznamu list před jeho prvním použitím (tzn. žádná
  * z následujících funkcí nebude volána nad neinicializovaným seznamem).
@@ -458,17 +463,17 @@ void CHR()
 // MATEJ
 //  FUNCTION,     // function        --DONE NOT TESTED
 //  ID,           // write, reads..  --DONE NOT TESTED
-//  COMMA,        // ,               --DONE CHECK IF ITS RIGHT   ( TODO popisane pri case comma)
+//  COMMA,        // ,               --DONE CHECK IF ITS RIGHT  
 //  COLON         // :               --DONE NOT TESTED ->only empty case nothing to be done here
-//  IF,           // if              list not working--DONE NOT TESTED list not working
-//  ELSE,         // else            list not working--DONE NOT TESTED list not working
+//  IF,           // if              --DONE NOT TESTED
+//  ELSE,         // else            --DONE NOT TESTED
 //  INT_TYPE,     // int             --DONE NOT TESTED ->only empty case nothing to be done here
 //  NULL_KEYWORD, // null            --DONE NOT TESTED added CASE next to VAR_ID
 //  RETURN,       // return
 //  STRING_TYPE,  // string          --DONE NOT TESTED ->only empty case nothing to be done here
 //  FLOAT_TYPE,   // float           --DONE NOT TESTED ->only empty case nothing to be done here
 //  VOID,         // void            --DONE NOT TESTED ->only empty case nothing to be done here
-//  WHILE,        // while           list not working--DONE NOT TESTED
+//  WHILE,        // while           --DONE NOT TESTED
 
 // function add in UniqueName +1 its for purpose of not having same name of function and variable
 void GetUniqueName()
@@ -1933,7 +1938,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, "LABEL $");
         addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
         addToString(frameStr, "\n");
-        
+
         addToString(frameStr, "JUMP ");
         addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
         addToString(frameStr, "\n");
@@ -1952,17 +1957,17 @@ void codeGeneration(Token *token)
 
         //create char *string with name ELSE UniqueName
         NumberOfDigets=GetNumberOfDigets();
-        WhileNames = malloc(sizeof(char) * (strlen("ELSE") + NumberOfDigets));
+        WhileNames = malloc(sizeof(char) * (strlen("ELSE") + NumberOfDigets+1));
         strcpy(WhileNames, "ELSE");
         sprintf(TmpWhileAndIf, "%d", UniqueName);
         strcat(WhileNames, TmpWhileAndIf);
 
         DLL_InsertFirst(1, WhileNames);
         free(WhileNames);
-
+        
         //create char *string with name IFCOND UniqueName
         NumberOfDigets=GetNumberOfDigets();
-        WhileNames = malloc(sizeof(char) * (strlen("IFCOND") + NumberOfDigets));
+        WhileNames = malloc(sizeof(char) * (strlen("IFCOND") + NumberOfDigets+1));
         strcpy(WhileNames, "IFCOND");
         sprintf(TmpWhileAndIf, "%d", UniqueName);
         strcat(WhileNames, TmpWhileAndIf);
@@ -1973,7 +1978,7 @@ void codeGeneration(Token *token)
 
         //create char *string with name STARTIF UniqueName
         NumberOfDigets=GetNumberOfDigets();
-        WhileNames = malloc(sizeof(char) * (strlen("STARTIF") + NumberOfDigets));
+        WhileNames = malloc(sizeof(char) * (strlen("STARTIF") + NumberOfDigets+1));
         strcpy(WhileNames, "STARTIF");
         sprintf(TmpWhileAndIf, "%d", UniqueName);
         strcat(WhileNames, TmpWhileAndIf);
@@ -1984,7 +1989,7 @@ void codeGeneration(Token *token)
 
         //create char *string with name AFTERELSE UniqueName
         NumberOfDigets=GetNumberOfDigets();
-        WhileNames = malloc(sizeof(char) * (strlen("AFTERELSE") + NumberOfDigets));
+        WhileNames = malloc(sizeof(char) * (strlen("AFTERELSE") + NumberOfDigets+1));
         strcpy(WhileNames, "AFTERELSE");
         sprintf(TmpWhileAndIf, "%d", UniqueName);
         strcat(WhileNames, TmpWhileAndIf);
