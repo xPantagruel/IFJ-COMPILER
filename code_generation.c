@@ -2147,7 +2147,8 @@ void codeGeneration(Token *token)
         NumberOfDigets=GetNumberOfDigets();
         WhileNames = malloc(sizeof(char) * (strlen("STARTIF") + NumberOfDigets));
         strcpy(WhileNames, "STARTIF");
-        strcat(WhileNames, UniqueName);
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
 
         //push string to DLL
         DLL_InsertFirst(1, WhileNames);
@@ -2157,7 +2158,8 @@ void codeGeneration(Token *token)
         NumberOfDigets=GetNumberOfDigets();
         WhileNames = malloc(sizeof(char) * (strlen("AFTERELSE") + NumberOfDigets));
         strcpy(WhileNames, "AFTERELSE");
-        strcat(WhileNames, UniqueName);
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
 
         //push string to DLL
         DLL_InsertFirst(1, WhileNames);
