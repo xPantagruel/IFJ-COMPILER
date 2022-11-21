@@ -1847,21 +1847,24 @@ void codeGeneration(Token *token)
         addToString(frameStr,"DEFVAR ");
         AddLForFG(frame,IAmInFunction);
         addToString(frameStr,"CONDVAR");
-        addToString(frameStr, UniqueVarName);// DEFVAR GF/LF@CONDVAR UniqueName
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
         addToString(frameStr, "\n");
 
 
         addToString(frameStr, "POPS ");
         AddLForFG(frame,IAmInFunction);
         addToString(frameStr,"CONDVAR");
-        addToString(frameStr, UniqueVarName);//POPS GF/LF@CONDVAR UniqueName
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMPIFEQ ");
         addToString(frameStr, listWhileLabels->firstElement->data);
         AddLForFG(frame,IAmInFunction);
         addToString(frameStr, "CONDVAR");
-        addToString(frameStr, UniqueVarName);
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);
         addToString(frameStr, " true");//JUMPIFEQ LOOPBODY UNIQUENAME true
         addToString(frameStr, "\n");
 
@@ -1884,20 +1887,23 @@ void codeGeneration(Token *token)
         addToString(frameStr,"DEFVAR ");
         AddLForFG(frame,IAmInFunction);
         addToString(frameStr,"CONDVAR");
-        addToString(frameStr, UniqueVarName);// DEFVAR GF/LF@CONDVAR UniqueName
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
         addToString(frameStr, "\n");
 
         addToString(frameStr, "POPS ");
         AddLForFG(frame,IAmInFunction);
         addToString(frameStr,"CONDVAR");
-        addToString(frameStr, UniqueVarName);//POPS GF/LF@CONDVAR UniqueName
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMPIFEQ ");
         addToString(frameStr, listWhileLabels->firstElement->previousElement->data);
         AddLForFG(frame,IAmInFunction);
         addToString(frameStr, "CONDVAR");
-        addToString(frameStr, UniqueVarName);
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frameStr, TmpWhileAndIf);
         addToString(frameStr, " true");//JUMPIFEQ STARTIF UNIQUENAME true
         addToString(frameStr, "\n");
 
@@ -2064,8 +2070,8 @@ void codeGeneration(Token *token)
         break;
 
     case COMMA:
-        pushStorage(storage[storageLen - 1], frame);
-        removeLastFromStorage();
+        // pushStorage(storage[storageLen - 1], frame);
+        // removeLastFromStorage();
         // todo push last from storage storage[storageLen-1] (var1)
         // removeLastFromStorage();
         // pozor na posledny parameter -> nebude comma
