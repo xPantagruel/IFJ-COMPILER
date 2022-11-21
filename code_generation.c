@@ -1082,6 +1082,7 @@ void codeGeneration(Token *token)
             // free(generatedString);
         }
         printf("%s\n", allFunctionsString);
+        exit(0);
         break;
 
     case VAR_ID:
