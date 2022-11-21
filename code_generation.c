@@ -153,6 +153,7 @@ void DLL_Dispose(int num)
 void DLL_InsertFirst(int num, char *data)
 {
     DLLElementPtr new_element = malloc(sizeof(struct DLLElement));
+    
     if (new_element == NULL)
     {
         exit(99);
@@ -160,7 +161,11 @@ void DLL_InsertFirst(int num, char *data)
     }
     if (num == 0)
     {
-        new_element->data = data;
+        new_element->data = malloc(sizeof(char)*(strlen(data)+1));
+        if (new_element->data == NULL) {
+            exit(99);
+        } 
+        strcpy(new_element->data, data);
         new_element->nextElement = listCodeGen->firstElement;
         new_element->previousElement = NULL;
         if (listCodeGen->firstElement != NULL)
@@ -176,7 +181,11 @@ void DLL_InsertFirst(int num, char *data)
     }
     else if (num == 1)
     {
-        new_element->data = data;
+        new_element->data = malloc(sizeof(char)*(strlen(data)+1));
+        if (new_element->data == NULL) {
+            exit(99);
+        } 
+        strcpy(new_element->data, data);
         new_element->nextElement = listIfLabels->firstElement;
         new_element->previousElement = NULL;
         if (listIfLabels->firstElement != NULL)
@@ -192,7 +201,11 @@ void DLL_InsertFirst(int num, char *data)
     }
     else if(num ==2)
     {
-        new_element->data = data;
+        new_element->data = malloc(sizeof(char)*(strlen(data)+1));
+        if (new_element->data == NULL) {
+            exit(99);
+        } 
+        strcpy(new_element->data, data);
         new_element->nextElement = listWhileLabels->firstElement;
         new_element->previousElement = NULL;
         if (listWhileLabels->firstElement != NULL)
