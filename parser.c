@@ -181,7 +181,6 @@ int params(Token *token, int paramIndex)
 {
     if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT)
     { // VAR_ID OR STRING OR INT/FLOAT
-        codeGeneration(token);
         if (currentlyChecked)
         {
             if (currentlyChecked->function->params[paramIndex]->t != token->t) // potencionalni error
@@ -193,7 +192,7 @@ int params(Token *token, int paramIndex)
         {
             FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, currentlyChecked->function->name); // TODO: edit macro so no object can be passed
         }
-
+        codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (params_n(token) == 1)
@@ -372,6 +371,7 @@ int condition(Token *token)
         token = getToken();
         if (token->t == L_PAR)
         { // IF (
+            codeGeneration(token); //todo mozno tu dtor
             token = getToken();
             if (expression(token))
             { // IF ( <expression>
@@ -982,7 +982,7 @@ int main()
     DLL_Init(1);
     DLL_Init(2);
 
-    addBuiltInToSymtable();
+    //addBuiltInToSymtable();
     htab_print(symTable);
 
     Token *token = getToken();
