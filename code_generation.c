@@ -552,7 +552,7 @@ void addToString(int str, char *newStr)
             }
             else
             {
-                inFunctionString = realloc(inFunctionString, (strlen(inFunctionString) + strlen(newStr) + 1) * sizeof(char));
+                inFunctionString = realloc(inFunctionString, (strlen(inFunctionString) + strlen(newStr) + 2) * sizeof(char));
             }
 
             if (inFunctionString == NULL)
