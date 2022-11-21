@@ -689,7 +689,7 @@ int GetNumberOfDigets(){
   } while (n != 0);
 }
 
-AddLForFG(int frameStr,int IAmInFunction){
+AddLForFG(char* frameStr,int IAmInFunction){
     if (IAmInFunction)
     {
         addToString(frameStr, "LF@ ");
