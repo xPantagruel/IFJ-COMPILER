@@ -1776,9 +1776,18 @@ void codeGeneration(Token *token)
         break;
 
     case R_PAR:
+
+        if(storageLen == 1 )
+        {
+            addToString(frameStr, "PUSHS ");
+            AddLForFG(frameStr,IAmInFunction);
+            addToString(frameStr, storage[storageLen - 1]);
+            removeLastFromStorage();
+            addToString(frameStr, "\n");
+        }
         // added  check and uncomment
         //  if (IAmInFunction) {
-        //  pushStorage(storage[storageLen-1], frameStr, frame);
+        //  pushStorage(storage[storageLen], frameStr, frame);
         //  removeLastFromStorage();
         //  }
 
@@ -1894,8 +1903,12 @@ void codeGeneration(Token *token)
         break;
 
     case COMMA:
-        // pushStorage(storage[storageLen - 1], frame);
-        // removeLastFromStorage();
+        addToString(frameStr, "PUSHS ");
+        AddLForFG(frameStr,IAmInFunction);
+        addToString(frameStr, storage[storageLen - 1]);
+        removeLastFromStorage();
+        addToString(frameStr, "\n");
+
         // todo push last from storage storage[storageLen-1] (var1)
         // removeLastFromStorage();
         // pozor na posledny parameter -> nebude comma
