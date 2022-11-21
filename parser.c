@@ -181,7 +181,7 @@ int params(Token *token, int paramIndex)
     if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT)
     { // VAR_ID OR STRING OR INT/FLOAT
         codeGeneration(token);
-        if (currentSymbol)
+        /* if (currentSymbol)
         {
             if (currentSymbol->function->params[paramIndex]->t != token->t) // potencionalni error
             {
@@ -191,7 +191,7 @@ int params(Token *token, int paramIndex)
         else
         {
             FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, currentSymbol->function->name); // TODO: edit macro so no object can be passed
-        }
+        } */
 
         dtorToken(token);
         token = getToken();
