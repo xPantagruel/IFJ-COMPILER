@@ -689,13 +689,13 @@ int GetNumberOfDigets(){
   } while (n != 0);
 }
 
-AddLForFG(char* frameStr,int IAmInFunction){
+AddLForFG(int frameStr,int IAmInFunction){
     if (IAmInFunction)
     {
         addToString(frameStr, "LF@ ");
     }
     else{
-        addToString(frameStr, "LF@ ");
+        addToString(frameStr, "GF@ ");
     }
 }
 
@@ -1845,7 +1845,7 @@ void codeGeneration(Token *token)
         //add from listCodeGen condition and delete it after
         addToString(frameStr, listCodeGen->firstElement->data);//add condition
         addToString(frameStr,"DEFVAR ");
-        AddLForFG(frame,IAmInFunction);
+        AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr,"CONDVAR");
         sprintf(TmpWhileAndIf, "%d", UniqueVarName);
         addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
@@ -1853,7 +1853,7 @@ void codeGeneration(Token *token)
 
 
         addToString(frameStr, "POPS ");
-        AddLForFG(frame,IAmInFunction);
+        AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr,"CONDVAR");
         sprintf(TmpWhileAndIf, "%d", UniqueVarName);
         addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
@@ -1861,7 +1861,7 @@ void codeGeneration(Token *token)
 
         addToString(frameStr, "JUMPIFEQ ");
         addToString(frameStr, listWhileLabels->firstElement->data);
-        AddLForFG(frame,IAmInFunction);
+        AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr, "CONDVAR");
         sprintf(TmpWhileAndIf, "%d", UniqueVarName);
         addToString(frameStr, TmpWhileAndIf);
@@ -1885,14 +1885,14 @@ void codeGeneration(Token *token)
         addToString(frameStr, listCodeGen->firstElement->data);//add condition
 
         addToString(frameStr,"DEFVAR ");
-        AddLForFG(frame,IAmInFunction);
+        AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr,"CONDVAR");
         sprintf(TmpWhileAndIf, "%d", UniqueVarName);
         addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
         addToString(frameStr, "\n");
 
         addToString(frameStr, "POPS ");
-        AddLForFG(frame,IAmInFunction);
+        AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr,"CONDVAR");
         sprintf(TmpWhileAndIf, "%d", UniqueVarName);
         addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
@@ -1900,7 +1900,7 @@ void codeGeneration(Token *token)
 
         addToString(frameStr, "JUMPIFEQ ");
         addToString(frameStr, listWhileLabels->firstElement->previousElement->data);
-        AddLForFG(frame,IAmInFunction);
+        AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr, "CONDVAR");
         sprintf(TmpWhileAndIf, "%d", UniqueVarName);
         addToString(frameStr, TmpWhileAndIf);
