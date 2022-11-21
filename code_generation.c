@@ -1061,7 +1061,7 @@ void codeGeneration(Token *token)
     }
 
     // auxiliary variable for declarating new variables
-    char tmp[strlen(token->val) + strlen("DEFVAR GF@") + 1];
+    char *tmp = calloc(strlen(token->val) + strlen("DEFVAR GF@") + 1, sizeof(char));
     strcpy(tmp, "DEFVAR");
 
     // auxiliary variable which will be send to threeAddress function as newStr
@@ -1082,6 +1082,8 @@ void codeGeneration(Token *token)
             // free(generatedString);
         }
         printf("%s\n", allFunctionsString);
+        free(tmp);
+        exit(0);
         break;
 
     case VAR_ID:
@@ -1914,8 +1916,10 @@ void codeGeneration(Token *token)
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
 
+        printf("--------- %s\n", listWhileLabels->firstElement->data);
+
         //create char *string with name LOOPCOND UniqueName
-        WhileNames = malloc(sizeof(char) * (strlen("WhileNames") + NumberOfDigets+1));
+        WhileNames = malloc(sizeof(char) * (strlen("LOOPCOND") + NumberOfDigets+1));
         strcpy(WhileNames, "LOOPCOND");
         sprintf(TmpWhileAndIf, "%d", UniqueName);
         strcat(WhileNames, TmpWhileAndIf);
@@ -2013,4 +2017,6 @@ void codeGeneration(Token *token)
     default:
         break;
     }
+
+    free(tmp);
 }
