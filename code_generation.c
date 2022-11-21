@@ -2001,11 +2001,11 @@ void codeGeneration(Token *token)
         free(WhileNames);
 
         addToString(frameStr, "JUMP");
-        addToString(frameStr, listIfLabels->firstElement->previousElement->previousElement->data);//JUMP IFCOND
+        addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//JUMP IFCOND
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr, listIfLabels->firstElement->previousElement->data);//LABEL $STARTIF
+        addToString(frameStr, listIfLabels->firstElement->nextElement->data);//LABEL $STARTIF
         addToString(frameStr, "\n");
 
         break;
