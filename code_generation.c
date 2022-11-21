@@ -1924,7 +1924,7 @@ void codeGeneration(Token *token)
         free(WhileNames);
         
         //create char *string with name $LOOPBODY UniqueName
-        WhileNames = malloc(sizeof(char) * (strlen("LOOPBODY") + NumberOfDigets));
+        WhileNames = malloc(sizeof(char) * (strlen("LOOPBODY") + NumberOfDigets+1));
         strcpy(WhileNames, "LOOPBODY");
         sprintf(TmpWhileAndIf, "%d", UniqueName);
         strcat(WhileNames, TmpWhileAndIf);
@@ -1933,11 +1933,11 @@ void codeGeneration(Token *token)
         free(WhileNames);
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr,listWhileLabels->firstElement->previousElement->previousElement->data);//LABEL $WHILESTARTNUM
+        addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
         addToString(frameStr, "\n");
         
         addToString(frameStr, "JUMP ");
-        addToString(frameStr,listWhileLabels->firstElement->previousElement->data);//JUMP LOOPCONDNUM
+        addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
@@ -1958,6 +1958,9 @@ void codeGeneration(Token *token)
         strcpy(WhileNames, "ELSE");
         sprintf(TmpWhileAndIf, "%d", UniqueName);
         strcat(WhileNames, TmpWhileAndIf);
+
+        DLL_InsertFirst(2, WhileNames);
+        free(WhileNames);
 
         //create char *string with name IFCOND UniqueName
         NumberOfDigets=GetNumberOfDigets();
@@ -2003,7 +2006,7 @@ void codeGeneration(Token *token)
         break;
     case ELSE:
          addToString(frameStr, "LABEL ");
-         addToString(frameStr, listIfLabels->firstElement->previousElement->previousElement->previousElement->data);
+         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
          addToString(frameStr, "\n");
         break;
 
