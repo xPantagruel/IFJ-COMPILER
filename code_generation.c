@@ -68,7 +68,7 @@ void DLL_DeleteFirst( int num) {
     if (num == 0)
     {	
         if (listCodeGen->firstElement != NULL) {
-		DLLElementPtr tmp = listCodeGen->firstElement;
+		listTmp =  listCodeGen->firstElement;
 
 		if (listCodeGen->firstElement == listCodeGen->activeElement) { //checking if first element is active
 			listCodeGen->activeElement = NULL;
@@ -82,12 +82,12 @@ void DLL_DeleteFirst( int num) {
 		if (listCodeGen->firstElement != NULL) {
 			listCodeGen->firstElement->previousElement = NULL;
 		}
-		free(tmp);
+		free(listTmp);
 	    }
     }else if(num == 1) {
         if (listIfLabels->firstElement != NULL) 
         {
-            DLLElementPtr tmp = listIfLabels->firstElement;
+            listTmp = listIfLabels->firstElement;
 
             if (listIfLabels->firstElement == listIfLabels->activeElement) { //checking if first element is active
                 listIfLabels->activeElement = NULL;
@@ -101,13 +101,13 @@ void DLL_DeleteFirst( int num) {
             if (listIfLabels->firstElement != NULL) {
                 listIfLabels->firstElement->previousElement = NULL;
             }
-            free(tmp);
+            free(listTmp);
 	    }
         else if(num == 2)
         {
             if (listWhileLabels->firstElement != NULL) 
             {
-                DLLElementPtr tmp = listWhileLabels->firstElement;
+                listTmp= listWhileLabels->firstElement;
 
                 if (listWhileLabels->firstElement == listWhileLabels->activeElement) { //checking if first element is active
                     listWhileLabels->activeElement = NULL;
@@ -121,7 +121,7 @@ void DLL_DeleteFirst( int num) {
                 if (listWhileLabels->firstElement != NULL) {
                     listWhileLabels->firstElement->previousElement = NULL;
                 }
-                free(tmp);
+                free(listTmp);
             }
         }
     }
@@ -133,51 +133,20 @@ void DLL_Dispose(int num)
     {
         while (listCodeGen->firstElement != NULL)
         { // removing first element until first element will be NULL
-            // the code below is just copied DLL_DeleteFirst function
-            DLLElementPtr tmp = listCodeGen->firstElement;
-
-            if (listCodeGen->firstElement == listCodeGen->activeElement)
-            { // checking if first element is active
-                listCodeGen->activeElement = NULL;
-            }
-
-            if (listCodeGen->firstElement == listCodeGen->lastElement)
-            { // checking if the first element is also the last element
-                listCodeGen->lastElement = NULL;
-            }
-
-            listCodeGen->firstElement = listCodeGen->firstElement->nextElement;
-            if (listCodeGen->firstElement != NULL)
-            {
-                listCodeGen->firstElement->previousElement = NULL;
-            }
-            free(tmp);
+            DLL_DeleteFirst(0);
         }
     }
     else if (num == 1)
     {
         while (listIfLabels->firstElement != NULL)
         { // removing first element until first element will be NULL
-            // the code below is just copied DLL_DeleteFirst function
-            DLLElementPtr tmp = listIfLabels->firstElement;
-
-            if (listIfLabels->firstElement == listIfLabels->activeElement)
-            { // checking if first element is active
-                listCodeGen->activeElement = NULL;
-            }
-
-            if (listIfLabels->firstElement == listIfLabels->lastElement)
-            { // checking if the first element is also the last element
-                listIfLabels->lastElement = NULL;
-            }
-
-            listIfLabels->firstElement = listIfLabels->firstElement->nextElement;
-            if (listIfLabels->firstElement != NULL)
-            {
-                listIfLabels->firstElement->previousElement = NULL;
-            }
-            free(tmp);
+           DLL_DeleteFirst(1);
         }
+    } else if (num == 2) {
+        while (listWhileLabels->firstElement != NULL)
+        { // removing first element until first element will be NULL
+           DLL_DeleteFirst(2);
+        }   
     }
 }
 
@@ -2024,6 +1993,8 @@ void codeGeneration(Token *token)
          addToString(frameStr, "LABEL ");
          addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
          addToString(frameStr, "\n");
+
+         //todo ked zakomentujem else a if tak prechadza o 30 viac testov
         break;
 
     default:
