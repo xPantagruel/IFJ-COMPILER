@@ -1026,6 +1026,7 @@ void divIdiv(int frameStr, char *frame)
 
 void codeGeneration(Token *token)
 {
+    bool afterElse=false;
     char TmpWhileAndIf[256];
     int NumberOfDigets=0;
     char *WhileNames =NULL;//purpose->to store the name of the while labels to list
@@ -1646,11 +1647,11 @@ void codeGeneration(Token *token)
         inWhile -= 1;
         GetUniqueVarName();
         addToString(frameStr, "JUMP ");
-        addToString(frameStr, listWhileLabels->firstElement->previousElement->previousElement->data);//LABEL WHILESTART UniqueName
+        addToString(frameStr, listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL WHILESTART UniqueName
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr, listWhileLabels->firstElement->previousElement->data);//LABEL $LOOPCOND UniqueName
+        addToString(frameStr, listWhileLabels->firstElement->nextElement->data);//LABEL $LOOPCOND UniqueName
         addToString(frameStr, "\n");
 
         //add from listCodeGen condition and delete it after
@@ -1679,21 +1680,21 @@ void codeGeneration(Token *token)
         addToString(frameStr, " true");//JUMPIFEQ LOOPBODY UNIQUENAME true
         addToString(frameStr, "\n");
 
-        DLL_DeleteFirst(1);
-        DLL_DeleteFirst(3);
-        DLL_DeleteFirst(3);
-        DLL_DeleteFirst(3);
+        DLL_DeleteFirst(0);
+        DLL_DeleteFirst(2);
+        DLL_DeleteFirst(2);
+        DLL_DeleteFirst(2);
     }
 
-    if(inIf !=0){//jsem za else vetvi
+    if(inIf !=0 && afterElse){//jsem za else vetvi
         inIf -= 1;
         GetUniqueVarName();
         addToString(frameStr, "LABEL $");
-        addToString(frameStr, listIfLabels->firstElement->previousElement->previousElement->data);//LABEL IFCOND UniqueName
+        addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//LABEL IFCOND UniqueName
         addToString(frameStr, "\n");
 
         //add from listCodeGen condition and delete it after
-        addToString(frameStr, listCodeGen->firstElement->data);//add condition
+        addToString(frameStr, listIfLabels->firstElement->data);//add condition
 
         addToString(frameStr,"DEFVAR ");
         AddLForFG(frameStr,IAmInFunction);
@@ -1710,7 +1711,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMPIFEQ ");
-        addToString(frameStr, listWhileLabels->firstElement->previousElement->data);
+        addToString(frameStr, listIfLabels->firstElement->nextElement->data);
         AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr, "CONDVAR");
         sprintf(TmpWhileAndIf, "%d", UniqueVarName);
@@ -1721,11 +1722,13 @@ void codeGeneration(Token *token)
         addToString(frameStr, "LABEL $");
         addToString(frameStr, listIfLabels->firstElement->data);//LABEL ELSE UniqueName
 
+        DLL_DeleteFirst(0);
         DLL_DeleteFirst(1);
-        DLL_DeleteFirst(3);
-        DLL_DeleteFirst(3);
-        DLL_DeleteFirst(3);
-        DLL_DeleteFirst(3);
+        DLL_DeleteFirst(1);
+        DLL_DeleteFirst(1);
+        DLL_DeleteFirst(1);
+        afterElse=false;
+
     }
 //-------------------------------------------
 
@@ -2008,9 +2011,10 @@ void codeGeneration(Token *token)
 
         break;
     case ELSE:
-         addToString(frameStr, "LABEL ");
-         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
-         addToString(frameStr, "\n");
+        addToString(frameStr, "LABEL ");
+        addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
+        addToString(frameStr, "\n");
+        afterElse=true;
 
          //todo ked zakomentujem else a if tak prechadza o 30 viac testov
         break;
