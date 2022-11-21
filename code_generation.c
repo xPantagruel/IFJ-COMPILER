@@ -84,7 +84,7 @@ void DLL_DeleteFirst( int num) {
 		}
 		free(tmp);
 	    }
-    }else if(num == 1)
+    }else if(num == 1) {
         if (listIfLabels->firstElement != NULL) 
         {
             DLLElementPtr tmp = listIfLabels->firstElement;
@@ -124,6 +124,7 @@ void DLL_DeleteFirst( int num) {
                 free(tmp);
             }
         }
+    }
 }
 
 void DLL_Dispose(int num)

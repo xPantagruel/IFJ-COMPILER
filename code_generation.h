@@ -231,5 +231,6 @@ void randStr(char *dest, size_t length);
  */
 void divIdiv(int frameStr, char *frame);
 
-/*** End of code_generation.h ***/
 #endif
+
+/*** End of code_generation.h ***/ 
