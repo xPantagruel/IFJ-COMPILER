@@ -454,7 +454,7 @@ void CHR()
 //  SLASH,        // / (divide)      --
 //  EOF_T,        // EOF             --
 //  L_PAR,        // (               --
-//  R_PAR,        // )               --      TODO check comment if we are at the end of storage of parameters in function
+//  R_PAR,        // )               --      
 //  L_CPAR,       // {               --
 //  R_CPAR,       // }               --
 //  SEMICOL,      // ;               --
@@ -478,15 +478,15 @@ void CHR()
 //  ID,           // write, reads..  --DONE NOT TESTED
 //  COMMA,        // ,               --DONE CHECK IF ITS RIGHT   ( TODO popisane pri case comma)
 //  COLON         // :               --DONE NOT TESTED ->only empty case nothing to be done here
-//  IF,           // if                  --FUCK UP if i have if else and nested if else is fucked up becouse i need to store somewhere names of labels
-//  ELSE,         // else                --FUCK UP
+//  IF,           // if              list not working--DONE NOT TESTED list not working
+//  ELSE,         // else            list not working--DONE NOT TESTED list not working
 //  INT_TYPE,     // int             --DONE NOT TESTED ->only empty case nothing to be done here
 //  NULL_KEYWORD, // null            --DONE NOT TESTED added CASE next to VAR_ID
 //  RETURN,       // return
 //  STRING_TYPE,  // string          --DONE NOT TESTED ->only empty case nothing to be done here
 //  FLOAT_TYPE,   // float           --DONE NOT TESTED ->only empty case nothing to be done here
 //  VOID,         // void            --DONE NOT TESTED ->only empty case nothing to be done here
-//  WHILE,        // while
+//  WHILE,        // while           list not working--DONE NOT TESTED
 
 // function add in UniqueName +1 its for purpose of not having same name of function and variable
 void GetUniqueName()
