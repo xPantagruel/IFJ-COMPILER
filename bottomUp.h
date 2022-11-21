@@ -12,6 +12,7 @@
 
 enum termType
 {
+    NOTDEF_TERM = -1,
     MULT_DIV,
     PLUS_MINUS,
     CONCAT,

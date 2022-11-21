@@ -434,13 +434,14 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
 
 bool freeAndReturn(bool success, Stack *stack)
 {
+    (void)stack;
     return success;
 }
 
 bool bottomUp(Expression *exp, int *resultType)
 {
 
-    *resultType = NULL;
+    *resultType = 0;
     int currentExpPos = 0;
 
     Term *startTerm = initTerm("$", TOP_BOTTOM, NULL);

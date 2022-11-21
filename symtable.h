@@ -12,6 +12,7 @@
 
 enum VarType
 {
+    NOTDEF_PARAM = -1,
     FLOAT_PARAM = 16,
     INT_PARAM = 19,
     STRING_PARAM = 22,
