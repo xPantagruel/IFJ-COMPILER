@@ -688,6 +688,8 @@ int GetNumberOfDigets(){
     n /= 10;
     ++count;
   } while (n != 0);
+  
+  return count;
 }
 
 AddLForFG(int frameStr,int IAmInFunction){
