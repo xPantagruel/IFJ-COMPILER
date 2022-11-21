@@ -1218,6 +1218,7 @@ void divIdiv(int frameStr, char *frame)
 
 void codeGeneration(Token *token)
 {
+    char TmpWhileAndIf[256];
     int NumberOfDigets=0;
     char *WhileNames =NULL;//purpose->to store the name of the while labels to list
     int defined = 0;  // auxiliary variable to know if variable was defined or not
@@ -2077,25 +2078,30 @@ void codeGeneration(Token *token)
         GetUniqueName();//ziskani noveho jmena pro while
         //create char *string with name WHILESTART UniqueName
         NumberOfDigets=GetNumberOfDigets();
-        WhileNames = malloc(sizeof(char) * (strlen("WHILESTART") + NumberOfDigets));
+        WhileNames = malloc(sizeof(char) * (strlen("WHILESTART") + NumberOfDigets+1));
         strcpy(WhileNames, "WHILESTART");
-        strcat(WhileNames, UniqueName);
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
         
         //push string to DLL
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
 
         //create char *string with name LOOPCOND UniqueName
-        WhileNames = malloc(sizeof(char) * (strlen("WhileNames") + NumberOfDigets));
+        WhileNames = malloc(sizeof(char) * (strlen("WhileNames") + NumberOfDigets+1));
         strcpy(WhileNames, "LOOPCOND");
-        strcat(WhileNames, UniqueName);
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
+
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
         
         //create char *string with name $LOOPBODY UniqueName
         WhileNames = malloc(sizeof(char) * (strlen("LOOPBODY") + NumberOfDigets));
         strcpy(WhileNames, "LOOPBODY");
-        strcat(WhileNames, UniqueName);
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
+
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
 
@@ -2123,13 +2129,15 @@ void codeGeneration(Token *token)
         NumberOfDigets=GetNumberOfDigets();
         WhileNames = malloc(sizeof(char) * (strlen("ELSE") + NumberOfDigets));
         strcpy(WhileNames, "ELSE");
-        strcat(WhileNames, UniqueName);
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
 
         //create char *string with name IFCOND UniqueName
         NumberOfDigets=GetNumberOfDigets();
         WhileNames = malloc(sizeof(char) * (strlen("IFCOND") + NumberOfDigets));
         strcpy(WhileNames, "IFCOND");
-        strcat(WhileNames, UniqueName);
+        sprintf(TmpWhileAndIf, "%d", UniqueName);
+        strcat(WhileNames, TmpWhileAndIf);
 
         //push string to DLL
         DLL_InsertFirst(1, WhileNames);
