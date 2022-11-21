@@ -40,7 +40,7 @@ typedef struct
     DLLElementPtr lastElement;
 } DLList;
 
-void DLL_DeleteFirst( int num);
+void DLL_DeleteFirst(int num);
 
 void DLL_Init(int num);
 

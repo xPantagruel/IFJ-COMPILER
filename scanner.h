@@ -232,6 +232,13 @@ void error(int errID, Token *token);
  */
 void dtorToken(Token *token);
 
+/**
+ * @brief Converts type name (eg. string_type) to type (string)
+ *
+ * @param typeName enum type of type name
+ */
+int typeNameToType(enum type typeName);
+
 #endif
 
 /*** End of scanner.h ***/

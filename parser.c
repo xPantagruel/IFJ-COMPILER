@@ -18,7 +18,6 @@
 #include "code_generation.h"
 
 htab_pair_t *currentSymbol;
-int functionStatus = -1;
 
 Expression *initExpression()
 {
@@ -81,7 +80,8 @@ bool function_declaration(Token *token)
     dtorToken(token);
     token = getToken();
     if (type(token) != 1)
-    {                 // FUNCTION <function_call> : <type>
+    {
+        // FUNCTION <function_call> : <type>
         return false; // wrong type
     }
     else
@@ -90,7 +90,6 @@ bool function_declaration(Token *token)
         param->t = token->t;
         // FUNCTION ADDED TO SYMTABLE
         currentSymbol = NULL;
-        functionStatus = -1;
     }
 
     codeGeneration(token);
@@ -176,16 +175,28 @@ int type(Token *token)
     }
 }
 
-int params(Token *token)
+int params(Token *token, int paramIndex)
 {
     if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT)
     { // VAR_ID OR STRING OR INT/FLOAT
         codeGeneration(token);
+        if (currentSymbol)
+        {
+            if (currentSymbol->function->params[paramIndex]->t != token->t) // potencionalni error
+            {
+                FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentSymbol->function->name);
+            }
+        }
+        else
+        {
+            FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, currentSymbol->function->name); // TODO: edit macro so no object can be passed
+        }
+
         dtorToken(token);
         token = getToken();
         if (params_n(token) == 1)
         { // (VAR_ID OR STRING OR INT/FLOAT) <params_n>
-            if (params(token))
+            if (params(token, ++paramIndex))
             {
                 return 1;
             }
@@ -197,6 +208,11 @@ int params(Token *token)
         else if (params_n(token) == 2)
         { // epsilon
             ungetc(')', stdin);
+            if (currentSymbol->function->paramCount != paramIndex + 1)
+            {
+                FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentSymbol->function->name);
+            }
+
             return 1;
         }
         else
@@ -234,7 +250,7 @@ int params(Token *token)
             token = getToken();
             if (params_n(token) == 1)
             { // <type> VAR_ID OR <type> STRING OR <type> INT/FLOAT <params_n>
-                if (params(token))
+                if (params(token, ++paramIndex))
                 {
                     return 1;
                 }
@@ -463,11 +479,18 @@ int function_call(Token *token, bool isDeclaration)
         if (isDeclaration)
         {
             currentSymbol = htab_add_function(symTable, token->val, NULL, NULL, 0);
+            if (!currentSymbol)
+            {
+                FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, token->val);
+            }
         }
-
-        if (!currentSymbol)
+        else
         {
-            // function exists;
+            htab_pair_t *currentSymbol = htab_search(symTable, token->val);
+            if (!currentSymbol || !(currentSymbol->function))
+            {
+                FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, token->val);
+            }
         }
 
         codeGeneration(token);
@@ -478,7 +501,7 @@ int function_call(Token *token, bool isDeclaration)
             codeGeneration(token);
             dtorToken(token);
             token = getToken();
-            if (params(token))
+            if (params(token, 0))
             { // ID ( <params>
 
                 // dtorToken(token);
@@ -963,6 +986,7 @@ int main()
         dtorToken(token);
         // htab_print(symTable);
         // printFrameStack(frameStack);
+
         if (generatedString != NULL)
         {
             free(generatedString);

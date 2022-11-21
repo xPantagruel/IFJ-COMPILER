@@ -16,8 +16,8 @@
 
 #define ERROR_1_LEXICAL
 #define ERROR_2_SYNTACTIC
-#define ERROR_3_FUNCTION_NOT_DEFINED
-#define ERROR_4_FUNCTION_INCORRECT_CALL
+#define ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED "Function %s not defined or can't be redefined\n"
+#define ERROR_4_FUNCTION_INCORRECT_CALL "Wrong type or number of arguments or return type in %s\n"
 #define ERROR_5_VARIABLE_NOT_DEFINED "Variable %s not defined\n"
 #define ERROR_6_FUNCTION_INCORRECT_RETURN
 #define ERROR_7_INCOMPATIBLE_TYPE
@@ -206,7 +206,7 @@ int type(Token *token);
                2 no rule was matched -> we maybe can use other rule
                0 error in syntax
  */
-int params(Token *token);
+int params(Token *token, int paramIndex);
 
 /**
  * @brief Implementation of rules:  <params_n> -> , <params>

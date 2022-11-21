@@ -1,6 +1,15 @@
 <?php
 declare(strict_types=1);
 
+$z = "hello";
+
+function x(string $y):string
+{
+
+}
+
+x($z);
 
 
-$a = 7 + $b;
+
+

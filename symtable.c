@@ -207,7 +207,8 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
         }
         strcpy(str, key);
         str[strlen(key)] = '\0';
-
+        t->ptr_arr[index]->pair->function = NULL;
+        t->ptr_arr[index]->pair->variable = NULL;
         t->ptr_arr[index]->pair->key = str;
         t->size = t->size + 1;
         return t->ptr_arr[index]->pair;

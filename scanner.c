@@ -25,18 +25,24 @@ void getProlog()
     {
         c = getchar();
 
-        if (c == '/') { //skip comment in prolog
-             c = getchar();
-             if (c == '/') {
-                 skipLineComment();
-                 continue;
-             } else if (c == '*') {
-                 skipBlockComment(tokenInit());
-                 continue;
-             } else {
-                 exit(2);
-             }
-         }
+        if (c == '/')
+        { // skip comment in prolog
+            c = getchar();
+            if (c == '/')
+            {
+                skipLineComment();
+                continue;
+            }
+            else if (c == '*')
+            {
+                skipBlockComment(tokenInit());
+                continue;
+            }
+            else
+            {
+                exit(2);
+            }
+        }
 
         if (c == '\n')
         { // counting on which line from stdin we are
@@ -98,7 +104,7 @@ void changeLastChar(int c, Token *token)
 void addCharToToken(int c, Token *token)
 {
     char tmp[] = {c, '\0'}; // creating "string" so we can use strncat
-    
+
     if (token && token->val == NULL)
     {
         token->val = calloc(2, sizeof(char));
@@ -285,6 +291,27 @@ void error(int errID, Token *token)
 {
     dtorToken(token);
     exit(errID);
+}
+
+int typeNameToType(enum type typeName)
+{
+    switch (typeName)
+    {
+    case STRING_TYPE:
+        return STRING;
+
+    case INT_TYPE:
+        return INT;
+
+    case FLOAT_TYPE:
+        return FLOAT;
+
+    case VOID:
+        return VOID;
+
+    default:
+        return -1;
+    }
 }
 
 Token *getToken()
@@ -1068,7 +1095,7 @@ Token *getToken()
             // end of switch by actualState
         }
     }
-    
+
     return token;
 }
 /*** End of scanner.c ***/
