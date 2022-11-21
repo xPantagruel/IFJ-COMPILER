@@ -1065,7 +1065,7 @@ void codeGeneration(Token *token)
     strcpy(tmp, "DEFVAR");
 
     // auxiliary variable which will be send to threeAddress function as newStr
-    char var[strlen(token->val) + strlen(" string@") + 1]; // max lenght which can occur
+    char *var = calloc(strlen(token->val) + strlen(" string@") + 1, sizeof(char)); // max lenght which can occur
 
     switch (token->t)
     { // switch by token type
@@ -1082,6 +1082,7 @@ void codeGeneration(Token *token)
             // free(generatedString);
         }
         printf("%s\n", allFunctionsString);
+        free(var);
         free(tmp);
         exit(0);
         break;
@@ -2018,5 +2019,6 @@ void codeGeneration(Token *token)
         break;
     }
 
+    free(var);
     free(tmp);
 }
