@@ -1962,7 +1962,7 @@ void codeGeneration(Token *token)
         sprintf(TmpWhileAndIf, "%d", UniqueName);
         strcat(WhileNames, TmpWhileAndIf);
 
-        DLL_InsertFirst(2, WhileNames);
+        DLL_InsertFirst(1, WhileNames);
         free(WhileNames);
 
         //create char *string with name IFCOND UniqueName
