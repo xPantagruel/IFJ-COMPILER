@@ -77,9 +77,6 @@ static bool Return = 0;
 /** int if in if body*/
 static int inIf = 0;
 
-/** int if in else body*/
-static int inElse = 0;
-
 /** int if in While body*/
 static int inWhile = 0;
 
