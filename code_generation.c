@@ -166,11 +166,13 @@ void DLL_InsertFirst(int num, char *data)
     }
     if (num == 0)
     {
-        new_element->data = malloc(sizeof(char)*(strlen(data)+1));
-        if (new_element->data == NULL) {
-            exit(99);
-        } 
-        strcpy(new_element->data, data);
+        if (data != NULL) {
+            new_element->data = malloc(sizeof(char)*(strlen(data)+1));
+            if (new_element->data == NULL) {
+                exit(99);
+            } 
+            strcpy(new_element->data, data);
+        }
         new_element->nextElement = listCodeGen->firstElement;
         new_element->previousElement = NULL;
         if (listCodeGen->firstElement != NULL)
@@ -186,11 +188,13 @@ void DLL_InsertFirst(int num, char *data)
     }
     else if (num == 1)
     {
-        new_element->data = malloc(sizeof(char)*(strlen(data)+1));
-        if (new_element->data == NULL) {
-            exit(99);
+        if (data != NULL) {
+            new_element->data = malloc(sizeof(char)*(strlen(data)+1));
+            if (new_element->data == NULL) {
+                exit(99);
+            }
+            strcpy(new_element->data, data);
         } 
-        strcpy(new_element->data, data);
         new_element->nextElement = listIfLabels->firstElement;
         new_element->previousElement = NULL;
         if (listIfLabels->firstElement != NULL)
@@ -206,11 +210,13 @@ void DLL_InsertFirst(int num, char *data)
     }
     else if(num ==2)
     {
-        new_element->data = malloc(sizeof(char)*(strlen(data)+1));
-        if (new_element->data == NULL) {
-            exit(99);
-        } 
-        strcpy(new_element->data, data);
+        if (data != NULL) {
+            new_element->data = malloc(sizeof(char)*(strlen(data)+1));
+            if (new_element->data == NULL) {
+                exit(99);
+            } 
+            strcpy(new_element->data, data);
+        }
         new_element->nextElement = listWhileLabels->firstElement;
         new_element->previousElement = NULL;
         if (listWhileLabels->firstElement != NULL)
@@ -1655,14 +1661,15 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         //add from listCodeGen condition and delete it after
-        addToString(frameStr, listCodeGen->firstElement->data);//add condition
-        addToString(frameStr,"DEFVAR ");
-        AddLForFG(frameStr,IAmInFunction);
-        addToString(frameStr,"CONDVAR");
-        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
-        addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
-        addToString(frameStr, "\n");
-
+        if (listCodeGen->firstElement != NULL) {
+            addToString(frameStr, listCodeGen->firstElement->data);//add condition
+        }
+            addToString(frameStr,"DEFVAR ");
+            AddLForFG(frameStr,IAmInFunction);
+            addToString(frameStr,"CONDVAR");
+            sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+            addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
+            addToString(frameStr, "\n");
 
         addToString(frameStr, "POPS ");
         AddLForFG(frameStr,IAmInFunction);
@@ -1750,10 +1757,11 @@ void codeGeneration(Token *token)
             { // not else {}
                 DLL_InsertFirst(0, NULL);
                 listCodeGen->firstElement->data = malloc(sizeof(char) * (strlen(whileIfString) + 1));
-                if (listCodeGen->firstElement->data == NULL)
-                {
-                    exit(99);
-                }
+                // vzdy bude null -> nastavene od insertFirst
+                // if (listCodeGen->firstElement->data == NULL)
+                // {
+                //     exit(99);
+                // }
                 strcpy(listCodeGen->firstElement->data, whileIfString);
                 free(whileIfString);
                 whileIfString = NULL;
