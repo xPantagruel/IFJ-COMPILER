@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+function write(float $number, string $text):string{
+
+}
+
 $x = 1.0 * 1.0;
 
 write($x,"\n");

@@ -13,9 +13,9 @@
 enum VarType
 {
     NOTDEF_PARAM = -1,
-    FLOAT_PARAM = 16,
-    INT_PARAM = 19,
-    STRING_PARAM = 22,
+    FLOAT_PARAM = 26,
+    INT_PARAM = 25,
+    STRING_PARAM = 34,
 };
 
 // Tabulka:
@@ -99,4 +99,6 @@ bool htab_erase(htab_t *t, htab_key_t key); // ruší zadaný záznam
 void htab_print(htab_t *t);
 void htab_clear(htab_t *t); // ruší všechny záznamy
 void htab_free(htab_t *t);  // destruktor tabulky
+
+void addBuiltInToSymtable();
 #endif

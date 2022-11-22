@@ -429,5 +429,31 @@ void htab_print(htab_t *t)
     }
 }
 
+
+void addBuiltInToSymtable()
+{
+
+    htab_function_t * fun = htab_add_function(symTable,"reads",NULL,NULL,0)->function;
+    htab_add_return_type(fun);
+    fun->returnType->canBeNull = true;
+    fun->returnType->t = STRING_PARAM;
+
+    fun = htab_add_function(symTable,"readi",NULL,NULL,0)->function;
+    htab_add_return_type(fun);
+    fun->returnType->canBeNull = true;
+    fun->returnType->t = INT_PARAM;
+
+    fun = htab_add_function(symTable,"readf",NULL,NULL,0)->function;
+    htab_add_return_type(fun);
+    fun->returnType->canBeNull = true;
+    fun->returnType->t = FLOAT_PARAM;
+
+    fun = htab_add_function(symTable,"floatval",NULL,NULL,0)->function;
+    htab_add_return_type(fun);
+    fun->returnType->canBeNull = true;
+    fun->returnType->t = FLOAT_PARAM;
+
+}
+
 // TODO ZMENIT htab_pair STRUKTURU ABY VYHOVOVALA
 // TODO komentare
