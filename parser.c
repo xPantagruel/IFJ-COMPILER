@@ -394,7 +394,7 @@ int condition(Token *token)
                             token = getToken();
                             if (token->t == R_CPAR)
                             { // IF ( <expression> ) { <statement> }
-                                codeGeneration(token);
+                                //codeGeneration(token);
                                 dtorToken(token);
                                 token = getToken();
                                 if (token->t == ELSE)
@@ -538,7 +538,8 @@ int while_rule(Token *token)
     if (token->t == WHILE)
     { // while
         iAmInConditionWhileFunRule = 1;
-        token = getToken();
+        codeGeneration(token);
+        token = getToken(); //mozno tu free??
         if (token->t == L_PAR)
         { // while (
             codeGeneration(token);
@@ -892,7 +893,7 @@ int statement(Token *token)
     { // <condtion> (IF)
         if (condition(token) == 1)
         { // <condition>
-            codeGeneration(token);
+            //codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
@@ -913,7 +914,7 @@ int statement(Token *token)
     { //<while> (WHILE)
         if (while_rule(token) == 1)
         { // <while>
-            codeGeneration(token);
+            //codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
