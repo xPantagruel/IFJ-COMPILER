@@ -298,7 +298,7 @@ int htab_erase_function(htab_function_t *f, int paramCount)
     return 0;
 }
 
-htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum VarType type)
+htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum type type)
 {
     htab_pair_t *pair = htab_lookup_add(t, name);
     if (pair->function || pair->variable)

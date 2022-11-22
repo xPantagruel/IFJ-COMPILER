@@ -181,16 +181,31 @@ int params(Token *token, int paramIndex)
 {
     if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT)
     { // VAR_ID OR STRING OR INT/FLOAT
-        if (currentlyChecked)
+        if (currentlyChecked && currentlyChecked->function)
         {
-            if (currentlyChecked->function->params[paramIndex]->t != token->t) // potencionalni error
+            if (token->t == VAR_ID)
             {
-                FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
+                htab_pair_t *pair = htab_search(symTable, token->val);
+                if (!pair->variable)
+                {
+                    FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, token->val);
+                }
+                if (currentlyChecked->function->params[paramIndex]->t != pair->variable->t) // potencionalni error
+                {
+                    FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
+                }
+            }
+            else
+            {
+                if (currentlyChecked->function->params[paramIndex]->t != token->t) // potencionalni error
+                {
+                    FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
+                }
             }
         }
         else
         {
-            FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, currentlyChecked->function->name); // TODO: edit macro so no object can be passed
+            FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, ""); // TODO: edit macro so no object can be passed
         }
         codeGeneration(token);
         dtorToken(token);
@@ -209,10 +224,10 @@ int params(Token *token, int paramIndex)
         else if (params_n(token) == 2)
         { // epsilon
             ungetc(')', stdin);
-            if (currentlyChecked && currentlyChecked->function->paramCount != paramIndex + 1)
+            /* if (currentlyChecked && currentlyChecked->function->paramCount != paramIndex + 1)
             {
                 FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentSymbol->function->name);
-            }
+            } */
 
             return 1;
         }
@@ -227,7 +242,20 @@ int params(Token *token, int paramIndex)
         if (currentSymbol)
         {
             param = htab_add_parameter(currentSymbol->function);
-            param->t = token->t;
+            switch (token->t)
+            {
+            case INT_TYPE:
+                param->t = INT;
+                break;
+            case FLOAT_TYPE:
+                param->t = FLOAT;
+                break;
+            case STRING_TYPE:
+                param->t = STRING;
+                break;
+            default:
+                break;
+            }
             if (token->val[0] == '?')
             {
                 param->canBeNull = true;
@@ -370,8 +398,8 @@ int condition(Token *token)
         dtorToken(token);
         token = getToken();
         if (token->t == L_PAR)
-        { // IF (
-            codeGeneration(token); //todo mozno tu dtor
+        {                          // IF (
+            codeGeneration(token); // todo mozno tu dtor
             token = getToken();
             if (expression(token))
             { // IF ( <expression>
@@ -394,7 +422,7 @@ int condition(Token *token)
                             token = getToken();
                             if (token->t == R_CPAR)
                             { // IF ( <expression> ) { <statement> }
-                                //codeGeneration(token);
+                                // codeGeneration(token);
                                 dtorToken(token);
                                 token = getToken();
                                 if (token->t == ELSE)
@@ -488,7 +516,7 @@ int function_call(Token *token, bool isDeclaration)
         }
         else
         {
-            htab_pair_t *currentlyChecked = htab_search(symTable, token->val);
+            currentlyChecked = htab_search(symTable, token->val);
             if (!currentlyChecked || !(currentlyChecked->function))
             {
                 FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, token->val);
@@ -539,7 +567,7 @@ int while_rule(Token *token)
     { // while
         iAmInConditionWhileFunRule = 1;
         codeGeneration(token);
-        token = getToken(); //mozno tu free??
+        token = getToken(); // mozno tu free??
         if (token->t == L_PAR)
         { // while (
             codeGeneration(token);
@@ -893,7 +921,7 @@ int statement(Token *token)
     { // <condtion> (IF)
         if (condition(token) == 1)
         { // <condition>
-            //codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
@@ -914,7 +942,7 @@ int statement(Token *token)
     { //<while> (WHILE)
         if (while_rule(token) == 1)
         { // <while>
-            //codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
@@ -982,9 +1010,6 @@ int main()
     DLL_Init(0);
     DLL_Init(1);
     DLL_Init(2);
-
-    //addBuiltInToSymtable();
-    htab_print(symTable);
 
     Token *token = getToken();
     if (prog(token))

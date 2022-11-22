@@ -76,11 +76,13 @@ void dtorToken(Token *token)
     if (token && token->val != NULL)
     {
         free(token->val);
+        token->val = NULL;
     }
 
     if (token)
     {
         free(token);
+        token = NULL;
     }
 }
 
