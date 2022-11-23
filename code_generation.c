@@ -1032,7 +1032,6 @@ void divIdiv(int frameStr, char *frame)
 
 void codeGeneration(Token *token)
 {
-    bool afterElse=false;
     char TmpWhileAndIf[256];
     int NumberOfDigets=0;
     char *WhileNames =NULL;//purpose->to store the name of the while labels to list
@@ -2009,7 +2008,7 @@ void codeGeneration(Token *token)
         DLL_InsertFirst(1, WhileNames);
         free(WhileNames);
 
-        addToString(frameStr, "JUMP");
+        addToString(frameStr, "JUMP ");
         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//JUMP IFCOND
         addToString(frameStr, "\n");
 

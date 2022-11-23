@@ -40,6 +40,8 @@ typedef struct
     DLLElementPtr lastElement;
 } DLList;
 
+static bool afterElse=false;
+
 static DLLElementPtr listTmp = NULL;
 
 void AddLForFG(int frameStr, int IAmInFunction);
