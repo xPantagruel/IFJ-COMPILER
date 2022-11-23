@@ -1704,8 +1704,8 @@ void codeGeneration(Token *token)
         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//LABEL IFCOND UniqueName
         addToString(frameStr, "\n");
 
-        //add from listCodeGen condition and delete it after
-        addToString(frameStr, listIfLabels->firstElement->data);//add condition
+        // //add from listCodeGen condition and delete it after
+         addToString(frameStr, listCodeGen->firstElement->data);//add condition
 
         addToString(frameStr,"DEFVAR ");
         AddLForFG(frameStr,IAmInFunction);
