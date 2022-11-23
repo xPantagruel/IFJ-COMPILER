@@ -1695,6 +1695,11 @@ void codeGeneration(Token *token)
     if(inIf !=0 && afterElse){//jsem za else vetvi
         inIf -= 1;
         GetUniqueVarName();
+
+        addToString(frameStr, "JUMP $");
+        addToString(frameStr, listIfLabels->firstElement->data);//LABEL AFTERELSE UniqueName
+        addToString(frameStr, "\n");
+
         addToString(frameStr, "LABEL $");
         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//LABEL IFCOND UniqueName
         addToString(frameStr, "\n");
@@ -1726,7 +1731,8 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr, listIfLabels->firstElement->data);//LABEL ELSE UniqueName
+        addToString(frameStr, listIfLabels->firstElement->data);//LABEL AFTERELSE UniqueName
+        addToString(frameStr, "\n");
 
         DLL_DeleteFirst(0);
         DLL_DeleteFirst(1);
