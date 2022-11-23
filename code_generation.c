@@ -506,10 +506,10 @@ int GetNumberOfDigets(){
 void AddLForFG(int frameStr,int IAmInFunction){
     if (IAmInFunction)
     {
-        addToString(frameStr, "LF@ ");
+        addToString(frameStr, "LF@");
     }
     else{
-        addToString(frameStr, "GF@ ");
+        addToString(frameStr, "GF@");
     }
 }
 
@@ -1731,6 +1731,10 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
+        addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);//LABEL ELSE UniqueName
+        addToString(frameStr, "\n");
+
+        addToString(frameStr, "LABEL $");
         addToString(frameStr, listIfLabels->firstElement->data);//LABEL AFTERELSE UniqueName
         addToString(frameStr, "\n");
 
@@ -2024,6 +2028,10 @@ void codeGeneration(Token *token)
 
         break;
     case ELSE:
+        addToString(frameStr, "JUMP ");
+        addToString(frameStr, listIfLabels->firstElement->data);//JUMP AFTERELSE
+        addToString(frameStr, "\n");
+
         addToString(frameStr, "LABEL ");
         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
         addToString(frameStr, "\n");
