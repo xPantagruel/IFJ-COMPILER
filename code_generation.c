@@ -1779,23 +1779,6 @@ void codeGeneration(Token *token)
         break;
 
     case R_PAR:
-
-        if(storageLen == 1 )
-        {
-            addToString(frameStr, "PUSHS ");
-            AddLForFG(frameStr,IAmInFunction);
-            addToString(frameStr, storage[storageLen - 1]);
-            removeLastFromStorage();
-            addToString(frameStr, "\n");
-        }
-        // added  check and uncomment
-        //  if (IAmInFunction) {
-        //  pushStorage(storage[storageLen], frameStr, frame);
-        //  removeLastFromStorage();
-        //  }
-
-        checkStorage();
-
         if (storageLen == 1)
         { // if ($var1)
             addToString(frameStr, "PUSHS");
@@ -1813,6 +1796,8 @@ void codeGeneration(Token *token)
             addToString(frameStr, "LTS\n");
             removeLastFromStorage();
         }
+
+        checkStorage();
 
         if (IAmInFunction)
         {
