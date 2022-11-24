@@ -111,6 +111,7 @@ bool htab_erase(htab_t *t, htab_key_t key)
                 // ak sa jedná o prvú položku
                 if (count == 0)
                 {
+
                     htab_item_t *store = t->ptr_arr[index];
                     t->ptr_arr[index] = tmp->next;
                     if (store->pair->function)
@@ -120,6 +121,7 @@ bool htab_erase(htab_t *t, htab_key_t key)
                     if (store->pair->variable)
                     {
                         htab_erase_variable(store->pair->variable);
+                        store->pair->variable = NULL;
                     }
 
                     free((char *)store->pair->key);
@@ -139,7 +141,9 @@ bool htab_erase(htab_t *t, htab_key_t key)
                         }
                         if (tmp->pair->variable)
                         {
+
                             htab_erase_variable(tmp->pair->variable);
+                            tmp->pair->variable = NULL;
                         }
                         free((char *)tmp->pair->key);
                         free(tmp->pair);
@@ -158,6 +162,7 @@ bool htab_erase(htab_t *t, htab_key_t key)
                         if (store->pair->variable)
                         {
                             htab_erase_variable(store->pair->variable);
+                            store->pair->variable = NULL;
                         }
                         free((char *)store->pair->key);
                         free(store->pair);
@@ -179,7 +184,7 @@ bool htab_erase(htab_t *t, htab_key_t key)
 }
 
 // funkcia na pridanie kľúča do tabuľky
-htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
+htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key, Frame *frame)
 {
     // zistenie indexu na ktorý bude kľúč uložený
     size_t index = htab_hash_function(key) % htab_bucket_count(t);
@@ -221,7 +226,17 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
             // ak kľúč existuje v tabuľke
             if (!strcmp(tmp->pair->key, key))
             {
-                return tmp->pair;
+                if (frame)
+                {
+                    if (frame == tmp->pair->variable->frame)
+                    {
+                        return tmp->pair;
+                    }
+                }
+                else
+                {
+                    return tmp->pair;
+                }
                 // ak kľúč neexistuje v tabuľke
             }
             else
@@ -262,7 +277,7 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key)
 
 htab_pair_t *htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount)
 {
-    htab_pair_t *pair = htab_lookup_add(t, name);
+    htab_pair_t *pair = htab_lookup_add(t, name, NULL);
     if (pair->function || pair->variable)
     {
         return NULL;
@@ -298,12 +313,14 @@ int htab_erase_function(htab_function_t *f, int paramCount)
     return 0;
 }
 
-htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum type type)
+htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, Frame *frame, enum type type)
 {
-    htab_pair_t *pair = htab_lookup_add(t, name);
-    if (pair->function || pair->variable)
+
+    htab_pair_t *pair = htab_lookup_add(t, name, peekFrame(frameStack));
+
+    if (!pair)
     {
-        return NULL;
+        exit(99);
     }
 
     pair->variable = calloc(1, sizeof(htab_variable_t));
@@ -323,6 +340,7 @@ htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum 
     strcpy(pair->variable->name, name);
     pair->variable->frame = frame;
     pair->variable->t = type;
+    addVariableToFrame(frame, pair);
     return pair;
 }
 
@@ -345,6 +363,7 @@ function_param_t *htab_add_return_type(htab_function_t *function)
 
 int htab_erase_variable(htab_variable_t *v)
 {
+
     free(v->name);
     free(v);
     return 1;
@@ -429,30 +448,28 @@ void htab_print(htab_t *t)
     }
 }
 
-
 void addBuiltInToSymtable()
 {
 
-    htab_function_t * fun = htab_add_function(symTable,"reads",NULL,NULL,0)->function;
+    htab_function_t *fun = htab_add_function(symTable, "reads", NULL, NULL, 0)->function;
     htab_add_return_type(fun);
     fun->returnType->canBeNull = true;
     fun->returnType->t = STRING_PARAM;
 
-    fun = htab_add_function(symTable,"readi",NULL,NULL,0)->function;
+    fun = htab_add_function(symTable, "readi", NULL, NULL, 0)->function;
     htab_add_return_type(fun);
     fun->returnType->canBeNull = true;
     fun->returnType->t = INT_PARAM;
 
-    fun = htab_add_function(symTable,"readf",NULL,NULL,0)->function;
+    fun = htab_add_function(symTable, "readf", NULL, NULL, 0)->function;
     htab_add_return_type(fun);
     fun->returnType->canBeNull = true;
     fun->returnType->t = FLOAT_PARAM;
 
-    fun = htab_add_function(symTable,"floatval",NULL,NULL,0)->function;
+    fun = htab_add_function(symTable, "floatval", NULL, NULL, 0)->function;
     htab_add_return_type(fun);
     fun->returnType->canBeNull = true;
     fun->returnType->t = FLOAT_PARAM;
-
 }
 
 // TODO ZMENIT htab_pair STRUKTURU ABY VYHOVOVALA

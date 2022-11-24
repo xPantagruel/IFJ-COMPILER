@@ -25,7 +25,7 @@ typedef struct htab htab_t; // typedef podle zadání
 // Typy:
 typedef const char *htab_key_t; // typ klíče
 typedef int htab_value_t;       // typ hodnoty
-typedef struct frame frame_t;
+typedef struct frame Frame;
 typedef struct function_param function_param_t;
 typedef struct htab_function htab_function_t;
 typedef struct htab_variable htab_variable_t;
@@ -65,7 +65,7 @@ typedef struct htab_variable
 {
     char *name;
     Frame *frame;
-    enum VarType t;
+    enum type t;
     bool canBeNull;
 } htab_variable_t;
 
@@ -87,11 +87,11 @@ size_t htab_size(const htab_t *t);         // počet záznamů v tabulce
 size_t htab_bucket_count(const htab_t *t); // velikost pole
 
 htab_pair_t *htab_find(htab_t *t, htab_key_t key); // hledání
-htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key);
+htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key, Frame *frame);
 htab_pair_t *htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount);
 function_param_t *htab_add_parameter(htab_function_t *function);
 function_param_t *htab_add_return_type(htab_function_t *function);
-htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, frame_t *frame, enum type type);
+htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, Frame *frame, enum type type);
 htab_pair_t *htab_search(htab_t *t, htab_key_t key);
 int htab_erase_function(htab_function_t *f, int paramCount);
 int htab_erase_variable(htab_variable_t *v);

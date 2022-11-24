@@ -71,9 +71,11 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call>
         return false; // missing function name
     }
+
     codeGeneration(token);
     dtorToken(token);
     token = getToken();
+
     if (token->t != COLON)
     {                 // FUNCTION <function_call> :
         return false; // missing COLON
@@ -88,10 +90,12 @@ bool function_declaration(Token *token)
     }
     else
     {
-        function_param_t *param = htab_add_return_type(currentSymbol->function);
-        param->t = token->t;
-        // FUNCTION ADDED TO SYMTABLE
-        currentSymbol = NULL;
+        if (currentSymbol)
+        {
+            function_param_t *param = htab_add_return_type(currentSymbol->function);
+            param->t = token->t;
+            // FUNCTION ADDED TO SYMTABLE
+        }
     }
 
     codeGeneration(token);
@@ -101,6 +105,17 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> : <type> {
         return false; // missing L_CPAR
     }
+
+    if (currentSymbol)
+    {
+        pushFrame(frameStack, currentSymbol->function->name);
+        for (int i = 0; i < currentSymbol->function->paramCount; i++)
+        {
+            htab_pair_t *var = htab_add_variable(symTable, currentSymbol->function->params[i]->name, peekFrame(frameStack), currentSymbol->function->params[i]->t);
+            var->variable->canBeNull = currentSymbol->function->params[i]->canBeNull;
+        }
+    }
+
     codeGeneration(token);
     dtorToken(token);
     token = getToken();
@@ -115,6 +130,10 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> : <type> { <statement> }
         return false; // missing R_CPAR
     }
+
+    Frame *f = popFrame(frameStack);
+    eraseFrame(f);
+    currentSymbol = NULL;
 
     iAmInConditionWhileFunRule = 0; // I am out of function declaration
     return true;
@@ -186,10 +205,12 @@ int params(Token *token, int paramIndex)
             if (token->t == VAR_ID)
             {
                 htab_pair_t *pair = htab_search(symTable, token->val);
-                if (!pair->variable)
+
+                if (!pair || !pair->variable)
                 {
                     FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, token->val);
                 }
+
                 if (currentlyChecked->function->params[paramIndex]->t != pair->variable->t) // potencionalni error
                 {
                     FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
@@ -224,10 +245,6 @@ int params(Token *token, int paramIndex)
         else if (params_n(token) == 2)
         { // epsilon
             ungetc(')', stdin);
-            /* if (currentlyChecked && currentlyChecked->function->paramCount != paramIndex + 1)
-            {
-                FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentSymbol->function->name);
-            } */
 
             return 1;
         }
@@ -305,6 +322,10 @@ int params(Token *token, int paramIndex)
     }
     else
     { // epsilon
+        if (currentlyChecked && currentlyChecked->function->paramCount != paramIndex + 1)
+        {
+            FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentSymbol->function->name);
+        }
         ungetc(')', stdin);
         return 2;
     }
@@ -532,6 +553,7 @@ int function_call(Token *token, bool isDeclaration)
         token = getToken();
         if (token->t == L_PAR)
         { // ID (
+
             codeGeneration(token);
             dtorToken(token);
             token = getToken();
@@ -540,8 +562,11 @@ int function_call(Token *token, bool isDeclaration)
 
                 // dtorToken(token);
                 token = getToken();
+
                 if (token->t == R_PAR)
                 { // ID ( <params> )
+                    // function checked - OK
+                    currentlyChecked = NULL;
                     return 1;
                 }
                 else
@@ -588,7 +613,7 @@ int while_rule(Token *token)
                     token = getToken();
                     if (token->t == L_CPAR)
                     { // while ( <expression> ) {
-                        // pushFrame(frameStack, "while");
+
                         codeGeneration(token);
                         dtorToken(token);
                         token = getToken();
@@ -599,8 +624,6 @@ int while_rule(Token *token)
                             token = getToken();
                             if (token->t == R_CPAR)
                             { // while ( <expression> ) { <statement> }
-                                // Frame *tmpFrame = popFrame(frameStack);
-                                // eraseFrame(tmpFrame);
                                 iAmInConditionWhileFunRule = 0;
                                 return 1;
                             }
@@ -1024,7 +1047,6 @@ int main()
         codeGeneration(token);
         dtorToken(token);
         // htab_print(symTable);
-        // printFrameStack(frameStack);
 
         if (generatedString != NULL)
         {

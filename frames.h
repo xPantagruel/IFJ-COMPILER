@@ -5,11 +5,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "symtable.h"
 
 #define GLOBAL_FRAME_NAME "global"
 
 typedef struct frame Frame;
 typedef struct frameStack FrameStack;
+typedef struct htab_pair htab_pair_t;
 
 extern FrameStack *frameStack;
 
@@ -17,6 +19,8 @@ typedef struct frame
 {
     char *name;
     Frame *parent;
+    htab_pair_t **vars;
+    int varCount;
 } Frame;
 
 typedef struct frameStack
@@ -31,6 +35,8 @@ Frame *popFrame(FrameStack *stack);
 Frame *findFrame(FrameStack *stack, const char *name);
 
 Frame *peekFrame(FrameStack *stack);
+
+bool addVariableToFrame(Frame *frame, htab_pair_t *var);
 
 Frame *eraseFrame(Frame *frame);
 

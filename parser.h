@@ -30,11 +30,10 @@
  * @param message predefined status message, pass "" when no message needed
  * @param object name(must be string) of variable/function/lexeme where error occured, pass "" when no object
  */
-#define FREE_EXIT(code, message, object)\
-    htab_free(symTable);\
-    eraseFrameStack(frameStack);\
-    if ((message)) \
-        fprintf(stdout, (message), (object));\
+#define FREE_EXIT(code, message, object)      \
+    htab_free(symTable);                      \
+    if ((message))                            \
+        fprintf(stdout, (message), (object)); \
     exit(code);
 
 #include "scanner.h"
