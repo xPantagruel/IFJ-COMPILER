@@ -3,4 +3,7 @@ parser
 .vscode
 test-main.c
 IFJ22_Tester-master
+test.py
+LICENSE
+tests
 testFile.txt
