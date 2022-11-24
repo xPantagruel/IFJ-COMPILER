@@ -194,7 +194,7 @@ int checkId(int c, Token *token)
         }
         else
         { // invalid char after ID
-            error(2, token);
+            error(1, token);
             return -1;
         }
     }
@@ -464,7 +464,7 @@ Token *getToken()
                         actualState = ID_S;
                     }
                     unGetC(c);
-                }
+                } 
                 break;
                 // end of switch by char in START state
             }
@@ -472,6 +472,9 @@ Token *getToken()
             // end of case START
 
         case STRING_S:
+            if (c == EOF) {
+                exit(1);
+            }
             switch (isalpha(c))
             {
             case 0: // not alpha
