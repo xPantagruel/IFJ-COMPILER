@@ -1032,6 +1032,11 @@ void divIdiv(int frameStr, char *frame)
 
 void codeGeneration(Token *token)
 {
+    // if prolog not added
+    if (allFunctionsString == NULL) {
+        addToString(2, ".IFJcode22\n");
+    }
+
     char TmpWhileAndIf[256];
     int NumberOfDigets=0;
     char *WhileNames =NULL;//purpose->to store the name of the while labels to list
@@ -1067,7 +1072,6 @@ void codeGeneration(Token *token)
 
     case EOF_T:
         // end of file -> we want to print generated code
-        addToString(2, ".IFJcode22\n");
         addToString(2, generatedString); // merge
 
         if (generatedString != NULL)
@@ -1705,7 +1709,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         // //add from listCodeGen condition and delete it after
-         addToString(frameStr, listCodeGen->firstElement->data);//add condition
+        addToString(frameStr, listCodeGen->firstElement->data);//add condition
 
         addToString(frameStr,"DEFVAR ");
         AddLForFG(frameStr,IAmInFunction);
@@ -1803,7 +1807,7 @@ void codeGeneration(Token *token)
 
         checkStorage();
 
-        if (IAmInFunction)
+        if (IAmInFunction) //todo dat na if IamInFunctionCall (nie function declaration)
         {
             addToString(frameStr, "CALL $");
             addToString(frameStr, functionName);
@@ -1900,12 +1904,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, storage[storageLen - 1]);
         removeLastFromStorage();
         addToString(frameStr, "\n");
-
-        // todo push last from storage storage[storageLen-1] (var1)
-        // removeLastFromStorage();
-        // pozor na posledny parameter -> nebude comma
         break;
-
     case COLON:
         break;
     case WHILE:
@@ -2021,8 +2020,6 @@ void codeGeneration(Token *token)
         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
         addToString(frameStr, "\n");
         afterElse=true;
-
-         //todo ked zakomentujem else a if tak prechadza o 30 viac testov
         break;
 
     default:
