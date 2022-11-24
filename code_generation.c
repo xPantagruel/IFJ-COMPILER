@@ -233,6 +233,7 @@ void DLL_InsertFirst(int num, char *data)
 }
 // todo zkontrolovat v zadani špatného formátu a navratove hodnoty
 // function reads() : ?string
+//todo je tu spravny argument 0? (ak nie tak zmenit aj inde)
 void READS()
 {
     addToString(0, "LABEL $readS \n");
@@ -1087,6 +1088,10 @@ void codeGeneration(Token *token)
     case VAR_ID:
     case INT:
     case FLOAT:
+        if (IAmInFunction) {
+            frameStr = 1;
+        }
+
         // setting prefix
         if (token->t == VAR_ID)
         { // variable -> GF@-var1
@@ -1114,6 +1119,7 @@ void codeGeneration(Token *token)
             {
                 strcat(tmp, " LF@");
                 strcat(tmp, var);
+                strcat(tmp, "\n");
                 if (inFunctionString)
                 {
                     if (strstr(inFunctionString, tmp))
@@ -1121,12 +1127,12 @@ void codeGeneration(Token *token)
                         defined = 1;
                     }
                 }
-                frameStr = 1;
             }
             else
             {
                 strcat(tmp, " GF@");
                 strcat(tmp, var);
+                strcat(tmp, "\n");
                 if (generatedString)
                 {
                     if (strstr(generatedString, tmp))
@@ -1153,7 +1159,7 @@ void codeGeneration(Token *token)
             addToString(frameStr, "\n");
         }
 
-        // if operator was set (it means that in storage we have at least 2 items)
+            // if operator was set (it means that in storage we have at least 2 items)
         if (operator!= NOT_DEFINED)
         {
             convertToSameType(frameStr, frame);
@@ -1601,6 +1607,7 @@ void codeGeneration(Token *token)
             }
             removeOperator(); // removing operator
         }
+
         break;
         // end of case VAR_ID/INT/FLOAT
 
@@ -1758,10 +1765,16 @@ void codeGeneration(Token *token)
             cparCounter--;
         }
         if (!cparCounter && IAmInFunction)
-        { // function declaration ended
+        { // function ended
+            if (IAmInFunctionDeclaration) {
+                addToString(1, "POPFRAME\n");
+            }
+
             IAmInFunction = 0;
+            IAmInFunctionDeclaration = 0;
             addToString(2, inFunctionString);
             free(inFunctionString);
+            inFunctionString = NULL;
         }
         else
         {
@@ -1784,9 +1797,22 @@ void codeGeneration(Token *token)
         break;
 
     case L_PAR:
+        lparCounter++;
         break;
 
     case R_PAR:
+        // lparCounter == 1 -> because we can have R_PAR in a body of a function (recognizing body and params)
+        if (IAmInFunctionDeclaration && lparCounter == 1) {
+            for (int i = storageLen-1; i >= 0; i--) {
+                addToString(1, "POPS");
+                addToString(1, frame);
+                addToString(1, storage[i]);
+                addToString(1, "\n");
+
+                removeLastFromStorage();
+            }
+        }
+
         if (storageLen == 1)
         { // if ($var1)
             addToString(frameStr, "PUSHS");
@@ -1800,16 +1826,18 @@ void codeGeneration(Token *token)
             }
             addToString(frameStr, storage[0]);
             addToString(frameStr, "\n");
-            addToString(frameStr, "PUSHS int@0\n");
-            addToString(frameStr, "LTS\n");
+            if (inIf || inWhile) {
+                addToString(frameStr, "PUSHS int@0\n");
+                addToString(frameStr, "LTS\n");
+            }
             removeLastFromStorage();
         }
 
         checkStorage();
 
-        if (IAmInFunction) //todo dat na if IamInFunctionCall (nie function declaration)
+        if (IAmInFunctionCall)
         {
-            addToString(frameStr, "CALL $");
+            addToString(frameStr, "CALL ");
             addToString(frameStr, functionName);
             addToString(frameStr, "\n");
 
@@ -1829,7 +1857,8 @@ void codeGeneration(Token *token)
         break;
 
     case FUNCTION:
-        IAmInFunction = 1;
+        IAmInFunctionDeclaration = 1;
+        lparCounter = 0;
         break;
     case PLUS:
         addToOperator(PLUS);
@@ -1883,27 +1912,39 @@ void codeGeneration(Token *token)
         break;
 
     case ID:
-        if (IAmInFunction)
+        IAmInFunction = 1;
+        if (functionName == NULL)
         {
-            if (functionName == NULL)
-            {
-                functionName = malloc(strlen(token->val) + 1);
-                strcpy(functionName, token->val);
-            }
-            else
-            {
-                functionName = realloc(functionName, strlen(token->val) + 1);
-                strcpy(functionName, token->val);
-            }
+            functionName = malloc(strlen(token->val) + 1);
+            strcpy(functionName, token->val);
         }
+        else
+        {
+            functionName = realloc(functionName, strlen(token->val) + 1);
+            strcpy(functionName, token->val);
+        }
+
+        if (IAmInFunctionDeclaration) {
+            addToString(1, "LABEL ");
+            addToString(1, functionName);
+            addToString(1, "\n");
+
+            addToString(1, "CREATEFRAME\n");
+            addToString(1, "PUSHFRAME\n");
+        } else {
+            IAmInFunctionCall = 1;
+        }
+
         break;
 
     case COMMA:
-        addToString(frameStr, "PUSHS ");
-        AddLForFG(frameStr,IAmInFunction);
-        addToString(frameStr, storage[storageLen - 1]);
-        removeLastFromStorage();
-        addToString(frameStr, "\n");
+        if (!IAmInFunctionDeclaration) {
+            addToString(frameStr, "PUSHS ");
+            AddLForFG(frameStr,IAmInFunction);
+            addToString(frameStr, storage[storageLen - 1]);
+            removeLastFromStorage();
+            addToString(frameStr, "\n");
+        }
         break;
     case COLON:
         break;

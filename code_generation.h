@@ -98,11 +98,20 @@ static char *allFunctionsString = NULL;
 /** Condition/While condition asm code */
 static char *whileIfString = NULL;
 
+/** Auxiliary variable to know if we are in function call */
+static int IAmInFunctionCall = 0;
+
+/** Auxiliary variable to know if we are in function declaration */
+static int IAmInFunctionDeclaration = 0;
+
 /** Auxiliary variable to know if we are in function */
 static int IAmInFunction = 0;
 
 /** Counter of { and } */
 static int cparCounter = 0;
+
+/** Counter of ( */
+static int lparCounter = 0;
 
 /** Number of items in storage */
 static int storageLen = 0;
