@@ -354,6 +354,7 @@ int expression(Token *token)
 {
     Expression *exp = initExpression();
     int count = 0;
+
     while (token->t != SEMICOL && (token->t != R_PAR || count != 0))
     { // getting all tokens in expression
         if (token->t == L_PAR)
@@ -395,23 +396,28 @@ int expression(Token *token)
         return 1;
     }
 
-    int resultType;
+    if (exp->arrayLen != 0) {
+        int resultType;
 
-    if (bottomUp(exp, &resultType))
-    {
-        if (currentSymbol)
+        if (bottomUp(exp, &resultType))
         {
-            currentSymbol->variable->t = resultType;
-        }
+            if (currentSymbol)
+            {
+                currentSymbol->variable->t = resultType;
+            }
 
-        dtorExpression(exp);
+            dtorExpression(exp);
+            return 1;
+        }
+        else
+        {
+            dtorExpression(exp);
+            return 0;
+        }
+    } else {
         return 1;
     }
-    else
-    {
-        dtorExpression(exp);
-        return 0;
-    }
+
 }
 
 int condition(Token *token)
@@ -922,7 +928,6 @@ int statement(Token *token)
             codeGeneration(token);
             dtorToken(token);
             token = getToken();
-
             if (expression(token) == 1)
             { // RETURN <expression>
                 // dtorToken(token);
