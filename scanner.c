@@ -516,6 +516,9 @@ Token *getToken()
                             addCharToToken('0', token);
                             addCharToToken(snum[0], token);
                             addCharToToken(snum[1], token);
+                            if (c == 92) {
+                                getchar();
+                            }
                         }
                         else
                         {
