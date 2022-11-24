@@ -1065,7 +1065,7 @@ void codeGeneration(Token *token)
 {
     // if prolog not added
     if (allFunctionsString == NULL) {
-        addToString(2, ".IFJcode22\n");
+        addToString(2, ".IFJcode22\nJUMP $main\n");
     }
 
     char TmpWhileAndIf[256];
@@ -1108,6 +1108,7 @@ void codeGeneration(Token *token)
 
     case EOF_T:
         // end of file -> we want to print generated code
+        addToString(2, "LABEL $main\n");
         addToString(2, generatedString); // merge
 
         if (generatedString != NULL)
