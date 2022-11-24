@@ -558,6 +558,40 @@ void addBuiltInToSymtable()
     fun->function->params[0]->t = INT;
 
     // ord
+    fun = htab_add_function(symTable, "ord", NULL, NULL, 0);
+    if (!fun)
+    {
+        exit(99);
+    }
+    htab_add_return_type(fun->function);
+    fun->function->returnType->t = INT_PARAM;
+    param = htab_add_parameter(fun->function);
+    fun->function->params[0]->name = calloc(strlen("c") + 1, sizeof(char));
+    strcpy(fun->function->params[0]->name, "c");
+    fun->function->params[0]->t = STRING;
+
+    // chr
+    fun = htab_add_function(symTable, "chr", NULL, NULL, 0);
+    if (!fun)
+    {
+        exit(99);
+    }
+    htab_add_return_type(fun->function);
+    fun->function->returnType->t = STRING_PARAM;
+    param = htab_add_parameter(fun->function);
+    fun->function->params[0]->name = calloc(strlen("i") + 1, sizeof(char));
+    strcpy(fun->function->params[0]->name, "i");
+    fun->function->params[0]->t = INT;
+
+    // write
+    fun = htab_add_function(symTable, "write", NULL, NULL, 0);
+    if (!fun)
+    {
+        exit(99);
+    }
+    htab_add_return_type(fun->function);
+    fun->function->returnType->t = VOID;
+    param = htab_add_parameter(fun->function);
 }
 
 // TODO ZMENIT htab_pair STRUKTURU ABY VYHOVOVALA

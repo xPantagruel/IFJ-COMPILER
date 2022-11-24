@@ -212,7 +212,7 @@ int params(Token *token, int paramIndex)
                 {
                     FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, token->val);
                 }
-                if (currentlyChecked->function->params && currentlyChecked->function->params[paramIndex]->t != ANY)
+                if (strcmp(currentlyChecked->function->name, "write") != 0 && currentlyChecked->function->params && currentlyChecked->function->params[paramIndex]->t != ANY)
                 {
                     if (currentlyChecked->function->params[paramIndex]->t != pair->variable->t) // potencionalni error
                     {
@@ -222,7 +222,7 @@ int params(Token *token, int paramIndex)
             }
             else
             {
-                if (currentlyChecked->function->params && currentlyChecked->function->params[paramIndex]->t != ANY)
+                if (strcmp(currentlyChecked->function->name, "write") != 0 && currentlyChecked->function->params && currentlyChecked->function->params[paramIndex]->t != ANY)
                 {
                     if (currentlyChecked->function->params[paramIndex]->t != token->t) // potencionalni error
                     {
@@ -329,9 +329,16 @@ int params(Token *token, int paramIndex)
     }
     else
     { // epsilon
-        if (currentlyChecked && currentlyChecked->function->paramCount != paramIndex + 1)
+        if (currentlyChecked)
         {
-            FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
+            printf("CURRENTLY CHECKED: %s : %d\n", currentlyChecked->function->name, paramIndex);
+            if (!((currentlyChecked->function->paramCount == 0) && (paramIndex == 0)) && strcmp(currentlyChecked->function->name, "write") != 0)
+            {
+                if (currentlyChecked->function->paramCount != paramIndex + 1)
+                {
+                    FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
+                }
+            }
         }
         ungetc(')', stdin);
         return 2;
