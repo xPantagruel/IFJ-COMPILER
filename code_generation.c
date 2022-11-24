@@ -884,14 +884,18 @@ void convertToSameType(int frameStr, char *frame)
     addToString(frameStr, "TYPE ");
     addToString(frameStr, frame);
     addToString(frameStr, tmp1);
-    addToString(frameStr, frame);
+    if (!strstr(storage[storageLen - 1], "@")) {
+        addToString(frameStr, frame);
+    }
     addToString(frameStr, storage[storageLen - 1]);
     addToString(frameStr, "\n");
 
     addToString(frameStr, "TYPE ");
     addToString(frameStr, frame);
     addToString(frameStr, tmp2);
-    addToString(frameStr, frame);
+    if (!strstr(storage[storageLen - 2], "@")) {
+        addToString(frameStr, frame);
+    }
     addToString(frameStr, storage[storageLen - 2]);
     addToString(frameStr, "\n");
 
@@ -927,12 +931,17 @@ void convertToSameType(int frameStr, char *frame)
     addToString(frameStr, "LABEL "); // neqEq
     addToString(frameStr, neqEqLabel);
     addToString(frameStr, "\n");
-    addToString(frameStr, "INT2FLOAT ");
-    addToString(frameStr, frame);
-    addToString(frameStr, storage[storageLen - 1]);
-    addToString(frameStr, frame);
-    addToString(frameStr, storage[storageLen - 1]);
-    addToString(frameStr, "\n");
+    if (!strstr(storage[storageLen - 1], "@")) {
+        addToString(frameStr, "INT2FLOAT ");
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen - 1]);
+        if (!strstr(storage[storageLen - 1], "@")) {
+            addToString(frameStr, frame);
+        }
+        addToString(frameStr, storage[storageLen - 1]);
+        addToString(frameStr, "\n");
+    } 
+
 
     addToString(frameStr, "JUMP ");
     addToString(frameStr, checkTypeEnd);
@@ -941,12 +950,16 @@ void convertToSameType(int frameStr, char *frame)
     addToString(frameStr, "LABEL "); // neqNeq
     addToString(frameStr, neqNeqLabel);
     addToString(frameStr, "\n");
-    addToString(frameStr, "INT2FLOAT ");
-    addToString(frameStr, frame);
-    addToString(frameStr, storage[storageLen - 2]);
-    addToString(frameStr, frame);
-    addToString(frameStr, storage[storageLen - 2]);
-    addToString(frameStr, "\n");
+    if (!strstr(storage[storageLen - 2], "@")) {
+        addToString(frameStr, "INT2FLOAT ");
+        addToString(frameStr, frame);
+        addToString(frameStr, storage[storageLen - 2]);
+        if (!strstr(storage[storageLen - 2], "@")) {
+            addToString(frameStr, frame);
+        }
+        addToString(frameStr, storage[storageLen - 2]);
+        addToString(frameStr, "\n");
+    } 
 
     addToString(frameStr, "JUMP ");
     addToString(frameStr, checkTypeEnd);
@@ -981,7 +994,9 @@ void divIdiv(int frameStr, char *frame)
     addToString(frameStr, "TYPE ");
     addToString(frameStr, frame);
     addToString(frameStr, tmp1); // result in tmp1
-    addToString(frameStr, frame);
+    if (!strstr(storage[storageLen - 1], "@")) {
+        addToString(frameStr, frame);
+    }
     addToString(frameStr, storage[storageLen - 1]);
     addToString(frameStr, "\n");
 
@@ -1060,6 +1075,11 @@ void codeGeneration(Token *token)
     int frameStr = 0; // generatedString
     char frame[5];    // string of actual frame LF/GF/TF
 
+    double strFloat;
+    char convertedFloatToHexa[100];
+    int convertedLen;
+    
+
     // variables used to create random names
     char randomVar1[11];
     char randomVar2[11];
@@ -1105,6 +1125,17 @@ void codeGeneration(Token *token)
     case FLOAT:
         if (IAmInFunction) {
             frameStr = 1;
+        }
+
+        if (token->t == FLOAT) {
+            strFloat = atof(token->val);
+            sprintf(convertedFloatToHexa, "%a", strFloat);
+            convertedLen = strlen(convertedFloatToHexa);
+            token->val = realloc(token->val, sizeof(char)*convertedLen);
+            if (token->val == NULL) {
+                exit(99);
+            }
+            strcpy(token->val, convertedFloatToHexa);
         }
 
         // setting prefix
