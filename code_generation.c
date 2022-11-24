@@ -1678,7 +1678,7 @@ void codeGeneration(Token *token)
         inWhile -= 1;
         GetUniqueVarName();
         addToString(frameStr, "JUMP ");
-        addToString(frameStr, listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL WHILESTART UniqueName
+        addToString(frameStr, listWhileLabels->firstElement->nextElement->nextElement->data);//JUMP WHILESTART UniqueName
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
@@ -1731,8 +1731,10 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         // //add from listCodeGen condition and delete it after
-        addToString(frameStr, listCodeGen->firstElement->data);//add condition
-
+        //add from listCodeGen condition and delete it after
+        if (listCodeGen->firstElement != NULL) {
+            addToString(frameStr, listCodeGen->firstElement->data);//add condition
+        }
         addToString(frameStr,"DEFVAR ");
         AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr,"CONDVAR");
