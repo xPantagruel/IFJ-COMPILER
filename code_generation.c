@@ -1756,7 +1756,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, " true");//JUMPIFEQ STARTIF UNIQUENAME true
         addToString(frameStr, "\n");
 
-        addToString(frameStr, "LABEL $");
+        addToString(frameStr, "JUMP $");
         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);//LABEL ELSE UniqueName
         addToString(frameStr, "\n");
 
