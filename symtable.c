@@ -450,7 +450,7 @@ void htab_print(htab_t *t)
 
 void addBuiltInToSymtable()
 {
-
+    // reads
     htab_pair_t *fun = htab_add_function(symTable, "reads", NULL, NULL, 0);
     if (!fun)
     {
@@ -460,6 +460,7 @@ void addBuiltInToSymtable()
     fun->function->returnType->canBeNull = true;
     fun->function->returnType->t = STRING_PARAM;
 
+    // readi
     fun = htab_add_function(symTable, "readi", NULL, NULL, 0);
     if (!fun)
     {
@@ -469,6 +470,7 @@ void addBuiltInToSymtable()
     fun->function->returnType->canBeNull = true;
     fun->function->returnType->t = INT_PARAM;
 
+    // readf
     fun = htab_add_function(symTable, "readf", NULL, NULL, 0);
     if (!fun)
     {
@@ -478,6 +480,7 @@ void addBuiltInToSymtable()
     fun->function->returnType->canBeNull = true;
     fun->function->returnType->t = FLOAT_PARAM;
 
+    // floatval
     fun = htab_add_function(symTable, "floatval", NULL, NULL, 0);
     if (!fun)
     {
@@ -491,6 +494,7 @@ void addBuiltInToSymtable()
     fun->function->params[0]->t = ANY;
     fun->function->params[0]->canBeNull = true;
 
+    // intval
     fun = htab_add_function(symTable, "intval", NULL, NULL, 0);
     if (!fun)
     {
@@ -504,6 +508,7 @@ void addBuiltInToSymtable()
     fun->function->params[0]->t = ANY;
     fun->function->params[0]->canBeNull = true;
 
+    // stringval
     fun = htab_add_function(symTable, "stringval", NULL, NULL, 0);
     if (!fun)
     {
@@ -516,6 +521,41 @@ void addBuiltInToSymtable()
     strcpy(fun->function->params[0]->name, "term");
     fun->function->params[0]->t = ANY;
     fun->function->params[0]->canBeNull = true;
+
+    // strlen
+    fun = htab_add_function(symTable, "strlen", NULL, NULL, 0);
+    if (!fun)
+    {
+        exit(99);
+    }
+    htab_add_return_type(fun->function);
+    fun->function->returnType->t = INT_PARAM;
+    param = htab_add_parameter(fun->function);
+    fun->function->params[0]->name = calloc(strlen("s") + 1, sizeof(char));
+    strcpy(fun->function->params[0]->name, "s");
+    fun->function->params[0]->t = STRING;
+
+    // substring
+    fun = htab_add_function(symTable, "substring", NULL, NULL, 0);
+    if (!fun)
+    {
+        exit(99);
+    }
+    htab_add_return_type(fun->function);
+    fun->function->returnType->t = STRING_PARAM;
+    fun->function->returnType->canBeNull = true;
+    param = htab_add_parameter(fun->function);
+    fun->function->params[0]->name = calloc(strlen("s") + 1, sizeof(char));
+    strcpy(fun->function->params[0]->name, "s");
+    fun->function->params[0]->t = STRING;
+    function_param_t *param2 = htab_add_parameter(fun->function);
+    fun->function->params[0]->name = calloc(strlen("i") + 1, sizeof(char));
+    strcpy(fun->function->params[0]->name, "i");
+    fun->function->params[0]->t = INT;
+    function_param_t *param3 = htab_add_parameter(fun->function);
+    fun->function->params[0]->name = calloc(strlen("j") + 1, sizeof(char));
+    strcpy(fun->function->params[0]->name, "j");
+    fun->function->params[0]->t = INT;
 }
 
 // TODO ZMENIT htab_pair STRUKTURU ABY VYHOVOVALA

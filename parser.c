@@ -63,7 +63,7 @@ bool function_declaration(Token *token)
 
     iAmInConditionWhileFunRule = 1;
 
-    codeGeneration(token);
+    // codeGeneration(token);
     dtorToken(token);
     token = getToken();
 
@@ -72,7 +72,7 @@ bool function_declaration(Token *token)
         return false; // missing function name
     }
 
-    codeGeneration(token);
+    // codeGeneration(token);
     dtorToken(token);
     token = getToken();
 
@@ -80,7 +80,7 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> :
         return false; // missing COLON
     }
-    codeGeneration(token);
+    // codeGeneration(token);
     dtorToken(token);
     token = getToken();
     if (type(token) != 1)
@@ -98,7 +98,7 @@ bool function_declaration(Token *token)
         }
     }
 
-    codeGeneration(token);
+    // codeGeneration(token);
     dtorToken(token);
     token = getToken();
     if (token->t != L_CPAR)
@@ -117,14 +117,14 @@ bool function_declaration(Token *token)
     }
     printFrameStack(frameStack);
     htab_print(symTable);
-    codeGeneration(token);
+    // codeGeneration(token);
     dtorToken(token);
     token = getToken();
     if (statement(token) == 0)
     {                 // FUNCTION <function_call> : <type> { <statement>
         return false; // invalid statement
     }
-    // codeGeneration(token);
+    // //codeGeneration(token);
     dtorToken(token);
     token = getToken();
     if (token->t != R_CPAR)
@@ -156,7 +156,7 @@ bool prog(Token *token)
         {                 //<prog> -> <statement>
             return false; // invalid statement
         }
-        codeGeneration(token);
+        // codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (prog(token))
@@ -235,7 +235,7 @@ int params(Token *token, int paramIndex)
         {
             FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, ""); // TODO: edit macro so no object can be passed
         }
-        codeGeneration(token);
+        // codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (params_n(token) == 1)
@@ -286,7 +286,7 @@ int params(Token *token, int paramIndex)
             }
         }
 
-        codeGeneration(token);
+        // codeGeneration(token);
         dtorToken(token);
 
         token = getToken();
@@ -298,7 +298,7 @@ int params(Token *token, int paramIndex)
                 strcpy(param->name, token->val);
             }
 
-            codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (params_n(token) == 1)
@@ -331,7 +331,7 @@ int params(Token *token, int paramIndex)
     { // epsilon
         if (currentlyChecked && currentlyChecked->function->paramCount != paramIndex + 1)
         {
-            FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentSymbol->function->name);
+            FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
         }
         ungetc(')', stdin);
         return 2;
@@ -346,7 +346,7 @@ int params_n(Token *token)
     }
     else if (token->t == COMMA)
     {
-        codeGeneration(token);
+        // codeGeneration(token);
         dtorToken(token);
         token = getToken(); // token is set to the next one
         return 1;
@@ -394,7 +394,7 @@ int expression(Token *token)
 
     if (exp->arrayLen == 1)
     {
-        codeGeneration(exp->tokenArray[0]);
+        // codeGeneration(exp->tokenArray[0]);
         if (currentSymbol)
         {
             currentSymbol->variable->t = exp->tokenArray[0]->t;
@@ -434,12 +434,12 @@ int condition(Token *token)
     if (token->t == IF)
     { // IF
         iAmInConditionWhileFunRule = 1;
-        codeGeneration(token);
+        // codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (token->t == L_PAR)
-        {                          // IF (
-            codeGeneration(token); // todo mozno tu dtor
+        { // IF (
+            // codeGeneration(token); // todo mozno tu dtor
             token = getToken();
             if (expression(token))
             { // IF ( <expression>
@@ -447,37 +447,37 @@ int condition(Token *token)
                 token = getToken();
                 if (token->t == R_PAR)
                 { // IF ( <expression> )
-                    codeGeneration(token);
+                    // codeGeneration(token);
                     dtorToken(token);
                     token = getToken();
                     if (token->t == L_CPAR)
                     { // IF ( <expression> ) {
-                        codeGeneration(token);
+                        // codeGeneration(token);
                         dtorToken(token);
                         token = getToken();
                         if (statement(token))
                         { // IF ( <expression> ) { <statement>
-                            codeGeneration(token);
+                            // codeGeneration(token);
                             dtorToken(token);
                             token = getToken();
                             if (token->t == R_CPAR)
                             { // IF ( <expression> ) { <statement> }
-                                // codeGeneration(token);
+                                // //codeGeneration(token);
                                 dtorToken(token);
                                 token = getToken();
                                 if (token->t == ELSE)
                                 { // IF ( <expression> ) { <statement> } ELSE
-                                    codeGeneration(token);
+                                    // codeGeneration(token);
                                     dtorToken(token);
                                     token = getToken();
                                     if (token->t == L_CPAR)
                                     { // IF ( <expression> ) { <statement> } ELSE {
-                                        codeGeneration(token);
+                                        // codeGeneration(token);
                                         dtorToken(token);
                                         token = getToken();
                                         if (statement(token))
                                         { // IF ( <expression> ) { <statement> } ELSE { <statement>
-                                            codeGeneration(token);
+                                            // codeGeneration(token);
                                             dtorToken(token);
                                             token = getToken();
                                             if (token->t == R_CPAR)
@@ -563,13 +563,13 @@ int function_call(Token *token, bool isDeclaration)
             }
         }
 
-        codeGeneration(token);
+        // codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (token->t == L_PAR)
         { // ID (
 
-            codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (params(token, 0))
@@ -610,11 +610,11 @@ int while_rule(Token *token)
     if (token->t == WHILE)
     { // while
         iAmInConditionWhileFunRule = 1;
-        codeGeneration(token);
+        // codeGeneration(token);
         token = getToken(); // mozno tu free??
         if (token->t == L_PAR)
         { // while (
-            codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (expression(token) == 1)
@@ -623,18 +623,18 @@ int while_rule(Token *token)
                 token = getToken();
                 if (token->t == R_PAR)
                 { // while ( <expression> )
-                    codeGeneration(token);
+                    // codeGeneration(token);
                     dtorToken(token);
                     token = getToken();
                     if (token->t == L_CPAR)
                     { // while ( <expression> ) {
 
-                        codeGeneration(token);
+                        // codeGeneration(token);
                         dtorToken(token);
                         token = getToken();
                         if (statement(token))
                         { // while ( <expression> ) { <statement>
-                            codeGeneration(token);
+                            // codeGeneration(token);
                             dtorToken(token);
                             token = getToken();
                             if (token->t == R_CPAR)
@@ -717,7 +717,7 @@ int statement(Token *token)
     {
         if (function_declaration(token))
         {
-            codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
@@ -737,12 +737,12 @@ int statement(Token *token)
     else if (token->t == VAR_ID)
     { // VAR_ID
         currentSymbol = htab_add_variable(symTable, token->val, peekFrame(frameStack), -1);
-        codeGeneration(token);
+        // codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (token->t == EQ)
         { // VAR_ID =
-            codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
 
@@ -759,7 +759,7 @@ int statement(Token *token)
                 }
                 char *tmpStr = calloc(token->valLen + 1, sizeof(char));
                 strcpy(tmpStr, token->val);
-                codeGeneration(token);
+                // codeGeneration(token);
                 dtorToken(token);
                 token = getToken();
                 if (token->t == SEMICOL)
@@ -772,7 +772,7 @@ int statement(Token *token)
 
                     free(tmpStr);
                     dtorToken(tmp);
-                    codeGeneration(token);
+                    // codeGeneration(token);
                     dtorToken(token);
                     token = getToken();
                     if (statement(token))
@@ -792,7 +792,7 @@ int statement(Token *token)
                         token = getToken();
                         if (token->t == SEMICOL)
                         { // VAR_ID = <expression> ;
-                            codeGeneration(token);
+                            // codeGeneration(token);
                             dtorToken(token);
                             token = getToken();
                             if (statement(token))
@@ -817,12 +817,12 @@ int statement(Token *token)
             }
             else if (var_rule(token) == 1)
             { // VAR_ID = <var_rule>
-                codeGeneration(token);
+                // codeGeneration(token);
                 dtorToken(token);
                 token = getToken();
                 if (token->t == SEMICOL)
                 { // VAR_ID = <var_rule>;
-                    codeGeneration(token);
+                    // codeGeneration(token);
                     dtorToken(token);
                     token = getToken();
                     if (statement(token))
@@ -847,7 +847,7 @@ int statement(Token *token)
                     token = getToken();
                     if (token->t == SEMICOL)
                     { // VAR_ID = <expression>;
-                        codeGeneration(token);
+                        // codeGeneration(token);
                         dtorToken(token);
                         token = getToken();
                         if (statement(token))
@@ -881,7 +881,7 @@ int statement(Token *token)
     }
     else if (token->t == RETURN)
     { // RETURN
-        codeGeneration(token);
+        // codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (token->t == SEMICOL)
@@ -901,12 +901,12 @@ int statement(Token *token)
                 addCharToToken(token->val[i], tmp);
             }
 
-            codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (token->t == SEMICOL)
-            {                          // RETURN <var_rule>;
-                codeGeneration(token); // added
+            { // RETURN <var_rule>;
+                // codeGeneration(token); // added
                 dtorToken(tmp);
                 return 1;
             }
@@ -918,7 +918,7 @@ int statement(Token *token)
                     token = getToken();
                     if (token->t == SEMICOL)
                     {
-                        codeGeneration(token); // added
+                        // codeGeneration(token); // added
                         return 1;
                     }
                     else
@@ -934,7 +934,7 @@ int statement(Token *token)
         }
         else if (var_rule(token) == 2)
         {
-            codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (expression(token) == 1)
@@ -942,8 +942,8 @@ int statement(Token *token)
                 // dtorToken(token);
                 token = getToken();
                 if (token->t == SEMICOL)
-                {                          // RETURN <expression>;
-                    codeGeneration(token); // mozno chyba dtor added
+                { // RETURN <expression>;
+                    // codeGeneration(token); // mozno chyba dtor added
                     return 1;
                 }
                 else
@@ -965,7 +965,7 @@ int statement(Token *token)
     { // <condtion> (IF)
         if (condition(token) == 1)
         { // <condition>
-            // codeGeneration(token);
+            // //codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
@@ -986,7 +986,7 @@ int statement(Token *token)
     { //<while> (WHILE)
         if (while_rule(token) == 1)
         { // <while>
-            // codeGeneration(token);
+            // //codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
@@ -1007,12 +1007,12 @@ int statement(Token *token)
     { // <function_call> (ID)
         if (function_call(token, false) == 1)
         { // <function_call>
-            codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (token->t == SEMICOL)
             { // <function_call> ;
-                codeGeneration(token);
+                // codeGeneration(token);
                 dtorToken(token);
                 token = getToken();
                 if (statement(token))
@@ -1060,7 +1060,7 @@ int main()
     Token *token = getToken();
     if (prog(token))
     {
-        codeGeneration(token);
+        // codeGeneration(token);
         dtorToken(token);
         // htab_print(symTable);
 
