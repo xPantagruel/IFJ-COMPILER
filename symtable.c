@@ -556,6 +556,8 @@ void addBuiltInToSymtable()
     fun->function->params[0]->name = calloc(strlen("j") + 1, sizeof(char));
     strcpy(fun->function->params[0]->name, "j");
     fun->function->params[0]->t = INT;
+
+    // ord
 }
 
 // TODO ZMENIT htab_pair STRUKTURU ABY VYHOVOVALA

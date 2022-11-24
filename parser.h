@@ -31,9 +31,9 @@
  * @param object name(must be string) of variable/function/lexeme where error occured, pass "" when no object
  */
 #define FREE_EXIT(code, message, object)      \
-    htab_free(symTable);                      \
     if ((message))                            \
         fprintf(stdout, (message), (object)); \
+    htab_free(symTable);                      \
     exit(code);
 
 #include "scanner.h"
