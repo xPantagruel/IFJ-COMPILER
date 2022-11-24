@@ -108,7 +108,7 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> : <type> { <statement>
         return false; // invalid statement
     }
-    codeGeneration(token);
+    //codeGeneration(token);
     dtorToken(token);
     token = getToken();
     if (token->t != R_CPAR)
@@ -358,6 +358,10 @@ int expression(Token *token)
     {
         ungetc(')', stdin);
     }
+
+    // for (int i = 0; i<exp->arrayLen;i++) {
+    //     printf("exp-%s\n", exp->tokenArray[i]->val);
+    // }
 
     if (exp->arrayLen == 1)
     {
@@ -848,7 +852,7 @@ int statement(Token *token)
         }
         else if (var_rule(token) == 1)
         { // RETURN <var_rule>
-
+            
             // if token == var_id -> can be <expression>
             // storing previous token
             Token *tmp = tokenInit();
@@ -864,6 +868,7 @@ int statement(Token *token)
             token = getToken();
             if (token->t == SEMICOL)
             { // RETURN <var_rule>;
+                codeGeneration(token); //added
                 dtorToken(tmp);
                 return 1;
             }
@@ -875,6 +880,7 @@ int statement(Token *token)
                     token = getToken();
                     if (token->t == SEMICOL)
                     {
+                        codeGeneration(token); //added
                         return 1;
                     }
                     else
@@ -900,6 +906,7 @@ int statement(Token *token)
                 token = getToken();
                 if (token->t == SEMICOL)
                 { // RETURN <expression>;
+                    codeGeneration(token); //mozno chyba dtor added
                     return 1;
                 }
                 else

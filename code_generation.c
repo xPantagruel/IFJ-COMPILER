@@ -692,7 +692,22 @@ void checkStorage()
 
         removeLastFromStorage();
         removeLastFromStorage();
+    } else if (storageLen == 1 && IAmInFunctionDeclaration) {
+        addToString(frameStr, "PUSHS");
+        if (storage[0] != NULL && storage[0][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[0]);
+        addToString(frameStr, "\n");
+
+        removeLastFromStorage();
     }
+
 }
 
 void threeAddress(int frameStr, char *frame)
@@ -1768,6 +1783,7 @@ void codeGeneration(Token *token)
         { // function ended
             if (IAmInFunctionDeclaration) {
                 addToString(1, "POPFRAME\n");
+                addToString(1, "RETURN\n");
             }
 
             IAmInFunction = 0;
@@ -1831,6 +1847,19 @@ void codeGeneration(Token *token)
                 addToString(frameStr, "LTS\n");
             }
             removeLastFromStorage();
+        } if (storageLen == 2 && IAmInFunctionCall) {
+            addToString(frameStr, "PUSHS ");
+            if (storage[0][0] == '-')
+            {
+                addToString(frameStr, frame);
+            }
+            else
+            {
+                addToString(frameStr, " ");
+            }
+            addToString(frameStr, storage[storageLen-1]);
+            addToString(frameStr, "\n");
+            removeLastFromStorage();
         }
 
         checkStorage();
@@ -1840,6 +1869,13 @@ void codeGeneration(Token *token)
             addToString(frameStr, "CALL ");
             addToString(frameStr, functionName);
             addToString(frameStr, "\n");
+
+            if (storage[0] != NULL) {
+                addToString(frameStr, "POPS GF@");
+                addToString(frameStr, storage[storageLen-1]);
+                addToString(frameStr, "\n");
+                removeLastFromStorage();
+            }
 
             if (functionName != NULL)
             {
@@ -1853,9 +1889,8 @@ void codeGeneration(Token *token)
 
     case SEMICOL:
         checkStorage();
-        resetGlobalValues();
+        resetGlobalValues(); 
         break;
-
     case FUNCTION:
         IAmInFunctionDeclaration = 1;
         lparCounter = 0;
@@ -1940,7 +1975,9 @@ void codeGeneration(Token *token)
     case COMMA:
         if (!IAmInFunctionDeclaration) {
             addToString(frameStr, "PUSHS ");
-            AddLForFG(frameStr,IAmInFunction);
+            if (!strstr(storage[storageLen - 1], "@")) {
+                AddLForFG(frameStr,IAmInFunction);
+            }
             addToString(frameStr, storage[storageLen - 1]);
             removeLastFromStorage();
             addToString(frameStr, "\n");

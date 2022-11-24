@@ -1098,6 +1098,7 @@ Token *getToken()
         }
     }
 
+    //printf("--%s\n", token->val);
     return token;
 }
 /*** End of scanner.c ***/
