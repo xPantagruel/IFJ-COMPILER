@@ -115,7 +115,8 @@ bool function_declaration(Token *token)
             var->variable->canBeNull = currentSymbol->function->params[i]->canBeNull;
         }
     }
-
+    printFrameStack(frameStack);
+    htab_print(symTable);
     codeGeneration(token);
     dtorToken(token);
     token = getToken();
@@ -123,16 +124,17 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> : <type> { <statement>
         return false; // invalid statement
     }
-    //codeGeneration(token);
+    // codeGeneration(token);
     dtorToken(token);
     token = getToken();
     if (token->t != R_CPAR)
     {                 // FUNCTION <function_call> : <type> { <statement> }
         return false; // missing R_CPAR
     }
-
+    printFrameStack(frameStack);
     Frame *f = popFrame(frameStack);
     eraseFrame(f);
+
     currentSymbol = NULL;
 
     iAmInConditionWhileFunRule = 0; // I am out of function declaration
@@ -210,17 +212,22 @@ int params(Token *token, int paramIndex)
                 {
                     FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, token->val);
                 }
-
-                if (currentlyChecked->function->params[paramIndex]->t != pair->variable->t) // potencionalni error
+                if (currentlyChecked->function->params && currentlyChecked->function->params[paramIndex]->t != ANY)
                 {
-                    FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
+                    if (currentlyChecked->function->params[paramIndex]->t != pair->variable->t) // potencionalni error
+                    {
+                        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
+                    }
                 }
             }
             else
             {
-                if (currentlyChecked->function->params[paramIndex]->t != token->t) // potencionalni error
+                if (currentlyChecked->function->params && currentlyChecked->function->params[paramIndex]->t != ANY)
                 {
-                    FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
+                    if (currentlyChecked->function->params[paramIndex]->t != token->t) // potencionalni error
+                    {
+                        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
+                    }
                 }
             }
         }
@@ -396,7 +403,8 @@ int expression(Token *token)
         return 1;
     }
 
-    if (exp->arrayLen != 0) {
+    if (exp->arrayLen != 0)
+    {
         int resultType;
 
         if (bottomUp(exp, &resultType))
@@ -414,10 +422,11 @@ int expression(Token *token)
             dtorExpression(exp);
             return 0;
         }
-    } else {
+    }
+    else
+    {
         return 1;
     }
-
 }
 
 int condition(Token *token)
@@ -881,7 +890,7 @@ int statement(Token *token)
         }
         else if (var_rule(token) == 1)
         { // RETURN <var_rule>
-            
+
             // if token == var_id -> can be <expression>
             // storing previous token
             Token *tmp = tokenInit();
@@ -896,8 +905,8 @@ int statement(Token *token)
             dtorToken(token);
             token = getToken();
             if (token->t == SEMICOL)
-            { // RETURN <var_rule>;
-                codeGeneration(token); //added
+            {                          // RETURN <var_rule>;
+                codeGeneration(token); // added
                 dtorToken(tmp);
                 return 1;
             }
@@ -909,7 +918,7 @@ int statement(Token *token)
                     token = getToken();
                     if (token->t == SEMICOL)
                     {
-                        codeGeneration(token); //added
+                        codeGeneration(token); // added
                         return 1;
                     }
                     else
@@ -933,8 +942,8 @@ int statement(Token *token)
                 // dtorToken(token);
                 token = getToken();
                 if (token->t == SEMICOL)
-                { // RETURN <expression>;
-                    codeGeneration(token); //mozno chyba dtor added
+                {                          // RETURN <expression>;
+                    codeGeneration(token); // mozno chyba dtor added
                     return 1;
                 }
                 else
@@ -1041,6 +1050,8 @@ int main()
     frameStack = initFrameStack();
     currentSymbol = NULL;
     currentlyChecked = NULL;
+    addBuiltInToSymtable();
+    htab_print(symTable);
     // Example how parser can be called.
     DLL_Init(0);
     DLL_Init(1);

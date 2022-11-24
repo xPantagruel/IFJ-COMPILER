@@ -9,6 +9,8 @@ run: parser
 copy:
 	sshpass -p ${pass} scp -r /home/xpetri25/School/IFJ/IFJ xpetri25@merlin.fit.vutbr.cz:/homes/eva/xp/xpetri25/ifj
 
+test: 
+	python3 test.py ./parser
 
 memcheck: parser
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./parser < testFile.txt

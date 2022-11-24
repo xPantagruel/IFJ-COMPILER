@@ -55,8 +55,9 @@ enum type
     MORE_EQ,          // >=
     NOT_EQ,           // !==
     STRING,           // "string \x1F"
-    COLON             // :
-};                    // end of enum type
+    COLON,            // :
+    ANY
+}; // end of enum type
 
 /** states of FSM */
 enum state

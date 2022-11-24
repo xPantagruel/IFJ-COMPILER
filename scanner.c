@@ -1100,6 +1100,7 @@ Token *getToken()
             // end of switch by actualState
         }
     }
+    printf("TOKEN: %s\n", token->val);
     return token;
 }
 /*** End of scanner.c ***/
