@@ -419,6 +419,7 @@ htab_pair_t *htab_search(htab_t *t, htab_key_t key)
         {
             return tmp->pair;
         }
+        tmp = tmp->next;
     }
     return NULL;
 }
