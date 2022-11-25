@@ -287,13 +287,11 @@ void WRITE()
     addToString(2, "DEFVAR LF@VarType\n");
     addToString(2, "DEFVAR LF@ParamsNumber\n");
 
-
-
     addToString(2, "POPS LF@ParamsNumber\n");//pocet parametru
 
     addToString(2, "LABEL $BEFOREPOP\n");
     
-    addToString(2, "EQ DEFINITIVEEND  0 ParamsNumber\n");
+    addToString(2, "JUMPIFEQ DEFINITIVEEND  0 ParamsNumber\n");
 
     addToString(2, "POPS LF@VarWrite\n");
     addToString(2, "SUB ParamsNumber ParamsNumber 1\n");
