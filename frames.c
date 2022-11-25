@@ -76,7 +76,6 @@ Frame *eraseFrame(Frame *frame)
     }
     free(frame->vars);
 
-    Frame *parent = frame->parent;
     frame = NULL;
     return NULL;
 }

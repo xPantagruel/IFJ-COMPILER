@@ -20,6 +20,7 @@
 /** types that token->t can acquire */
 enum type
 {
+    NEG = -1,
     NOT_DEFINED,      // initial type
     VAR_ID,           // $variable
     SLASH,            // / (divide)

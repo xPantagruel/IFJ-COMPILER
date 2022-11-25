@@ -378,7 +378,7 @@ void htab_print_variable(htab_variable_t *var)
 {
     if (var->name)
         printf("variable: %s\n", var->name);
-    if (var->t != -1)
+    if (var->t != NEG)
     {
         printf("type: %d\n", var->t);
     }
