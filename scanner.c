@@ -464,7 +464,7 @@ Token *getToken()
                         actualState = ID_S;
                     }
                     unGetC(c);
-                } 
+                }
                 break;
                 // end of switch by char in START state
             }
@@ -472,7 +472,8 @@ Token *getToken()
             // end of case START
 
         case STRING_S:
-            if (c == EOF) {
+            if (c == EOF)
+            {
                 exit(1);
             }
             switch (isalpha(c))
@@ -516,7 +517,8 @@ Token *getToken()
                             addCharToToken('0', token);
                             addCharToToken(snum[0], token);
                             addCharToToken(snum[1], token);
-                            if (c == 92) {
+                            if (c == 92)
+                            {
                                 getchar();
                             }
                         }
@@ -1103,7 +1105,6 @@ Token *getToken()
             // end of switch by actualState
         }
     }
-    printf("TOKEN: %s\n", token->val);
     return token;
 }
 /*** End of scanner.c ***/

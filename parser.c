@@ -115,8 +115,7 @@ bool function_declaration(Token *token)
             var->variable->canBeNull = currentSymbol->function->params[i]->canBeNull;
         }
     }
-    printFrameStack(frameStack);
-    htab_print(symTable);
+
     codeGeneration(token);
     dtorToken(token);
     token = getToken();
@@ -124,14 +123,13 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> : <type> { <statement>
         return false; // invalid statement
     }
-    //codeGeneration(token);
+    // codeGeneration(token);
     dtorToken(token);
     token = getToken();
     if (token->t != R_CPAR)
     {                 // FUNCTION <function_call> : <type> { <statement> }
         return false; // missing R_CPAR
     }
-    printFrameStack(frameStack);
     Frame *f = popFrame(frameStack);
     eraseFrame(f);
 
@@ -331,7 +329,6 @@ int params(Token *token, int paramIndex)
     { // epsilon
         if (currentlyChecked)
         {
-            printf("CURRENTLY CHECKED: %s : %d\n", currentlyChecked->function->name, paramIndex);
             if (!((currentlyChecked->function->paramCount == 0) && (paramIndex == 0)) && strcmp(currentlyChecked->function->name, "write") != 0)
             {
                 if (currentlyChecked->function->paramCount != paramIndex + 1)
@@ -395,10 +392,6 @@ int expression(Token *token)
         ungetc(')', stdin);
     }
 
-    // for (int i = 0; i<exp->arrayLen;i++) {
-    //     printf("exp-%s\n", exp->tokenArray[i]->val);
-    // }
-
     if (exp->arrayLen == 1)
     {
         // codeGeneration(exp->tokenArray[0]);
@@ -445,7 +438,7 @@ int condition(Token *token)
         dtorToken(token);
         token = getToken();
         if (token->t == L_PAR)
-        { // IF (
+        {                          // IF (
             codeGeneration(token); // todo mozno tu dtor
             token = getToken();
             if (expression(token))
@@ -469,7 +462,7 @@ int condition(Token *token)
                             token = getToken();
                             if (token->t == R_CPAR)
                             { // IF ( <expression> ) { <statement> }
-                                //codeGeneration(token);
+                                // codeGeneration(token);
                                 dtorToken(token);
                                 token = getToken();
                                 if (token->t == ELSE)
@@ -922,7 +915,7 @@ int statement(Token *token)
             dtorToken(token);
             token = getToken();
             if (token->t == SEMICOL)
-            { // RETURN <var_rule>;
+            {                          // RETURN <var_rule>;
                 codeGeneration(token); // added
                 dtorToken(tmp);
                 return 1;
@@ -959,7 +952,7 @@ int statement(Token *token)
                 // dtorToken(token);
                 token = getToken();
                 if (token->t == SEMICOL)
-                { // RETURN <expression>;
+                {                          // RETURN <expression>;
                     codeGeneration(token); // mozno chyba dtor added
                     return 1;
                 }
@@ -982,7 +975,7 @@ int statement(Token *token)
     { // <condtion> (IF)
         if (condition(token) == 1)
         { // <condition>
-            //codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
@@ -1003,7 +996,7 @@ int statement(Token *token)
     { //<while> (WHILE)
         if (while_rule(token) == 1)
         { // <while>
-            //codeGeneration(token);
+            // codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
@@ -1068,7 +1061,6 @@ int main()
     currentSymbol = NULL;
     currentlyChecked = NULL;
     addBuiltInToSymtable();
-    htab_print(symTable);
     // Example how parser can be called.
     DLL_Init(0);
     DLL_Init(1);
@@ -1079,7 +1071,6 @@ int main()
     {
         codeGeneration(token);
         dtorToken(token);
-        // htab_print(symTable);
 
         if (generatedString != NULL)
         {

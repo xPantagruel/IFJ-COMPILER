@@ -32,7 +32,7 @@
  */
 #define FREE_EXIT(code, message, object)      \
     if ((message))                            \
-        fprintf(stdout, (message), (object)); \
+        fprintf(stderr, (message), (object)); \
     htab_free(symTable);                      \
     exit(code);
 
