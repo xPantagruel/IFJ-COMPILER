@@ -517,10 +517,6 @@ Token *getToken()
                             addCharToToken('0', token);
                             addCharToToken(snum[0], token);
                             addCharToToken(snum[1], token);
-                            if (c == 92)
-                            {
-                                getchar();
-                            }
                         }
                         else
                         {
@@ -565,7 +561,13 @@ Token *getToken()
                 }
                 else
                 {
-                    addCharToToken(c, token);
+                    if (c == 'n' && token->valLen >= 4 && token->val[token->valLen-4] == '\\') {
+                                token->val[token->valLen-1] = '0';
+                                token->val[token->valLen-2] = '1';
+                                token->val[token->valLen-3] = '0';
+                    } else {
+                        addCharToToken(c, token);
+                    }
                 }
                 break;
             }

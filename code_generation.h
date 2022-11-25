@@ -83,6 +83,8 @@ static bool Return = 0;
 /** int if in if body*/
 static int inIf = 0;
 
+static int buildInCalled = 0;
+
 static int functionCallParamsCounter = 0;
 
 /** int if in While body*/

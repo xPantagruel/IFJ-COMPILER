@@ -280,56 +280,72 @@ void READF()
 // todo vypise write variable ???
 void WRITE()
 {
-    addToString(2, "LABEL $write \n");
+    char numStrTmp[100];
+    addToString(2, "LABEL write \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
-    addToString(2, "DEFVAR LF@VarWrite\n");
-    addToString(2, "DEFVAR LF@VarType\n");
+    for (int i = 0; i < functionCallParamsCounter; i++) {
+        sprintf(numStrTmp, "%d", i);
+        addToString(2, "DEFVAR LF@VarWrite");
+        addToString(2, numStrTmp);
+        addToString(2, "\n");
+    }
+    //addToString(2, "DEFVAR LF@VarType\n");
     addToString(2, "DEFVAR LF@ParamsNumber\n");
 
     addToString(2, "POPS LF@ParamsNumber\n");//pocet parametru
 
-    addToString(2, "LABEL $BEFOREPOP\n");
+    //addToString(2, "LABEL $BEFOREPOP\n");
     
-    addToString(2, "JUMPIFEQ DEFINITIVEEND  0 ParamsNumber\n");
-
-    addToString(2, "POPS LF@VarWrite\n");
-    addToString(2, "SUB ParamsNumber ParamsNumber 1\n");
+    //addToString(2, "JUMPIFEQ $DEFINITIVEEND int@0 LF@ParamsNumber\n");
+    for (int i = functionCallParamsCounter-1; i >= 0; i--) {
+        sprintf(numStrTmp, "%d", i);
+        addToString(2, "POPS LF@VarWrite");
+        addToString(2, numStrTmp);
+        addToString(2, "\n");
+    }
+    //addToString(2, "SUB LF@ParamsNumber LF@ParamsNumber int@1\n");
     // zjistit typ a zapis do VarType
-    addToString(2, "TYPE LF@VarType LF@VarWrite \n");
+    //addToString(2, "TYPE LF@VarType LF@VarWrite\n");
 
     // skoc podle hodnoty VarType
-    addToString(2, "JUMPIFEQ $INT LF@VarType int\n");       // type == int
-    addToString(2, "JUMPIFEQ $FLOAT LF@VarType float\n");   // type == float
-    addToString(2, "JUMPIFEQ $STRING LF@VarType string\n"); // type == string
-    addToString(2, "JUMPIFEQ $NULL LF@VarType null\n");     // type == NULL
+    // addToString(2, "JUMPIFEQ $INT LF@VarType string@int\n");       // type == int
+    // addToString(2, "JUMPIFEQ $FLOAT LF@VarType string@float\n");   // type == float
+    // addToString(2, "JUMPIFEQ $STRING LF@VarType string@string\n"); // type == string
+    // addToString(2, "JUMPIFEQ $NULL LF@VarType string@null\n");     // type == NULL
 
     // int
-    addToString(2, "LABEL $INT\n");
-    addToString(2, "WRITE LF@VarWrite ”%d”\n");
-    addToString(2, "JUMP $END\n");
+    //addToString(2, "LABEL $INT\n");
+    //addToString(2, "WRITE LF@VarWrite\n"); //%d
+    for (int i = 0; i < functionCallParamsCounter; i++) {
+        sprintf(numStrTmp, "%d", i);
+        addToString(2, "WRITE LF@VarWrite"); //%d
+        addToString(2, numStrTmp);
+        addToString(2, "\n");
+    }
+    //addToString(2, "JUMP $END\n");
 
     // float
-    addToString(2, "LABEL $FLOAT \n");
-    addToString(2, "WRITE LF@VarWrite ”%a”\n");
-    addToString(2, "JUMP $END\n");
+    // addToString(2, "LABEL $FLOAT \n");
+    // addToString(2, "WRITE LF@VarWrite\n"); //%a
+    // addToString(2, "JUMP $END\n");
 
-    // string
-    addToString(2, "LABEL $STRING\n");
-    addToString(2, "WRITE LF@VarWrite\n");
-    addToString(2, "JUMP $END\n");
+    // // string
+    // addToString(2, "LABEL $STRING\n");
+    // addToString(2, "WRITE LF@VarWrite\n");
+    // addToString(2, "JUMP $END\n");
 
-    // hodnota null dle tabulky 1.
-    addToString(2, "LABEL $NULL\n");
-    addToString(2, "WRITE "
-                   "\n");
-    addToString(2, "JUMP $END\n");
+    // // hodnota null dle tabulky 1.
+    // addToString(2, "LABEL $NULL\n");
+    // addToString(2, "WRITE nil@nil"
+    //                "\n");
+    // addToString(2, "JUMP $END\n");
 
     // END
-    addToString(2, "LABEL $END\n");
-    addToString(2, "JUMP BEFOREPOP\n");
+    // addToString(2, "LABEL $END\n");
+    // addToString(2, "JUMP $BEFOREPOP\n");
 
-    addToString(2, "LABEL $DEFINITIVEEND\n");
+    // addToString(2, "LABEL $DEFINITIVEEND\n");
 
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
@@ -1796,11 +1812,12 @@ void codeGeneration(Token *token)
 
         addToString(frameStr, "JUMPIFEQ ");
         addToString(frameStr, listIfLabels->firstElement->nextElement->data);
+        addToString(frameStr, " ");
         AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr, "CONDVAR");
         sprintf(TmpWhileAndIf, "%d", UniqueVarName);
         addToString(frameStr, TmpWhileAndIf);
-        addToString(frameStr, " true");//JUMPIFEQ STARTIF UNIQUENAME true
+        addToString(frameStr, " bool@true");//JUMPIFEQ STARTIF UNIQUENAME true
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMP $");
@@ -1923,6 +1940,32 @@ void codeGeneration(Token *token)
         if (IAmInFunctionCall)
         {
             functionCallParamsCounter++;
+            if (buildInCalled) {
+                if (!strcmp(functionName, "reads")) {
+                    READS();
+                } else if (!strcmp(functionName, "readi")) {
+                    READI();
+                } else if (!strcmp(functionName, "readf")) {
+                    READF();
+                } else if (!strcmp(functionName, "write")) {
+                    WRITE();
+                } else if (!strcmp(functionName, "floatval")) {
+                    FLOATVAL();
+                } else if (!strcmp(functionName, "intval")) {
+                    INTVAL();
+                } else if (!strcmp(functionName, "strval")) {
+                    STRVAL();
+                } else if (!strcmp(functionName, "strlen")) {
+                    STRLEN();
+                } else if (!strcmp(functionName, "substring")) {
+                    SUBSTRING();
+                } else if (!strcmp(functionName, "ord")) {
+                    ORD();
+                } else if (!strcmp(functionName, "chr")) {
+                    CHR();
+                }
+            }
+
             if (!strcmp(functionName, "write"))  {
                 sprintf(writeNumberOfParams, "%d", functionCallParamsCounter);
                 addToString(frameStr, "PUSHS int@");
@@ -2012,27 +2055,27 @@ void codeGeneration(Token *token)
 
     case ID:
         if (!strcmp(token->val, "reads")) {
-            READS();
+            buildInCalled = 1;
         } else if (!strcmp(token->val, "readi")) {
-            READI();
+            buildInCalled = 1;
         } else if (!strcmp(token->val, "readf")) {
-            READF();
+            buildInCalled = 1;
         } else if (!strcmp(token->val, "write")) {
-            WRITE();
+            buildInCalled = 1;
         } else if (!strcmp(token->val, "floatval")) {
-            FLOATVAL();
+            buildInCalled = 1;
         } else if (!strcmp(token->val, "intval")) {
-            INTVAL();
+            buildInCalled = 1;
         } else if (!strcmp(token->val, "strval")) {
-            STRVAL();
+            buildInCalled = 1;
         } else if (!strcmp(token->val, "strlen")) {
-            STRLEN();
+            buildInCalled = 1;
         } else if (!strcmp(token->val, "substring")) {
-            SUBSTRING();
+            buildInCalled = 1;
         } else if (!strcmp(token->val, "ord")) {
-            ORD();
+            buildInCalled = 1;
         } else if (!strcmp(token->val, "chr")) {
-            CHR();
+            buildInCalled = 1;
         }
 
         IAmInFunction = 1;
@@ -2046,6 +2089,10 @@ void codeGeneration(Token *token)
             functionName = realloc(functionName, strlen(token->val) + 1);
             strcpy(functionName, token->val);
         }
+
+        // if (buildInCalled) {
+        //     break;
+        // }
 
         if (IAmInFunctionDeclaration) {
             addToString(1, "LABEL ");
