@@ -291,18 +291,18 @@ void WRITE()
 
     addToString(2, "LABEL $BEFOREPOP\n");
     
-    addToString(2, "JUMPIFEQ $DEFINITIVEEND  int@0 LF@ParamsNumber\n");
+    addToString(2, "JUMPIFEQ DEFINITIVEEND  0 ParamsNumber\n");
 
     addToString(2, "POPS LF@VarWrite\n");
-    addToString(2, "SUB LF@ParamsNumber LF@ParamsNumber int@1\n");
+    addToString(2, "SUB ParamsNumber ParamsNumber 1\n");
     // zjistit typ a zapis do VarType
     addToString(2, "TYPE LF@VarType LF@VarWrite \n");
 
     // skoc podle hodnoty VarType
-    addToString(2, "JUMPIFEQ $INT LF@VarType string@int\n");       // type == int
-    addToString(2, "JUMPIFEQ $FLOAT LF@VarType string@float\n");   // type == float
-    addToString(2, "JUMPIFEQ $STRING LF@VarType string@string\n"); // type == string
-    addToString(2, "JUMPIFEQ $NULL LF@VarType string@null\n");     // type == NULL
+    addToString(2, "JUMPIFEQ $INT LF@VarType int\n");       // type == int
+    addToString(2, "JUMPIFEQ $FLOAT LF@VarType float\n");   // type == float
+    addToString(2, "JUMPIFEQ $STRING LF@VarType string\n"); // type == string
+    addToString(2, "JUMPIFEQ $NULL LF@VarType null\n");     // type == NULL
 
     // int
     addToString(2, "LABEL $INT\n");
@@ -327,7 +327,7 @@ void WRITE()
 
     // END
     addToString(2, "LABEL $END\n");
-    addToString(2, "JUMP $BEFOREPOP\n");
+    addToString(2, "JUMP BEFOREPOP\n");
 
     addToString(2, "LABEL $DEFINITIVEEND\n");
 
@@ -1089,6 +1089,8 @@ void codeGeneration(Token *token)
     double strFloat;
     char convertedFloatToHexa[100];
     int convertedLen;
+
+    char writeNumberOfParams[100];
     
 
     // variables used to create random names
@@ -1920,6 +1922,14 @@ void codeGeneration(Token *token)
 
         if (IAmInFunctionCall)
         {
+            functionCallParamsCounter++;
+            if (!strcmp(functionName, "write"))  {
+                sprintf(writeNumberOfParams, "%d", functionCallParamsCounter);
+                addToString(frameStr, "PUSHS int@");
+                addToString(frameStr, writeNumberOfParams);
+                addToString(frameStr, "\n");
+            }
+
             addToString(frameStr, "CALL ");
             addToString(frameStr, functionName);
             addToString(frameStr, "\n");
@@ -2057,6 +2067,7 @@ void codeGeneration(Token *token)
 
     case COMMA:
         if (!IAmInFunctionDeclaration) {
+            functionCallParamsCounter++;
             addToString(frameStr, "PUSHS ");
             if (!strstr(storage[storageLen - 1], "@")) {
                 if (callingFromGF) {
