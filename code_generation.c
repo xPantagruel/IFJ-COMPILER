@@ -240,7 +240,7 @@ void READS()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarReadS\n");
-    addToString(2, "POP LF@VarReadS\n");
+    addToString(2, "POPS LF@VarReadS\n");
     addToString(2, "READ LF@VarReadS string\n");
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
@@ -254,7 +254,7 @@ void READI()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarReadI\n");
-    addToString(2, "POP LF@VarReadI\n");
+    addToString(2, "POPS LF@VarReadI\n");
     addToString(2, "READ LF@VarReadI int\n");
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
@@ -268,7 +268,7 @@ void READF()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarReadF\n");
-    addToString(2, "POP LF@VarReadF\n");
+    addToString(2, "POPS LF@VarReadF\n");
     addToString(2, "READ LF@VarReadF float\n");
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
@@ -284,7 +284,7 @@ void WRITE()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarWrite\n");
-    addToString(2, "POP LF@VarWrite\n");
+    addToString(2, "POPS LF@VarWrite\n");
     addToString(2, "DEFVAR LF@VarType\n");
 
     // zjistit typ a zapis do VarType
@@ -332,7 +332,7 @@ void FLOATVAL()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarFloatval\n");
-    addToString(2, "POP LF@VarFloatval\n");
+    addToString(2, "POPS LF@VarFloatval\n");
     addToString(2, "INT2FLOAT LF@VarFloatval LF@VarFloatval\n"); // konvert na float
     addToString(2, "WRITE LF@VarWrite\n");                       // vypise na vystup
 
@@ -348,7 +348,7 @@ void INTVAL()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarIntval\n");
-    addToString(2, "POP LF@VarIntval\n");
+    addToString(2, "POPS LF@VarIntval\n");
     addToString(2, "FLOAT2INT LF@VarIntval LF@VarIntval\n"); // konvert na int
     addToString(2, "WRITE LF@VarWrite\n");                   // vypise na vystup
 
@@ -363,7 +363,7 @@ void STRVAL()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarStrval\n");
-    addToString(2, "POP LF@VarStrval\n");
+    addToString(2, "POPS LF@VarStrval\n");
     addToString(2, "DEFVAR LF@VarType\n");
 
     // zjistit typ a zapis do VarType
@@ -393,7 +393,7 @@ void STRLEN()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarStrlen\n");
-    addToString(2, "POP LF@VarStrlen\n");
+    addToString(2, "POPS LF@VarStrlen\n");
     addToString(2, "DEFVAR LF@Length\n");
     addToString(2, "STRLEN LF@Length LF@VarStrlen\n");
     addToString(2, "WRITE LF@Length\n"); // vypise na vystup
@@ -413,7 +413,7 @@ void ORD()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarOrd\n");
-    addToString(2, "POP LF@VarOrd\n");
+    addToString(2, "POPS LF@VarOrd\n");
     addToString(2, "DEFVAR LF@Length\n");
     addToString(2, "STRLEN LF@Length LF@VarOrd\n");
 
@@ -437,7 +437,7 @@ void CHR()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarChr\n");
-    addToString(2, "POP LF@VarChr\n");
+    addToString(2, "POPS LF@VarChr\n");
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
@@ -1868,7 +1868,11 @@ void codeGeneration(Token *token)
             addToString(frameStr, "PUSHS");
             if (storage[0][0] == '-')
             {
-                addToString(frameStr, frame);
+                if (callingFromGF && IAmInFunctionCall) {
+                    addToString(frameStr, " GF@");
+                } else {
+                    addToString(frameStr, frame);
+                }
             }
             else
             {
@@ -1885,7 +1889,11 @@ void codeGeneration(Token *token)
             addToString(frameStr, "PUSHS ");
             if (storage[0][0] == '-')
             {
-                addToString(frameStr, frame);
+                if (callingFromGF) {
+                    addToString(frameStr, " GF@");
+                } else {
+                    addToString(frameStr, frame);
+                }
             }
             else
             {
@@ -2026,6 +2034,11 @@ void codeGeneration(Token *token)
             addToString(1, "PUSHFRAME\n");
         } else {
             IAmInFunctionCall = 1;
+            if (frameStr == 0) {
+                callingFromGF = 1;
+            } else {
+                callingFromGF = 0;
+            }
         }
 
         break;
@@ -2034,7 +2047,11 @@ void codeGeneration(Token *token)
         if (!IAmInFunctionDeclaration) {
             addToString(frameStr, "PUSHS ");
             if (!strstr(storage[storageLen - 1], "@")) {
-                AddLForFG(frameStr,IAmInFunction);
+                if (callingFromGF) {
+                    addToString(0, " GF@");
+                } else {
+                    AddLForFG(frameStr,IAmInFunction);
+                }
             }
             addToString(frameStr, storage[storageLen - 1]);
             removeLastFromStorage();

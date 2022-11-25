@@ -107,6 +107,8 @@ static int IAmInFunctionDeclaration = 0;
 /** Auxiliary variable to know if we are in function */
 static int IAmInFunction = 0;
 
+static int callingFromGF = 0;
+
 /** Counter of { and } */
 static int cparCounter = 0;
 
