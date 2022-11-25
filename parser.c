@@ -703,8 +703,18 @@ int var_rule(Token *token)
     }
     else if (token->t == ID)
     { // <var_rule> (<function_call> (ID))
+        char *tmpString = calloc(strlen(token->val) + 1, sizeof(char));
+        strcpy(tmpString, token->val);
         if (function_call(token, false) == 1)
         { // <var_rule> (<function_call>)
+            htab_pair_t *fun = htab_search(symTable, tmpString);
+            if (!fun || !(fun->function))
+            {
+                FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, tmpString);
+            }
+
+            currentSymbol->variable->t = fun->function->returnType->t;
+            free(tmpString);
             return 1;
         }
         else

@@ -243,18 +243,18 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key, Frame *frame)
             {
                 if (tmp->next == NULL)
                 {
-                    tmp->next = malloc(sizeof(htab_item_t));
+                    tmp->next = calloc(1, sizeof(htab_item_t));
                     if (tmp->next == NULL)
                     {
                         return NULL;
                     }
-                    tmp->next->pair = malloc(sizeof(htab_pair_t));
+                    tmp->next->pair = calloc(1, sizeof(htab_pair_t));
                     if (tmp->next->pair == NULL)
                     {
                         return NULL;
                     }
                     // skopírovanie kľúča
-                    str = malloc(strlen(key) * sizeof(htab_key_t));
+                    str = calloc(strlen(key) + 1, sizeof(htab_key_t));
                     if (str == NULL)
                     {
 
@@ -278,6 +278,11 @@ htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key, Frame *frame)
 htab_pair_t *htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount)
 {
     htab_pair_t *pair = htab_lookup_add(t, name, NULL);
+    if (pair == NULL)
+    {
+        exit(99);
+    }
+
     if (pair->function || pair->variable)
     {
         return NULL;
@@ -414,6 +419,7 @@ htab_pair_t *htab_search(htab_t *t, htab_key_t key)
         {
             return tmp->pair;
         }
+        tmp = tmp->next;
     }
     return NULL;
 }
@@ -488,7 +494,7 @@ void addBuiltInToSymtable()
     }
     htab_add_return_type(fun->function);
     fun->function->returnType->t = FLOAT_PARAM;
-    function_param_t *param = htab_add_parameter(fun->function);
+    htab_add_parameter(fun->function);
     fun->function->params[0]->name = calloc(strlen("term") + 1, sizeof(char));
     strcpy(fun->function->params[0]->name, "term");
     fun->function->params[0]->t = ANY;
@@ -502,7 +508,7 @@ void addBuiltInToSymtable()
     }
     htab_add_return_type(fun->function);
     fun->function->returnType->t = INT_PARAM;
-    param = htab_add_parameter(fun->function);
+    htab_add_parameter(fun->function);
     fun->function->params[0]->name = calloc(strlen("term") + 1, sizeof(char));
     strcpy(fun->function->params[0]->name, "term");
     fun->function->params[0]->t = ANY;
@@ -516,7 +522,7 @@ void addBuiltInToSymtable()
     }
     htab_add_return_type(fun->function);
     fun->function->returnType->t = STRING_PARAM;
-    param = htab_add_parameter(fun->function);
+    htab_add_parameter(fun->function);
     fun->function->params[0]->name = calloc(strlen("term") + 1, sizeof(char));
     strcpy(fun->function->params[0]->name, "term");
     fun->function->params[0]->t = ANY;
@@ -530,7 +536,7 @@ void addBuiltInToSymtable()
     }
     htab_add_return_type(fun->function);
     fun->function->returnType->t = INT_PARAM;
-    param = htab_add_parameter(fun->function);
+    htab_add_parameter(fun->function);
     fun->function->params[0]->name = calloc(strlen("s") + 1, sizeof(char));
     strcpy(fun->function->params[0]->name, "s");
     fun->function->params[0]->t = STRING;
@@ -544,18 +550,18 @@ void addBuiltInToSymtable()
     htab_add_return_type(fun->function);
     fun->function->returnType->t = STRING_PARAM;
     fun->function->returnType->canBeNull = true;
-    param = htab_add_parameter(fun->function);
+    htab_add_parameter(fun->function);
     fun->function->params[0]->name = calloc(strlen("s") + 1, sizeof(char));
     strcpy(fun->function->params[0]->name, "s");
     fun->function->params[0]->t = STRING;
-    function_param_t *param2 = htab_add_parameter(fun->function);
-    fun->function->params[0]->name = calloc(strlen("i") + 1, sizeof(char));
+    htab_add_parameter(fun->function);
+    fun->function->params[1]->name = calloc(strlen("i") + 1, sizeof(char));
     strcpy(fun->function->params[0]->name, "i");
-    fun->function->params[0]->t = INT;
-    function_param_t *param3 = htab_add_parameter(fun->function);
-    fun->function->params[0]->name = calloc(strlen("j") + 1, sizeof(char));
+    fun->function->params[1]->t = INT;
+    htab_add_parameter(fun->function);
+    fun->function->params[2]->name = calloc(strlen("j") + 1, sizeof(char));
     strcpy(fun->function->params[0]->name, "j");
-    fun->function->params[0]->t = INT;
+    fun->function->params[2]->t = INT;
 
     // ord
     fun = htab_add_function(symTable, "ord", NULL, NULL, 0);
@@ -565,7 +571,7 @@ void addBuiltInToSymtable()
     }
     htab_add_return_type(fun->function);
     fun->function->returnType->t = INT_PARAM;
-    param = htab_add_parameter(fun->function);
+    htab_add_parameter(fun->function);
     fun->function->params[0]->name = calloc(strlen("c") + 1, sizeof(char));
     strcpy(fun->function->params[0]->name, "c");
     fun->function->params[0]->t = STRING;
@@ -578,7 +584,7 @@ void addBuiltInToSymtable()
     }
     htab_add_return_type(fun->function);
     fun->function->returnType->t = STRING_PARAM;
-    param = htab_add_parameter(fun->function);
+    htab_add_parameter(fun->function);
     fun->function->params[0]->name = calloc(strlen("i") + 1, sizeof(char));
     strcpy(fun->function->params[0]->name, "i");
     fun->function->params[0]->t = INT;
@@ -591,7 +597,7 @@ void addBuiltInToSymtable()
     }
     htab_add_return_type(fun->function);
     fun->function->returnType->t = VOID;
-    param = htab_add_parameter(fun->function);
+    htab_add_parameter(fun->function);
 }
 
 // TODO ZMENIT htab_pair STRUKTURU ABY VYHOVOVALA

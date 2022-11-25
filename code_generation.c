@@ -1896,7 +1896,8 @@ void codeGeneration(Token *token)
                 addToString(frameStr, "LTS\n");
             }
             removeLastFromStorage();
-        } if (storageLen == 2 && IAmInFunctionCall) {
+        } 
+        if (storageLen == 2 && IAmInFunctionCall) {
             addToString(frameStr, "PUSHS ");
             if (storage[0][0] == '-')
             {
@@ -1923,7 +1924,7 @@ void codeGeneration(Token *token)
             addToString(frameStr, functionName);
             addToString(frameStr, "\n");
 
-            if (storage[0] != NULL) {
+            if (storage != NULL && storage[0] != NULL) {
                 addToString(frameStr, "POPS GF@");
                 addToString(frameStr, storage[storageLen-1]);
                 addToString(frameStr, "\n");
