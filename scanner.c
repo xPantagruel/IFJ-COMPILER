@@ -484,7 +484,7 @@ Token *getToken()
                     switch (c)
                     {
                     case '"':
-                        if (token->val[strlen(token->val) - 1] == '\\')
+                        if (token->val != NULL && token->val[strlen(token->val) - 1] == '\\')
                         { // char " in string
                             addCharToToken(c, token);
                         }
