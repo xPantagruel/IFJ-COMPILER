@@ -284,9 +284,19 @@ void WRITE()
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarWrite\n");
-    addToString(2, "POPS LF@VarWrite\n");
     addToString(2, "DEFVAR LF@VarType\n");
+    addToString(2, "DEFVAR LF@ParamsNumber\n");
 
+
+
+    addToString(2, "POPS LF@ParamsNumber\n");//pocet parametru
+
+    addToString(2, "LABEL $BEFOREPOP\n");
+    
+    addToString(2, "EQ DEFINITIVEEND  0 ParamsNumber\n");
+
+    addToString(2, "POPS LF@VarWrite\n");
+    addToString(2, "SUB ParamsNumber ParamsNumber 1\n");
     // zjistit typ a zapis do VarType
     addToString(2, "TYPE LF@VarType LF@VarWrite \n");
 
@@ -319,6 +329,9 @@ void WRITE()
 
     // END
     addToString(2, "LABEL $END\n");
+    addToString(2, "JUMP BEFOREPOP\n");
+
+    addToString(2, "LABEL $DEFINITIVEEND\n");
 
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
