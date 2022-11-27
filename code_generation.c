@@ -1316,8 +1316,8 @@ void codeGeneration(Token *token)
                     pushStorage(frameStr, frame);
                     addToString(frameStr, "EQS\n");
 
-                    pushStorage(3, frame);
-                    addToString(3, "EQS\n");
+                    // pushStorage(3, frame);
+                    // addToString(3, "EQS\n");
                 }
                 break;
             case LESS:

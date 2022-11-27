@@ -154,7 +154,7 @@ bool prog(Token *token)
         {                 //<prog> -> <statement>
             return false; // invalid statement
         }
-        codeGeneration(token);
+        //codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (prog(token))
@@ -394,7 +394,7 @@ int expression(Token *token)
 
     if (exp->arrayLen == 1)
     {
-        // codeGeneration(exp->tokenArray[0]);
+        codeGeneration(exp->tokenArray[0]);
         if (currentSymbol)
         {
             currentSymbol->variable->t = exp->tokenArray[0]->t;
