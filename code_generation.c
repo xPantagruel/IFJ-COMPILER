@@ -1738,7 +1738,7 @@ void codeGeneration(Token *token)
     if(inWhile !=0){
         inWhile -= 1;
         GetUniqueVarName();
-        addToString(frameStr, "JUMP ");
+        addToString(frameStr, "JUMP $");
         addToString(frameStr, listWhileLabels->firstElement->nextElement->nextElement->data);//JUMP WHILESTART UniqueName
         addToString(frameStr, "\n");
 
@@ -1764,7 +1764,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
         addToString(frameStr, "\n");
 
-        addToString(frameStr, "JUMPIFEQ ");
+        addToString(frameStr, "JUMPIFEQ $");
         addToString(frameStr, listWhileLabels->firstElement->data);
         AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr, "CONDVAR");
@@ -1810,7 +1810,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
         addToString(frameStr, "\n");
 
-        addToString(frameStr, "JUMPIFEQ ");
+        addToString(frameStr, "JUMPIFEQ $");
         addToString(frameStr, listIfLabels->firstElement->nextElement->data);
         addToString(frameStr, " ");
         AddLForFG(frameStr,IAmInFunction);
@@ -2166,7 +2166,7 @@ void codeGeneration(Token *token)
         addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
         addToString(frameStr, "\n");
 
-        addToString(frameStr, "JUMP ");
+        addToString(frameStr, "JUMP $");
         addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
         addToString(frameStr, "\n");
 
@@ -2225,7 +2225,7 @@ void codeGeneration(Token *token)
         DLL_InsertFirst(1, WhileNames);
         free(WhileNames);
 
-        addToString(frameStr, "JUMP ");
+        addToString(frameStr, "JUMP $");
         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//JUMP IFCOND
         addToString(frameStr, "\n");
 
@@ -2235,11 +2235,11 @@ void codeGeneration(Token *token)
 
         break;
     case ELSE:
-        addToString(frameStr, "JUMP ");
+        addToString(frameStr, "JUMP $");
         addToString(frameStr, listIfLabels->firstElement->data);//JUMP AFTERELSE
         addToString(frameStr, "\n");
 
-        addToString(frameStr, "LABEL ");
+        addToString(frameStr, "LABEL $");
         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
         addToString(frameStr, "\n");
         afterElse=true;
