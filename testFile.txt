@@ -1,12 +1,9 @@
 <?php
 declare(strict_types=1);
 
-function write(float $number, string $text):string{
-
+function factorial(int $a) : int { 
+    $a = 1;
 }
-
-
-write($x,"\n");
 
 
 

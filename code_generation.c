@@ -1104,6 +1104,7 @@ void divIdiv(int frameStr, char *frame)
 
 void codeGeneration(Token *token)
 {
+    printf("%s---\n", token->val);
     // if prolog not added
     if (allFunctionsString == NULL) {
         addToString(2, ".IFJcode22\nJUMP $main\n");
@@ -2026,6 +2027,7 @@ void codeGeneration(Token *token)
                 free(functionName);
                 functionName = NULL;
             }
+            IAmInFunctionCall = 0;
         }
 
         resetGlobalValues();

@@ -634,11 +634,12 @@ int while_rule(Token *token)
                         token = getToken();
                         if (statement(token))
                         { // while ( <expression> ) { <statement>
-                            codeGeneration(token);
+                            //codeGeneration(token);
                             dtorToken(token);
                             token = getToken();
                             if (token->t == R_CPAR)
                             { // while ( <expression> ) { <statement> }
+                                codeGeneration(token);
                                 iAmInConditionWhileFunRule = 0;
                                 return 1;
                             }
