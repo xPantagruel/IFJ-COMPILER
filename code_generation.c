@@ -2240,7 +2240,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, listIfLabels->firstElement->data);//JUMP AFTERELSE
         addToString(frameStr, "\n");
 
-        addToString(frameStr, "LABEL $---");
+        addToString(frameStr, "LABEL $");
         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
         addToString(frameStr, "\n");
         afterElse=true;
