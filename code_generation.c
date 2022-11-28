@@ -1766,11 +1766,12 @@ void codeGeneration(Token *token)
 
         addToString(frameStr, "JUMPIFEQ $");
         addToString(frameStr, listWhileLabels->firstElement->data);
+        addToString(frameStr, " ");
         AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr, "CONDVAR");
         sprintf(TmpWhileAndIf, "%d", UniqueVarName);
         addToString(frameStr, TmpWhileAndIf);
-        addToString(frameStr, " true");//JUMPIFEQ LOOPBODY UNIQUENAME true
+        addToString(frameStr, " bool@true");//JUMPIFEQ LOOPBODY UNIQUENAME true
         addToString(frameStr, "\n");
 
         DLL_DeleteFirst(0);
@@ -1833,7 +1834,6 @@ void codeGeneration(Token *token)
         DLL_DeleteFirst(1);
         DLL_DeleteFirst(1);
         DLL_DeleteFirst(1);
-        afterElse=false;
 
     }
 //-------------------------------------------
