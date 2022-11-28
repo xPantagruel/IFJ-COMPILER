@@ -1090,6 +1090,7 @@ void divIdiv(int frameStr, char *frame)
 
 void codeGeneration(Token *token)
 {
+    printf("%s\n", token->val);
     // if prolog not added
     if (allFunctionsString == NULL) {
         addToString(2, ".IFJcode22\nJUMP $main\n");
@@ -2232,14 +2233,14 @@ void codeGeneration(Token *token)
         addToString(frameStr, "LABEL $");
         addToString(frameStr, listIfLabels->firstElement->nextElement->data);//LABEL $STARTIF
         addToString(frameStr, "\n");
-
+        afterElse = false;
         break;
     case ELSE:
         addToString(frameStr, "JUMP $");
         addToString(frameStr, listIfLabels->firstElement->data);//JUMP AFTERELSE
         addToString(frameStr, "\n");
 
-        addToString(frameStr, "LABEL $");
+        addToString(frameStr, "LABEL $---");
         addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
         addToString(frameStr, "\n");
         afterElse=true;
