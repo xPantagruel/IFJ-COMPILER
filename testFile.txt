@@ -1,10 +1,7 @@
 <?php
 declare(strict_types=1);
 
-function factorial(int $a) : int { 
-    $a = 1;
+$a = 1;
+while ($a < 3) {
+    $a = 3;
 }
-
-
-
-

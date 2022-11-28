@@ -148,7 +148,10 @@ bool prog(Token *token)
             if (!function_declaration(token))
             {
                 return false;
+            } else {
+                codeGeneration(token);
             }
+            
         }
         else if (statement(token) == 0)
         {                 //<prog> -> <statement>
