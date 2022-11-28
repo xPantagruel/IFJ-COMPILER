@@ -1052,10 +1052,17 @@ void divIdiv(int frameStr, char *frame)
     }
     else
     {
-        pushStorage(frameStr, frame);
-        addToString(frameStr, "DIVS\n");
-        addToString(frameStr, "PUSHS int@0\n");
-        addToString(frameStr, "LTS\n");
+        if (Return) {
+            pushStorage(frameStr, frame);
+            addToString(frameStr, "DIVS\n");
+            addToString(frameStr, "PUSHS int@0\n");
+            addToString(frameStr, "LTS\n");
+        } else {
+            pushStorage(3, frame);
+            addToString(3, "DIVS\n");
+            addToString(3, "PUSHS int@0\n");
+            addToString(3, "LTS\n");
+        }
     }
 
     addToString(frameStr, "JUMP ");
@@ -1073,10 +1080,17 @@ void divIdiv(int frameStr, char *frame)
     }
     else
     {
-        pushStorage(frameStr, frame);
-        addToString(frameStr, "IDIVS\n");
-        addToString(frameStr, "PUSHS int@0\n");
-        addToString(frameStr, "LTS\n");
+        if (Return) {
+            pushStorage(frameStr, frame);
+            addToString(frameStr, "IDIVS\n");
+            addToString(frameStr, "PUSHS int@0\n");
+            addToString(frameStr, "LTS\n");
+        } else {
+            pushStorage(3, frame);
+            addToString(3, "IDIVS\n");
+            addToString(3, "PUSHS int@0\n");
+            addToString(3, "LTS\n");
+        }
     }
 
     addToString(frameStr, "JUMP ");
@@ -1249,15 +1263,17 @@ void codeGeneration(Token *token)
                 }
                 else
                 { // $var1 + 2 (without '=' -> it means that we are for example in condition, so we store result to stack)
-                    pushStorage(frameStr, frame);
-                    addToString(frameStr, "ADDS\n");
-                    addToString(frameStr, "PUSHS int@0\n");
-                    addToString(frameStr, "LTS\n");
-
-                    pushStorage(3, frame);
-                    addToString(3, "ADDS\n");
-                    addToString(3, "PUSHS int@0\n");
-                    addToString(3, "LTS\n");
+                    if (Return) {
+                        pushStorage(frameStr, frame);
+                        addToString(frameStr, "ADDS\n");
+                        addToString(frameStr, "PUSHS int@0\n");
+                        addToString(frameStr, "LTS\n");
+                    } else {
+                        pushStorage(3, frame);
+                        addToString(3, "ADDS\n");
+                        addToString(3, "PUSHS int@0\n");
+                        addToString(3, "LTS\n");
+                    }
                 }
                 break;
             case MINUS:
@@ -1268,19 +1284,21 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
-                    pushStorage(frameStr, frame);
-                    addToString(frameStr, "SUBS\n");
-                    addToString(frameStr, "PUSHS int@0\n");
-                    addToString(frameStr, "LTS\n");
-
-                    pushStorage(3, frame);
-                    addToString(3, "SUBS\n");
-                    addToString(3, "PUSHS int@0\n");
-                    addToString(3, "LTS\n");
+                    if (Return) {
+                        pushStorage(frameStr, frame);
+                        addToString(frameStr, "SUBS\n");
+                        addToString(frameStr, "PUSHS int@0\n");
+                        addToString(frameStr, "LTS\n");
+                    } else {
+                        pushStorage(3, frame);
+                        addToString(3, "SUBS\n");
+                        addToString(3, "PUSHS int@0\n");
+                        addToString(3, "LTS\n");
+                    }
                 }
                 break;
             case SLASH:
-                divIdiv(frameStr, frame);
+                divIdiv(frameStr, frame); 
                 break;
             case MUL:
                 if (eqSymbolFound)
@@ -1290,15 +1308,17 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
-                    pushStorage(frameStr, frame);
-                    addToString(frameStr, "MULS\n");
-                    addToString(frameStr, "PUSHS int@0\n");
-                    addToString(frameStr, "LTS\n");
-
-                    pushStorage(3, frame);
-                    addToString(3, "MULS\n");
-                    addToString(3, "PUSHS int@0\n");
-                    addToString(3, "LTS\n");
+                    if (Return) {
+                        pushStorage(frameStr, frame);
+                        addToString(frameStr, "MULS\n");
+                        addToString(frameStr, "PUSHS int@0\n");
+                        addToString(frameStr, "LTS\n");
+                    } else {
+                        pushStorage(3, frame);
+                        addToString(3, "MULS\n");
+                        addToString(3, "PUSHS int@0\n");
+                        addToString(3, "LTS\n");
+                    }
                 }
                 break;
             case DOT:
@@ -1313,11 +1333,13 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
-                    pushStorage(frameStr, frame);
-                    addToString(frameStr, "EQS\n");
-
-                    // pushStorage(3, frame);
-                    // addToString(3, "EQS\n");
+                    if (Return) {
+                        pushStorage(frameStr, frame);
+                        addToString(frameStr, "EQS\n");
+                    } else {
+                        pushStorage(3, frame);
+                        addToString(3, "EQS\n");
+                    }
                 }
                 break;
             case LESS:
@@ -1328,11 +1350,13 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
-                    pushStorage(frameStr, frame);
-                    addToString(frameStr, "LTS\n");
-
-                    pushStorage(3, frame);
-                    addToString(3, "LTS\n");
+                    if (Return) {
+                        pushStorage(frameStr, frame);
+                        addToString(frameStr, "LTS\n");
+                    } else {
+                        pushStorage(3, frame);
+                        addToString(3, "LTS\n");
+                    }
                 }
                 break;
             case MORE:
@@ -1343,11 +1367,13 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
-                    pushStorage(frameStr, frame);
-                    addToString(frameStr, "GTS\n");
-
-                    pushStorage(3, frame);
-                    addToString(3, "GTS\n");
+                    if (Return) {
+                        pushStorage(frameStr, frame);
+                        addToString(frameStr, "GTS\n");
+                    } else {
+                        pushStorage(3, frame);
+                        addToString(3, "GTS\n");
+                    }
                 }
                 break;
             case NOT_EQ:
@@ -1378,13 +1404,15 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
-                    pushStorage(frameStr, frame);
-                    addToString(frameStr, "EQS\n");
-                    addToString(frameStr, "NOTS\n");
-
-                    pushStorage(3, frame);
-                    addToString(3, "EQS\n");
-                    addToString(3, "NOTS\n");
+                    if (Return) {
+                        pushStorage(frameStr, frame);
+                        addToString(frameStr, "EQS\n");
+                        addToString(frameStr, "NOTS\n");
+                    } else {
+                        pushStorage(3, frame);
+                        addToString(3, "EQS\n");
+                        addToString(3, "NOTS\n");
+                    }
                 }
                 break;
 
@@ -1472,61 +1500,62 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
-                    pushWithoutDeleting(frameStr, frame);
+                    if (Return) {
+                        pushWithoutDeleting(frameStr, frame);
 
-                    addToString(frameStr, "LTS\n"); // LESS
-                    addToString(frameStr, "POPS");  // STORE
-                    addToString(frameStr, frame);
-                    addToString(frameStr, randomVar1);
-                    addToString(frameStr, "\n");
+                        addToString(frameStr, "LTS\n"); // LESS
+                        addToString(frameStr, "POPS");  // STORE
+                        addToString(frameStr, frame);
+                        addToString(frameStr, randomVar1);
+                        addToString(frameStr, "\n");
 
-                    pushWithoutDeleting(frameStr, frame);
+                        pushWithoutDeleting(frameStr, frame);
 
-                    addToString(frameStr, "EQS\n"); // EQ
-                    addToString(frameStr, "POPS");  // STORE
-                    addToString(frameStr, frame);
-                    addToString(frameStr, randomVar2);
-                    addToString(frameStr, "\n");
+                        addToString(frameStr, "EQS\n"); // EQ
+                        addToString(frameStr, "POPS");  // STORE
+                        addToString(frameStr, frame);
+                        addToString(frameStr, randomVar2);
+                        addToString(frameStr, "\n");
 
-                    addToString(frameStr, "PUSHS");
-                    addToString(frameStr, frame);
-                    addToString(frameStr, randomVar1);
-                    addToString(frameStr, "\n");
-                    addToString(frameStr, "PUSHS");
-                    addToString(frameStr, frame);
-                    addToString(frameStr, randomVar2);
-                    addToString(frameStr, "\n");
+                        addToString(frameStr, "PUSHS");
+                        addToString(frameStr, frame);
+                        addToString(frameStr, randomVar1);
+                        addToString(frameStr, "\n");
+                        addToString(frameStr, "PUSHS");
+                        addToString(frameStr, frame);
+                        addToString(frameStr, randomVar2);
+                        addToString(frameStr, "\n");
 
-                    addToString(frameStr, "ORS\n"); // OR
+                        addToString(frameStr, "ORS\n"); // OR
+                    } else {
+                        pushWithoutDeleting(3, frame);
 
-                    //---
-                    pushWithoutDeleting(3, frame);
+                        addToString(3, "LTS\n"); // LESS
+                        addToString(3, "POPS");  // STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
 
-                    addToString(3, "LTS\n"); // LESS
-                    addToString(3, "POPS");  // STORE
-                    addToString(3, frame);
-                    addToString(3, randomVar1);
-                    addToString(3, "\n");
+                        pushWithoutDeleting(3, frame);
 
-                    pushWithoutDeleting(3, frame);
+                        addToString(3, "EQS\n"); // EQ
+                        addToString(3, "POPS");  // STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
 
-                    addToString(3, "EQS\n"); // EQ
-                    addToString(3, "POPS");  // STORE
-                    addToString(3, frame);
-                    addToString(3, randomVar2);
-                    addToString(3, "\n");
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
 
-                    addToString(3, "PUSHS");
-                    addToString(3, frame);
-                    addToString(3, randomVar1);
-                    addToString(3, "\n");
-                    addToString(3, "PUSHS");
-                    addToString(3, frame);
-                    addToString(3, randomVar2);
-                    addToString(3, "\n");
+                        addToString(3, "ORS\n"); // OR
 
-                    addToString(3, "ORS\n"); // OR
-
+                    }
                     removeLastFromStorage();
                     removeLastFromStorage();
                     removeOperator();
@@ -1616,61 +1645,62 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
-                    pushWithoutDeleting(frameStr, frame);
+                    if (Return) {
+                        pushWithoutDeleting(frameStr, frame);
 
-                    addToString(frameStr, "GTS\n"); // MORE
-                    addToString(frameStr, "POPS");  // STORE
-                    addToString(frameStr, frame);
-                    addToString(frameStr, randomVar1);
-                    addToString(frameStr, "\n");
+                        addToString(frameStr, "GTS\n"); // MORE
+                        addToString(frameStr, "POPS");  // STORE
+                        addToString(frameStr, frame);
+                        addToString(frameStr, randomVar1);
+                        addToString(frameStr, "\n");
 
-                    pushWithoutDeleting(frameStr, frame);
+                        pushWithoutDeleting(frameStr, frame);
 
-                    addToString(frameStr, "EQS\n"); // EQ
-                    addToString(frameStr, "POPS");  // STORE
-                    addToString(frameStr, frame);
-                    addToString(frameStr, randomVar2);
-                    addToString(frameStr, "\n");
+                        addToString(frameStr, "EQS\n"); // EQ
+                        addToString(frameStr, "POPS");  // STORE
+                        addToString(frameStr, frame);
+                        addToString(frameStr, randomVar2);
+                        addToString(frameStr, "\n");
 
-                    addToString(frameStr, "PUSHS");
-                    addToString(frameStr, frame);
-                    addToString(frameStr, randomVar1);
-                    addToString(frameStr, "\n");
-                    addToString(frameStr, "PUSHS");
-                    addToString(frameStr, frame);
-                    addToString(frameStr, randomVar2);
-                    addToString(frameStr, "\n");
+                        addToString(frameStr, "PUSHS");
+                        addToString(frameStr, frame);
+                        addToString(frameStr, randomVar1);
+                        addToString(frameStr, "\n");
+                        addToString(frameStr, "PUSHS");
+                        addToString(frameStr, frame);
+                        addToString(frameStr, randomVar2);
+                        addToString(frameStr, "\n");
 
-                    addToString(frameStr, "ORS\n"); // OR
+                        addToString(frameStr, "ORS\n"); // OR
+                    } else {
 
-                    // ---
+                        pushWithoutDeleting(3, frame);
 
-                    pushWithoutDeleting(3, frame);
+                        addToString(3, "GTS\n"); // MORE
+                        addToString(3, "POPS");  // STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
 
-                    addToString(3, "GTS\n"); // MORE
-                    addToString(3, "POPS");  // STORE
-                    addToString(3, frame);
-                    addToString(3, randomVar1);
-                    addToString(3, "\n");
+                        pushWithoutDeleting(3, frame);
 
-                    pushWithoutDeleting(3, frame);
+                        addToString(3, "EQS\n"); // EQ
+                        addToString(3, "POPS");  // STORE
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
 
-                    addToString(3, "EQS\n"); // EQ
-                    addToString(3, "POPS");  // STORE
-                    addToString(3, frame);
-                    addToString(3, randomVar2);
-                    addToString(3, "\n");
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar1);
+                        addToString(3, "\n");
+                        addToString(3, "PUSHS");
+                        addToString(3, frame);
+                        addToString(3, randomVar2);
+                        addToString(3, "\n");
 
-                    addToString(3, "PUSHS");
-                    addToString(3, frame);
-                    addToString(3, randomVar1);
-                    addToString(3, "\n");
-                    addToString(3, "PUSHS");
-                    addToString(3, frame);
-                    addToString(3, randomVar2);
-                    addToString(3, "\n");
-
-                    addToString(3, "ORS\n"); // OR
+                        addToString(3, "ORS\n"); // OR
+                    }
 
                     removeLastFromStorage();
                     removeLastFromStorage();
@@ -1882,6 +1912,13 @@ void codeGeneration(Token *token)
 
     case R_PAR:
         // lparCounter == 1 -> because we can have R_PAR in a body of a function (recognizing body and params)
+        
+        if (inIf || inWhile) {
+            DLL_InsertFirst(0, whileIfString);
+            free(whileIfString);
+            whileIfString = NULL;
+        }
+
         if (IAmInFunctionDeclaration && lparCounter == 1) {
             for (int i = storageLen-1; i >= 0; i--) {
                 addToString(1, "POPS");
@@ -1997,6 +2034,7 @@ void codeGeneration(Token *token)
     case SEMICOL:
         checkStorage();
         resetGlobalValues(); 
+        Return = false;
         break;
     case FUNCTION:
         IAmInFunctionDeclaration = 1;
