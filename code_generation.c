@@ -280,54 +280,39 @@ void READF()
 // todo vypise write variable ???
 void WRITE()
 {
-    char numStrTmp[100];
     addToString(2, "LABEL write \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
-    for (int i = 0; i < functionCallParamsCounter; i++) {
-        sprintf(numStrTmp, "%d", i);
-        addToString(2, "DEFVAR LF@VarWrite");
-        addToString(2, numStrTmp);
-        addToString(2, "\n");
-    }
-    //addToString(2, "DEFVAR LF@VarType\n");
+    addToString(2, "DEFVAR LF@VarWrite\n");
+    addToString(2, "DEFVAR LF@VarType\n");
     addToString(2, "DEFVAR LF@ParamsNumber\n");
 
     addToString(2, "POPS LF@ParamsNumber\n");//pocet parametru
 
-    //addToString(2, "LABEL $BEFOREPOP\n");
+    addToString(2, "LABEL $BEFOREPOP\n");
     
-    //addToString(2, "JUMPIFEQ $DEFINITIVEEND int@0 LF@ParamsNumber\n");
-    for (int i = functionCallParamsCounter-1; i >= 0; i--) {
-        sprintf(numStrTmp, "%d", i);
-        addToString(2, "POPS LF@VarWrite");
-        addToString(2, numStrTmp);
-        addToString(2, "\n");
-    }
-    //addToString(2, "SUB LF@ParamsNumber LF@ParamsNumber int@1\n");
-    // zjistit typ a zapis do VarType
-    //addToString(2, "TYPE LF@VarType LF@VarWrite\n");
+    addToString(2, "JUMPIFEQ $DEFINITIVEEND  int@0 LF@ParamsNumber\n");
 
-    // skoc podle hodnoty VarType
+    addToString(2, "POPS LF@VarWrite\n");
+    addToString(2, "WRITE LF@VarWrite\n");
+    addToString(2, "SUB LF@ParamsNumber LF@ParamsNumber int@1\n");
+    // zjistit typ a zapis do VarType
+    addToString(2, "TYPE LF@VarType LF@VarWrite \n");
+
+    // // skoc podle hodnoty VarType
     // addToString(2, "JUMPIFEQ $INT LF@VarType string@int\n");       // type == int
     // addToString(2, "JUMPIFEQ $FLOAT LF@VarType string@float\n");   // type == float
     // addToString(2, "JUMPIFEQ $STRING LF@VarType string@string\n"); // type == string
     // addToString(2, "JUMPIFEQ $NULL LF@VarType string@null\n");     // type == NULL
 
-    // int
-    //addToString(2, "LABEL $INT\n");
-    //addToString(2, "WRITE LF@VarWrite\n"); //%d
-    for (int i = 0; i < functionCallParamsCounter; i++) {
-        sprintf(numStrTmp, "%d", i);
-        addToString(2, "WRITE LF@VarWrite"); //%d
-        addToString(2, numStrTmp);
-        addToString(2, "\n");
-    }
-    //addToString(2, "JUMP $END\n");
+    // // int
+    // addToString(2, "LABEL $INT\n");
+    // addToString(2, "WRITE LF@VarWrite ”%d”\n");
+    // addToString(2, "JUMP $END\n");
 
-    // float
+    // // float
     // addToString(2, "LABEL $FLOAT \n");
-    // addToString(2, "WRITE LF@VarWrite\n"); //%a
+    // addToString(2, "WRITE LF@VarWrite ”%a”\n");
     // addToString(2, "JUMP $END\n");
 
     // // string
@@ -337,15 +322,15 @@ void WRITE()
 
     // // hodnota null dle tabulky 1.
     // addToString(2, "LABEL $NULL\n");
-    // addToString(2, "WRITE nil@nil"
+    // addToString(2, "WRITE "
     //                "\n");
     // addToString(2, "JUMP $END\n");
 
     // END
-    // addToString(2, "LABEL $END\n");
-    // addToString(2, "JUMP $BEFOREPOP\n");
+    addToString(2, "LABEL $END\n");
+    addToString(2, "JUMP $BEFOREPOP\n");
 
-    // addToString(2, "LABEL $DEFINITIVEEND\n");
+    addToString(2, "LABEL $DEFINITIVEEND\n");
 
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
