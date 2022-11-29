@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
-if(1 === 1) {
-    write("GOOD\n");
+if(2 === 2) {
+    $a = write("GOOD");
 } else {
-    write("BAD\n");
+    $a =  write("BAD");
 }

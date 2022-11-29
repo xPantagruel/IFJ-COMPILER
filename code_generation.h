@@ -59,6 +59,7 @@ int GetNumberOfDigets();
 void GetUniqueVarName();
 
 void GetUniqueName();
+
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
 
@@ -130,6 +131,8 @@ static int eqSymbolFound = 0;
 /** Storage for expressions (var1 = var2 + 2) */
 static char **storage = NULL;
 
+static char **buildInFunctionsParams = NULL;
+
 /** Actual operator in expression */
 static enum type operator= NOT_DEFINED;
 
@@ -157,6 +160,10 @@ void codeGeneration(Token *token);
  * @param val value which will be stored to storage.
  */
 void store(char *val);
+
+void storeBuildInParams(char *val);
+
+void writeAndFreeBuildInParams(int frame, char *frameStr);
 
 /**
  * @brief Function which removes last item from storage.

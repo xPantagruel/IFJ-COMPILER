@@ -648,6 +648,68 @@ void store(char *val)
     storageLen++;
 }
 
+void storeBuildInParams(char *val)
+{
+    // creating space for new item
+    if (buildInFunctionsParams == NULL)
+    {
+        buildInFunctionsParams = malloc(sizeof(char *));
+    }
+    else
+    {
+        buildInFunctionsParams = realloc(buildInFunctionsParams, (functionCallParamsCounter + 1) * sizeof(char *));
+    }
+
+    if (buildInFunctionsParams == NULL)
+    {
+        exit(99);
+    }
+
+    buildInFunctionsParams[functionCallParamsCounter] = calloc(strlen(val) + 1, sizeof(char));
+    if (buildInFunctionsParams[functionCallParamsCounter] == NULL)
+    {
+        exit(99);
+    }
+
+    strcpy(buildInFunctionsParams[functionCallParamsCounter], val);
+}
+
+
+void writeAndFreeBuildInParams(int frame, char *frameStr) {
+    if (buildInFunctionsParams != NULL) {
+        for (int i = functionCallParamsCounter-1; i >= 0; i--) {
+            if (buildInFunctionsParams[i] != NULL) {
+
+                if (functionLabelCreated) {
+                    frame = 1;
+                }
+
+                addToString(frame, "PUSHS ");
+                if (buildInFunctionsParams[i][0] == '-')
+                {
+                    if (callingFromGF) {
+                        addToString(frame, " GF@");
+                    } else {
+                        addToString(frame, frameStr);
+                    }
+                }
+                else
+                {
+                    addToString(frame, " ");
+                }
+                addToString(frame, buildInFunctionsParams[i]);
+                addToString(frame, "\n");
+
+                free(buildInFunctionsParams[i]);
+                buildInFunctionsParams[i] = NULL;
+            }
+        }
+        free(buildInFunctionsParams);
+        buildInFunctionsParams = NULL;
+    }
+    functionCallParamsCounter = 0;
+}
+
 void removeLastFromStorage()
 {
     if (storageLen)
@@ -1238,7 +1300,11 @@ void codeGeneration(Token *token)
         }
 
         // storing variable
-        store(var);
+        if (buildInCalled) {
+            storeBuildInParams(var);
+        } else {
+            store(var);
+        }
 
         // variable wasn't defined -> define it
         if (!defined)
@@ -1252,7 +1318,7 @@ void codeGeneration(Token *token)
             // if operator was set (it means that in storage we have at least 2 items)
         if (operator!= NOT_DEFINED)
         {
-            convertToSameType(frameStr, frame);
+            //convertToSameType(frameStr, frame);
             switch (operator)
             {
             case PLUS:
@@ -1912,16 +1978,14 @@ void codeGeneration(Token *token)
         break;
 
     case R_PAR:
-        // lparCounter == 1 -> because we can have R_PAR in a body of a function (recognizing body and params)
-        
-        if (inIf || inWhile) {
+        if ((inIf || inWhile) && whileIfString != NULL) {
             DLL_InsertFirst(0, whileIfString);
             free(whileIfString);
             whileIfString = NULL;
         }
 
+        // lparCounter == 1 -> because we can have R_PAR in a body of a function (recognizing body and params)
         if (functionLabelCreated && lparCounter == 1) {
-            //todo nedostane sa sem
             for (int i = storageLen-1; i >= 0; i--) {
                 addToString(1, "POPS");
                 addToString(1, frame);
@@ -1932,7 +1996,7 @@ void codeGeneration(Token *token)
             }
         }
 
-        if (storageLen == 1)
+        if (storageLen == 1 && !buildInCalled)
         { // if ($var1)
             if (functionLabelCreated) {
                 addToString(1, "PUSHS");
@@ -1973,7 +2037,7 @@ void codeGeneration(Token *token)
             }
             removeLastFromStorage();
         } 
-        if (storageLen == 2 && IAmInFunctionCall) {
+        if (storageLen == 2 && IAmInFunctionCall && !buildInCalled) {
             addToString(frameStr, "PUSHS ");
             if (storage[0][0] == '-')
             {
@@ -1999,41 +2063,66 @@ void codeGeneration(Token *token)
             functionCallParamsCounter++;
             if (buildInCalled) {
                 if (!strcmp(functionName, "reads")) {
-                    READS();
+                    if (strstr(allFunctionsString, "LABEL reads") == NULL) {
+                        READS();
+                    }
                 } else if (!strcmp(functionName, "readi")) {
-                    READI();
+                    if (strstr(allFunctionsString, "LABEL readi") == NULL) {
+                        READI();
+                    }
                 } else if (!strcmp(functionName, "readf")) {
-                    READF();
+                    if (strstr(allFunctionsString, "LABEL readf") == NULL) {
+                        READF();
+                    }
                 } else if (!strcmp(functionName, "write")) {
-                    WRITE();
+                    if (strstr(allFunctionsString, "LABEL write") == NULL) {
+                        WRITE();
+                    }
                 } else if (!strcmp(functionName, "floatval")) {
-                    FLOATVAL();
+                    if (strstr(allFunctionsString, "LABEL floatval") == NULL) {
+                        FLOATVAL();
+                    }
                 } else if (!strcmp(functionName, "intval")) {
-                    INTVAL();
+                    if (strstr(allFunctionsString, "LABEL intval") == NULL) {
+                        INTVAL();
+                    }
                 } else if (!strcmp(functionName, "strval")) {
-                    STRVAL();
+                    if (strstr(allFunctionsString, "LABEL strval") == NULL) {
+                        STRVAL();
+                    }
                 } else if (!strcmp(functionName, "strlen")) {
-                    STRLEN();
+                    if (strstr(allFunctionsString, "LABEL strlen") == NULL) {
+                        STRLEN();
+                    }
                 } else if (!strcmp(functionName, "substring")) {
-                    SUBSTRING();
+                    if (strstr(allFunctionsString, "LABEL substring") == NULL) {
+                        SUBSTRING();
+                    }
                 } else if (!strcmp(functionName, "ord")) {
-                    ORD();
+                    if (strstr(allFunctionsString, "LABEL ord") == NULL) {
+                        ORD();
+                    }
                 } else if (!strcmp(functionName, "chr")) {
-                    CHR();
+                    if (strstr(allFunctionsString, "LABEL chr") == NULL) {
+                        CHR();
+                    }
                 }
             }
 
-            if (!strcmp(functionName, "write"))  { 
+            if (buildInCalled)  { 
                 sprintf(writeNumberOfParams, "%d", functionCallParamsCounter);
                 if (functionLabelCreated) {
+                    writeAndFreeBuildInParams(1, frame);
                     addToString(1, "PUSHS int@");
                     addToString(1, writeNumberOfParams);
                     addToString(1, "\n");
                 } else {
+                    writeAndFreeBuildInParams(frameStr, frame);
                     addToString(frameStr, "PUSHS int@");
                     addToString(frameStr, writeNumberOfParams);
                     addToString(frameStr, "\n");
                 }
+                buildInCalled = 0;
             }
 
             if (functionLabelCreated) {
@@ -2113,7 +2202,11 @@ void codeGeneration(Token *token)
         // string@"hello world"
         strcpy(var, " string@");
         strcat(var, token->val);
-        store(var);
+        if (buildInCalled) {
+            storeBuildInParams(var);
+        } else {
+            store(var);
+        }
 
         if (operator== DOT)
         {
@@ -2187,28 +2280,31 @@ void codeGeneration(Token *token)
 
     case COMMA:
         if (functionLabelCreated) {
-            functionCallParamsCounter++; //navezuje todoo
-            addToString(1, "PUSHS ");
-            if (!strstr(storage[storageLen - 1], "@")) {
-                addToString(1, " LF@");
+            functionCallParamsCounter++;
+            if (!buildInCalled) {
+                addToString(1, "PUSHS ");
+                if (!strstr(storage[storageLen - 1], "@")) {
+                    addToString(1, " LF@");
+                }
+                addToString(1, storage[storageLen - 1]);
+                removeLastFromStorage();
+                addToString(1, "\n");
             }
-            addToString(1, storage[storageLen - 1]);
-            removeLastFromStorage();
-            addToString(1, "\n");
-
         } else if (!IAmInFunctionDeclaration) {
             functionCallParamsCounter++;
-            addToString(frameStr, "PUSHS ");
-            if (!strstr(storage[storageLen - 1], "@")) {
-                if (callingFromGF) {
-                    addToString(0, " GF@");
-                } else {
-                    AddLForFG(frameStr,IAmInFunction);
+            if (!buildInCalled) {
+                addToString(frameStr, "PUSHS ");
+                if (!strstr(storage[storageLen - 1], "@")) {
+                    if (callingFromGF) {
+                        addToString(0, " GF@");
+                    } else {
+                        AddLForFG(frameStr,IAmInFunction);
+                    }
                 }
+                addToString(frameStr, storage[storageLen - 1]);
+                removeLastFromStorage();
+                addToString(frameStr, "\n");
             }
-            addToString(frameStr, storage[storageLen - 1]);
-            removeLastFromStorage();
-            addToString(frameStr, "\n");
         }
         break;
     case COLON:
