@@ -1104,7 +1104,6 @@ void divIdiv(int frameStr, char *frame)
 
 void codeGeneration(Token *token)
 {
-    printf("%s---\n", token->val);
     // if prolog not added
     if (allFunctionsString == NULL) {
         addToString(2, ".IFJcode22\nJUMP $main\n");
@@ -1876,13 +1875,14 @@ void codeGeneration(Token *token)
         }
         if (!cparCounter && IAmInFunction)
         { // function ended
-            if (IAmInFunctionDeclaration) {
+            if (functionLabelCreated) {
                 addToString(1, "POPFRAME\n");
                 addToString(1, "RETURN\n");
+                functionLabelCreated = 0;
+                //todo nedostane sa sem
             }
 
             IAmInFunction = 0;
-            IAmInFunctionDeclaration = 0;
             addToString(2, inFunctionString);
             free(inFunctionString);
             inFunctionString = NULL;
@@ -1920,7 +1920,8 @@ void codeGeneration(Token *token)
             whileIfString = NULL;
         }
 
-        if (IAmInFunctionDeclaration && lparCounter == 1) {
+        if (functionLabelCreated && lparCounter == 1) {
+            //todo nedostane sa sem
             for (int i = storageLen-1; i >= 0; i--) {
                 addToString(1, "POPS");
                 addToString(1, frame);
@@ -1933,24 +1934,42 @@ void codeGeneration(Token *token)
 
         if (storageLen == 1)
         { // if ($var1)
-            addToString(frameStr, "PUSHS");
-            if (storage[0][0] == '-')
-            {
-                if (callingFromGF && IAmInFunctionCall) {
-                    addToString(frameStr, " GF@");
-                } else {
-                    addToString(frameStr, frame);
+            if (functionLabelCreated) {
+                addToString(1, "PUSHS");
+                if (storage[0][0] == '-')
+                {
+                    addToString(1, " LF@");
                 }
-            }
-            else
-            {
-                addToString(frameStr, " ");
-            }
-            addToString(frameStr, storage[0]);
-            addToString(frameStr, "\n");
-            if (inIf || inWhile) {
-                addToString(frameStr, "PUSHS int@0\n");
-                addToString(frameStr, "LTS\n");
+                else
+                {
+                    addToString(1, " ");
+                }
+                addToString(1, storage[0]);
+                addToString(1, "\n");
+                if (inIf || inWhile) {
+                    addToString(1, "PUSHS int@0\n");
+                    addToString(1, "LTS\n");
+                }
+            } else {
+                addToString(frameStr, "PUSHS");
+                if (storage[0][0] == '-')
+                {
+                    if (callingFromGF && IAmInFunctionCall) {
+                        addToString(frameStr, " GF@");
+                    } else {
+                        addToString(frameStr, frame);
+                    }
+                }
+                else
+                {
+                    addToString(frameStr, " ");
+                }
+                addToString(frameStr, storage[0]);
+                addToString(frameStr, "\n");
+                if (inIf || inWhile) {
+                    addToString(frameStr, "PUSHS int@0\n");
+                    addToString(frameStr, "LTS\n");
+                }
             }
             removeLastFromStorage();
         } 
@@ -2004,16 +2023,28 @@ void codeGeneration(Token *token)
                 }
             }
 
-            if (!strcmp(functionName, "write"))  {
+            if (!strcmp(functionName, "write"))  { 
                 sprintf(writeNumberOfParams, "%d", functionCallParamsCounter);
-                addToString(frameStr, "PUSHS int@");
-                addToString(frameStr, writeNumberOfParams);
-                addToString(frameStr, "\n");
+                if (functionLabelCreated) {
+                    addToString(1, "PUSHS int@");
+                    addToString(1, writeNumberOfParams);
+                    addToString(1, "\n");
+                } else {
+                    addToString(frameStr, "PUSHS int@");
+                    addToString(frameStr, writeNumberOfParams);
+                    addToString(frameStr, "\n");
+                }
             }
 
-            addToString(frameStr, "CALL ");
-            addToString(frameStr, functionName);
-            addToString(frameStr, "\n");
+            if (functionLabelCreated) {
+                addToString(1, "CALL ");
+                addToString(1, functionName);
+                addToString(1, "\n");
+            } else {
+                addToString(frameStr, "CALL ");
+                addToString(frameStr, functionName);
+                addToString(frameStr, "\n");
+            }
 
             if (storage != NULL && storage[0] != NULL) {
                 addToString(frameStr, "POPS GF@");
@@ -2141,6 +2172,8 @@ void codeGeneration(Token *token)
 
             addToString(1, "CREATEFRAME\n");
             addToString(1, "PUSHFRAME\n");
+            IAmInFunctionDeclaration = 0;
+            functionLabelCreated = 1;
         } else {
             IAmInFunctionCall = 1;
             if (frameStr == 0) {
@@ -2153,7 +2186,17 @@ void codeGeneration(Token *token)
         break;
 
     case COMMA:
-        if (!IAmInFunctionDeclaration) {
+        if (functionLabelCreated) {
+            functionCallParamsCounter++; //navezuje todoo
+            addToString(1, "PUSHS ");
+            if (!strstr(storage[storageLen - 1], "@")) {
+                addToString(1, " LF@");
+            }
+            addToString(1, storage[storageLen - 1]);
+            removeLastFromStorage();
+            addToString(1, "\n");
+
+        } else if (!IAmInFunctionDeclaration) {
             functionCallParamsCounter++;
             addToString(frameStr, "PUSHS ");
             if (!strstr(storage[storageLen - 1], "@")) {

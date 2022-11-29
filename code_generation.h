@@ -87,6 +87,8 @@ static int buildInCalled = 0;
 
 static int functionCallParamsCounter = 0;
 
+static int functionLabelCreated = 0;
+
 /** int if in While body*/
 static int inWhile = 0;
 
