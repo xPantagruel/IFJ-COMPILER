@@ -385,6 +385,7 @@ int expression(Token *token)
         token = getToken();
     }
 
+
     if (token->t == SEMICOL)
     {
         ungetc(';', stdin);
@@ -394,16 +395,25 @@ int expression(Token *token)
         ungetc(')', stdin);
     }
 
+
+
     if (exp->arrayLen == 1)
     {
-        codeGeneration(exp->tokenArray[0]);
-        if (currentSymbol)
-        {
-            currentSymbol->variable->t = exp->tokenArray[0]->t;
+        if (exp->tokenArray[0]->val == NULL) {
+            
+            exp->tokenArray[0]->t = INT;
+            addCharToToken('0', exp->tokenArray[0]);
+            codeGeneration(exp->tokenArray[0]);
+        } else {
+            codeGeneration(exp->tokenArray[0]);
+            if (currentSymbol)
+            {
+                currentSymbol->variable->t = exp->tokenArray[0]->t;
+            }
         }
 
         return 1;
-    }
+    } 
 
     if (exp->arrayLen != 0)
     {

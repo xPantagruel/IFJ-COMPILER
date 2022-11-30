@@ -1,3 +1,7 @@
 <?php
 declare(strict_types=1);
-write("hello world", 99,);
+if("") {
+    write("BAD\n");
+} else {
+    write("GOOD\n");
+}
