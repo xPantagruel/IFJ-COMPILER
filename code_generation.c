@@ -2129,7 +2129,9 @@ void codeGeneration(Token *token)
 
         if (IAmInFunctionCall)
         {
-            functionCallParamsCounter++;
+            if (previousTokenType == L_PAR) {
+                functionCallParamsCounter++;
+            }
             if (buildInCalled) {
                 if (!strcmp(functionName, "reads")) {
                     if (strstr(allFunctionsString, "LABEL reads") == NULL) {
@@ -2285,7 +2287,24 @@ void codeGeneration(Token *token)
             addToString(frameStr, "CONCAT");
             threeAddress(frameStr, frame);
             removeOperator();
+        } else if (operator == THREE_EQ) {
+            if (eqSymbolFound)
+            {
+                addToString(frameStr, "EQ");
+                threeAddress(frameStr, frame);
+            }
+            else
+            {
+                if (Return) {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "EQS\n");
+                } else {
+                    pushStorage(3, frame);
+                    addToString(3, "EQS\n");
+                }
+            }
         }
+
 
         break;
 
@@ -2514,6 +2533,7 @@ void codeGeneration(Token *token)
         break;
     }
 
+    previousTokenType = token->t;
     free(var);
     free(tmp);
 }
