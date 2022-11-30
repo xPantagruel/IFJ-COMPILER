@@ -6,10 +6,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "frames.h"
 #include "scanner.h"
 
 #define SYMTABLE_SIZE 100
+
+typedef struct symTable SymTable;
+extern SymTable *symTable;
 
 typedef struct symFunctionReturn
 {
@@ -36,6 +38,8 @@ typedef struct symFunction
     int paramCount;
     SymFunctionReturn *returnType;
 } SymFunction;
+
+typedef struct symItem SymItem;
 
 typedef struct symItem
 {

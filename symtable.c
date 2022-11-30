@@ -37,7 +37,6 @@ Frame *initFrame(char *name)
         exit(99);
     }
     strcpy(frame->name, name);
-    symTable->topFrame = frame;
     frame->size = SYMTABLE_SIZE;
     frame->items = calloc(SYMTABLE_SIZE, sizeof(SymItem *));
     // TODO attach frame to symtable

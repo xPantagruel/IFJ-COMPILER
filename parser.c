@@ -14,11 +14,7 @@
 #include "bottomUp.h"
 #include "parser.h"
 #include "symtable.h"
-#include "frames.h"
 #include "code_generation.h"
-
-htab_pair_t *currentSymbol;
-htab_pair_t *currentlyChecked;
 
 Expression *initExpression()
 {
@@ -88,15 +84,6 @@ bool function_declaration(Token *token)
         // FUNCTION <function_call> : <type>
         return false; // wrong type
     }
-    else
-    {
-        if (currentSymbol)
-        {
-            function_param_t *param = htab_add_return_type(currentSymbol->function);
-            param->t = token->t;
-            // FUNCTION ADDED TO SYMTABLE
-        }
-    }
 
     codeGeneration(token);
     dtorToken(token);
@@ -104,16 +91,6 @@ bool function_declaration(Token *token)
     if (token->t != L_CPAR)
     {                 // FUNCTION <function_call> : <type> {
         return false; // missing L_CPAR
-    }
-
-    if (currentSymbol)
-    {
-        pushFrame(frameStack, currentSymbol->function->name);
-        for (int i = 0; i < currentSymbol->function->paramCount; i++)
-        {
-            htab_pair_t *var = htab_add_variable(symTable, currentSymbol->function->params[i]->name, peekFrame(frameStack), currentSymbol->function->params[i]->t);
-            var->variable->canBeNull = currentSymbol->function->params[i]->canBeNull;
-        }
     }
 
     codeGeneration(token);
@@ -130,10 +107,6 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> : <type> { <statement> }
         return false; // missing R_CPAR
     }
-    Frame *f = popFrame(frameStack);
-    eraseFrame(f);
-
-    currentSymbol = NULL;
 
     iAmInConditionWhileFunRule = 0; // I am out of function declaration
     return true;
@@ -148,16 +121,17 @@ bool prog(Token *token)
             if (!function_declaration(token))
             {
                 return false;
-            } else {
+            }
+            else
+            {
                 codeGeneration(token);
             }
-            
         }
         else if (statement(token) == 0)
         {                 //<prog> -> <statement>
             return false; // invalid statement
         }
-        //codeGeneration(token);
+        // codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (prog(token))
@@ -203,39 +177,7 @@ int params(Token *token, int paramIndex)
 {
     if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT)
     { // VAR_ID OR STRING OR INT/FLOAT
-        if (currentlyChecked && currentlyChecked->function)
-        {
-            if (token->t == VAR_ID)
-            {
-                htab_pair_t *pair = htab_search(symTable, token->val);
 
-                if (!pair || !pair->variable)
-                {
-                    FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, token->val);
-                }
-                if (strcmp(currentlyChecked->function->name, "write") != 0 && currentlyChecked->function->params && currentlyChecked->function->params[paramIndex]->t != ANY)
-                {
-                    if (currentlyChecked->function->params[paramIndex]->t != pair->variable->t) // potencionalni error
-                    {
-                        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
-                    }
-                }
-            }
-            else
-            {
-                if (strcmp(currentlyChecked->function->name, "write") != 0 && currentlyChecked->function->params && currentlyChecked->function->params[paramIndex]->t != ANY)
-                {
-                    if (currentlyChecked->function->params[paramIndex]->t != token->t) // potencionalni error
-                    {
-                        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
-                    }
-                }
-            }
-        }
-        else
-        {
-            FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, ""); // TODO: edit macro so no object can be passed
-        }
         codeGeneration(token);
         dtorToken(token);
         token = getToken();
@@ -263,29 +205,6 @@ int params(Token *token, int paramIndex)
     }
     else if (type(token) == 1)
     { // <type>
-        function_param_t *param;
-        if (currentSymbol)
-        {
-            param = htab_add_parameter(currentSymbol->function);
-            switch (token->t)
-            {
-            case INT_TYPE:
-                param->t = INT;
-                break;
-            case FLOAT_TYPE:
-                param->t = FLOAT;
-                break;
-            case STRING_TYPE:
-                param->t = STRING;
-                break;
-            default:
-                break;
-            }
-            if (token->val[0] == '?')
-            {
-                param->canBeNull = true;
-            }
-        }
 
         codeGeneration(token);
         dtorToken(token);
@@ -293,11 +212,6 @@ int params(Token *token, int paramIndex)
         token = getToken();
         if (token->t == VAR_ID || token->t == STRING || token->t == FLOAT || token->t == INT)
         { //<type> VAR_ID OR <type> STRING OR <type> INT/FLOAT
-            if (currentSymbol)
-            {
-                param->name = calloc(sizeof(token->val) + 1, sizeof(char));
-                strcpy(param->name, token->val);
-            }
 
             codeGeneration(token);
             dtorToken(token);
@@ -330,16 +244,7 @@ int params(Token *token, int paramIndex)
     }
     else
     { // epsilon
-        if (currentlyChecked)
-        {
-            if (!((currentlyChecked->function->paramCount == 0) && (paramIndex == 0)) && strcmp(currentlyChecked->function->name, "write") != 0)
-            {
-                if (currentlyChecked->function->paramCount != paramIndex + 1)
-                {
-                    FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, currentlyChecked->function->name);
-                }
-            }
-        }
+
         ungetc(')', stdin);
         return 2;
     }
@@ -398,10 +303,6 @@ int expression(Token *token)
     if (exp->arrayLen == 1)
     {
         codeGeneration(exp->tokenArray[0]);
-        if (currentSymbol)
-        {
-            currentSymbol->variable->t = exp->tokenArray[0]->t;
-        }
 
         return 1;
     }
@@ -411,10 +312,6 @@ int expression(Token *token)
         int resultType;
         if (bottomUp(exp, &resultType))
         {
-            if (currentSymbol)
-            {
-                currentSymbol->variable->t = resultType;
-            }
 
             dtorExpression(exp);
             return 1;
@@ -550,19 +447,9 @@ int function_call(Token *token, bool isDeclaration)
 
         if (isDeclaration)
         {
-            currentSymbol = htab_add_function(symTable, token->val, NULL, NULL, 0);
-            if (!currentSymbol)
-            {
-                FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, token->val);
-            }
         }
         else
         {
-            currentlyChecked = htab_search(symTable, token->val);
-            if (!currentlyChecked || !(currentlyChecked->function))
-            {
-                FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, token->val);
-            }
         }
 
         codeGeneration(token);
@@ -583,7 +470,6 @@ int function_call(Token *token, bool isDeclaration)
                 if (token->t == R_PAR)
                 { // ID ( <params> )
                     // function checked - OK
-                    currentlyChecked = NULL;
                     return 1;
                 }
                 else
@@ -636,7 +522,7 @@ int while_rule(Token *token)
                         token = getToken();
                         if (statement(token))
                         { // while ( <expression> ) { <statement>
-                            //codeGeneration(token);
+                            // codeGeneration(token);
                             dtorToken(token);
                             token = getToken();
                             if (token->t == R_CPAR)
@@ -699,18 +585,10 @@ int var_rule(Token *token)
     }
     else if (token->t == ID)
     { // <var_rule> (<function_call> (ID))
-        char *tmpString = calloc(strlen(token->val) + 1, sizeof(char));
-        strcpy(tmpString, token->val);
+
         if (function_call(token, false) == 1)
         { // <var_rule> (<function_call>)
-            htab_pair_t *fun = htab_search(symTable, tmpString);
-            if (!fun || !(fun->function))
-            {
-                FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, tmpString);
-            }
 
-            currentSymbol->variable->t = fun->function->returnType->t;
-            free(tmpString);
             return 1;
         }
         else
@@ -749,7 +627,7 @@ int statement(Token *token)
     }
     else if (token->t == VAR_ID)
     { // VAR_ID
-        currentSymbol = htab_add_variable(symTable, token->val, peekFrame(frameStack), -1);
+
         codeGeneration(token);
         dtorToken(token);
         token = getToken();
@@ -777,11 +655,6 @@ int statement(Token *token)
                 token = getToken();
                 if (token->t == SEMICOL)
                 { // VAR_ID = VAR_ID;
-                    htab_pair_t *pair = htab_search(symTable, tmpStr);
-                    if (pair && pair->variable)
-                    {
-                        currentSymbol->variable->t = pair->variable->t;
-                    }
 
                     free(tmpStr);
                     dtorToken(tmp);
@@ -1052,7 +925,9 @@ int statement(Token *token)
         if (token->t == R_CPAR)
         {
             ungetc('}', stdin);
-        } else {
+        }
+        else
+        {
             exit(2);
         }
         return 2;
@@ -1061,12 +936,9 @@ int statement(Token *token)
 
 int main()
 {
-    symTable = htab_init(SYMTABLE_SIZE);
-    frameStack = initFrameStack();
-    currentSymbol = NULL;
-    currentlyChecked = NULL;
-    addBuiltInToSymtable();
-    // Example how parser can be called.
+    symTable = initSymTable();
+    // addBuiltInToSymtable();
+    //  Example how parser can be called.
     DLL_Init(0);
     DLL_Init(1);
     DLL_Init(2);

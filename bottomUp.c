@@ -462,17 +462,6 @@ bool bottomUp(Expression *exp, int *resultType)
         int expType;
         if (exp->tokenArray[currentExpPos]->t == VAR_ID)
         {
-            // SEMANTIC CHECK
-            htab_pair_t *pair = htab_search(symTable, exp->tokenArray[currentExpPos]->val);
-            if (pair && pair->variable)
-            {
-                expType = convertTokenToTermType(pair->variable->t);
-            }
-            else
-            {
-
-                FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, exp->tokenArray[currentExpPos]->val);
-            }
         }
         else
         {
