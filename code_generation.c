@@ -242,7 +242,6 @@ void READS()
     addToString(2, "DEFVAR LF@LenParametr\n");
     addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarReadS\n");
-    addToString(2, "POPS LF@VarReadS\n");
     addToString(2, "READ LF@VarReadS string\n");
     addToString(2, "PUSHS LF@VarReadS\n");
 
@@ -260,7 +259,6 @@ void READI()
     addToString(2, "DEFVAR LF@LenParametr\n");
     addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarReadI\n");
-    addToString(2, "POPS LF@VarReadI\n");
     addToString(2, "READ LF@VarReadI int\n");
     addToString(2, "PUSHS LF@VarReadI\n");
 
@@ -278,7 +276,6 @@ void READF()
     addToString(2, "DEFVAR LF@LenParametr\n");
     addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarReadF\n");
-    addToString(2, "POPS LF@VarReadF\n");
     addToString(2, "READ LF@VarReadF float\n");
     addToString(2, "PUSHS LF@VarReadF\n");
     
