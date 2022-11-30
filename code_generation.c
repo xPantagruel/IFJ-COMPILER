@@ -239,6 +239,8 @@ void READS()
     addToString(2, "LABEL reads \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarReadS\n");
     addToString(2, "POPS LF@VarReadS\n");
     addToString(2, "READ LF@VarReadS string\n");
@@ -255,6 +257,8 @@ void READI()
     addToString(2, "LABEL readi \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarReadI\n");
     addToString(2, "POPS LF@VarReadI\n");
     addToString(2, "READ LF@VarReadI int\n");
@@ -271,6 +275,8 @@ void READF()
     addToString(2, "LABEL readf\n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarReadF\n");
     addToString(2, "POPS LF@VarReadF\n");
     addToString(2, "READ LF@VarReadF float\n");
@@ -349,6 +355,8 @@ void FLOATVAL()
     addToString(2, "LABEL floatval \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarFloatval\n");
     addToString(2, "POPS LF@VarFloatval\n");
     addToString(2, "INT2FLOAT LF@VarFloatval LF@VarFloatval\n"); // konvert na float
@@ -365,6 +373,8 @@ void INTVAL()
     addToString(2, "LABEL intval \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarIntval\n");
     addToString(2, "POPS LF@VarIntval\n");
     addToString(2, "FLOAT2INT LF@VarIntval LF@VarIntval\n"); // konvert na int
@@ -380,6 +390,8 @@ void STRVAL()
     addToString(2, "LABEL strval \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarStrval\n");
     addToString(2, "POPS LF@VarStrval\n");
     addToString(2, "DEFVAR LF@VarType\n");
@@ -410,6 +422,8 @@ void STRLEN()
     addToString(2, "LABEL strlen \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarStrlen\n");
     addToString(2, "POPS LF@VarStrlen\n");
     addToString(2, "DEFVAR LF@Length\n");
@@ -430,6 +444,8 @@ void ORD()
     addToString(2, "LABEL ord \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarOrd\n");
     addToString(2, "POPS LF@VarOrd\n");
     addToString(2, "DEFVAR LF@Length\n");
@@ -455,11 +471,30 @@ void CHR()
     addToString(2, "LABEL chr \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
+    addToString(2, "DEFVAR LF@Condition\n");
     addToString(2, "DEFVAR LF@VarChr\n");
     addToString(2, "POPS LF@VarChr\n");
+
+    // //vetsi nez 255
+    // addToString(2, "GT LF@Condition LF@VarChr int@255\n");
+    // addToString(2, "JUMPIFEQ END LF@Condition bool@true\n");
+
+    // //mensi nez 0
+    // addToString(2, "LT LF@Condition LF@VarChr int@0\n");
+    // addToString(2, "JUMPIFEQ END LF@Condition bool@true\n");
+
     addToString(2, "DEFVAR LF@Result\n");
     addToString(2, "INT2CHAR LF@Result LF@VarChr\n");
     addToString(2, "PUSHS LF@Result\n");
+    // addToString(2, "JUMP DEFINITIVEEND\n");
+
+    // addToString(2, "LABEL END\n");
+    // addToString(2, "DPRINT int@58\n");
+
+    // addToString(2, "LABEL DEFINITIVEEND\n");
+
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
