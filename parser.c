@@ -151,7 +151,7 @@ bool prog(Token *token)
             } else {
                 codeGeneration(token);
             }        
-        } 
+        }
         else if (statement(token) == 0)
         {                 //<prog> -> <statement>
             return false; // invalid statement
@@ -1044,6 +1044,24 @@ int statement(Token *token)
         else
         {
             return 0;
+        }
+    }
+    // <statement> ; <statement>
+    else if ((token->t == SLASH) || (SEMICOL <= token->t && token->t <= MUL) || (ELSE <= token->t && token->t <= FLOAT_TYPE) || (token->t == INT_TYPE) || (token->t == RETURN) || (token->t == STRING_TYPE) || (token->t == VOID) || (EQ <= token->t && token->t <= NOT_EQ) || (token->t == COLON)) {
+        return 0;
+    } else if ((token->t == NULL_KEYWORD) || (token->t == INT) || (token->t == FLOAT) || (token->t == STRING) ) {
+        dtorToken(token);
+        token = getToken();
+        if (token->t != SEMICOL) {
+            return 0;
+        } else {
+            dtorToken(token);
+            token = getToken();
+            if (statement(token) == 0) {
+                return 0;
+            } else {
+                return 1;
+            }
         }
     }
     else
