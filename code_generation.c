@@ -1837,11 +1837,15 @@ void codeGeneration(Token *token)
         inWhile -= 1;
         GetUniqueVarName();
         addToString(frameStr, "JUMP $");
-        addToString(frameStr, listWhileLabels->firstElement->nextElement->nextElement->data);//JUMP WHILESTART UniqueName
+        if(listWhileLabels->firstElement->nextElement->nextElement!=NULL){
+            addToString(frameStr, listWhileLabels->firstElement->nextElement->nextElement->data);//JUMP WHILESTART UniqueName
+        }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr, listWhileLabels->firstElement->nextElement->data);//LABEL $LOOPCOND UniqueName
+        if(listWhileLabels->firstElement->nextElement != NULL){
+            addToString(frameStr, listWhileLabels->firstElement->nextElement->data);//LABEL $LOOPCOND UniqueName
+        }
         addToString(frameStr, "\n");
 
         //add from listCodeGen condition and delete it after
@@ -1863,7 +1867,9 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMPIFEQ $");
-        addToString(frameStr, listWhileLabels->firstElement->data);
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frameStr, listWhileLabels->firstElement->data);
+        }
         addToString(frameStr, " ");
         AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr, "CONDVAR");
@@ -1883,15 +1889,18 @@ void codeGeneration(Token *token)
         GetUniqueVarName();
 
         addToString(frameStr, "JUMP $");
-        addToString(frameStr, listIfLabels->firstElement->data);//LABEL AFTERELSE UniqueName
+        if(listIfLabels->firstElement != NULL){
+            addToString(frameStr, listIfLabels->firstElement->data);//LABEL AFTERELSE UniqueName
+        }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//LABEL IFCOND UniqueName
+        if(listIfLabels->firstElement->nextElement->nextElement != NULL){
+            addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//LABEL IFCOND UniqueName
+        }
         addToString(frameStr, "\n");
 
         // //add from listCodeGen condition and delete it after
-        //add from listCodeGen condition and delete it after
         if (listCodeGen->firstElement != NULL) {
             addToString(frameStr, listCodeGen->firstElement->data);//add condition
         }
@@ -1910,7 +1919,9 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMPIFEQ $");
-        addToString(frameStr, listIfLabels->firstElement->nextElement->data);
+        if(listIfLabels->firstElement->nextElement != NULL){
+            addToString(frameStr, listIfLabels->firstElement->nextElement->data);
+        }
         addToString(frameStr, " ");
         AddLForFG(frameStr,IAmInFunction);
         addToString(frameStr, "CONDVAR");
@@ -1920,11 +1931,16 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMP $");
-        addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);//LABEL ELSE UniqueName
+        if(listIfLabels->firstElement->nextElement->nextElement->nextElement != NULL){
+            addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);//LABEL ELSE UniqueName
+        }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
+        if (listIfLabels->firstElement != NULL){
         addToString(frameStr, listIfLabels->firstElement->data);//LABEL AFTERELSE UniqueName
+        }
+        
         addToString(frameStr, "\n");
 
         DLL_DeleteFirst(0);
@@ -2426,21 +2442,29 @@ void codeGeneration(Token *token)
         free(WhileNames);
 
         addToString(frameStr, "JUMP $");
-        addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//JUMP IFCOND
+        if(listIfLabels->firstElement->nextElement->nextElement->data != NULL){
+            addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//JUMP IFCOND
+        }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr, listIfLabels->firstElement->nextElement->data);//LABEL $STARTIF
+        if(listIfLabels->firstElement->nextElement->data != NULL){
+            addToString(frameStr, listIfLabels->firstElement->nextElement->data);//LABEL $STARTIF
+        }
         addToString(frameStr, "\n");
         afterElse = false;
         break;
     case ELSE:
         addToString(frameStr, "JUMP $");
-        addToString(frameStr, listIfLabels->firstElement->data);//JUMP AFTERELSE
+        if(listIfLabels->firstElement->data != NULL){
+            addToString(frameStr, listIfLabels->firstElement->data);//JUMP AFTERELSE
+        }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
+        if(listIfLabels->firstElement->nextElement->nextElement->nextElement->data != NULL){
+            addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
+        }
         addToString(frameStr, "\n");
         afterElse=true;
         break;
