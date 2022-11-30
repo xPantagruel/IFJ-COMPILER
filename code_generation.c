@@ -236,12 +236,14 @@ void DLL_InsertFirst(int num, char *data)
 //todo je tu spravny argument 0? (ak nie tak zmenit aj inde)
 void READS()
 {
-    addToString(2, "LABEL $readS \n");
+    addToString(2, "LABEL reads \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarReadS\n");
     addToString(2, "POPS LF@VarReadS\n");
     addToString(2, "READ LF@VarReadS string\n");
+    addToString(2, "PUSHS LF@VarReadS\n");
+
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
@@ -250,12 +252,14 @@ void READS()
 // function readi() : ?int
 void READI()
 {
-    addToString(2, "LABEL $readS \n");
+    addToString(2, "LABEL readi \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarReadI\n");
     addToString(2, "POPS LF@VarReadI\n");
     addToString(2, "READ LF@VarReadI int\n");
+    addToString(2, "PUSHS LF@VarReadI\n");
+
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
@@ -264,12 +268,14 @@ void READI()
 // function readf() : ?float
 void READF()
 {
-    addToString(2, "LABEL $readS\n");
+    addToString(2, "LABEL readf\n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarReadF\n");
     addToString(2, "POPS LF@VarReadF\n");
     addToString(2, "READ LF@VarReadF float\n");
+    addToString(2, "PUSHS LF@VarReadF\n");
+    
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
@@ -327,7 +333,7 @@ void WRITE()
     // addToString(2, "JUMP $END\n");
 
     // END
-    addToString(2, "LABEL $END\n");
+    addToString(2, "LABEL $WRITEEND\n");
     addToString(2, "JUMP $BEFOREPOP\n");
 
     addToString(2, "LABEL $DEFINITIVEEND\n");
@@ -340,13 +346,13 @@ void WRITE()
 // todo zkontrolovat zda je dobre convert a vypi
 void FLOATVAL()
 {
-    addToString(2, "LABEL $FLOATVAL \n");
+    addToString(2, "LABEL floatval \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarFloatval\n");
     addToString(2, "POPS LF@VarFloatval\n");
     addToString(2, "INT2FLOAT LF@VarFloatval LF@VarFloatval\n"); // konvert na float
-    addToString(2, "WRITE LF@VarWrite\n");                       // vypise na vystup
+    addToString(2, "PUSHS LF@VarWrite\n");                       // vypise na vystup
 
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
@@ -356,13 +362,13 @@ void FLOATVAL()
 // todo zkontrolovat zda je dobre convert a vypi
 void INTVAL()
 {
-    addToString(2, "LABEL $INTVAL \n");
+    addToString(2, "LABEL intval \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarIntval\n");
     addToString(2, "POPS LF@VarIntval\n");
     addToString(2, "FLOAT2INT LF@VarIntval LF@VarIntval\n"); // konvert na int
-    addToString(2, "WRITE LF@VarWrite\n");                   // vypise na vystup
+    addToString(2, "PUSHS LF@VarWrite\n");                   // vypise na vystup
 
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
@@ -371,7 +377,7 @@ void INTVAL()
 // function strval(term) : string –
 void STRVAL()
 {
-    addToString(2, "LABEL $STRVAL \n");
+    addToString(2, "LABEL strval \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarStrval\n");
@@ -382,17 +388,17 @@ void STRVAL()
     addToString(2, "TYPE LF@VarType LF@VarWrite \n");
     addToString(2, "JUMPIFEQ $NULL LF@VarType null\n"); // type == null
 
-    addToString(2, "WRITE LF@VarWrite\n"); // vypise na vystup
-    addToString(2, "JUMP $END\n");
+    addToString(2, "PUSHS LF@VarWrite\n"); // vypise na vystup
+    addToString(2, "JUMP $STRVALEND\n");
 
     // hodnota null dle tabulky 1.
     addToString(2, "LABEL $NULL\n");
-    addToString(2, "WRITE "
+    addToString(2, "PUSHS "
                    "\n");
-    addToString(2, "JUMP $END\n");
+    addToString(2, "JUMP $STRVALEND\n");
 
     // END
-    addToString(2, "LABEL $END\n");
+    addToString(2, "LABEL $STRVALEND\n");
 
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
@@ -401,14 +407,14 @@ void STRVAL()
 // function strlen(string $𝑠) : int
 void STRLEN()
 {
-    addToString(2, "LABEL $STRLEN \n");
+    addToString(2, "LABEL strlen \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarStrlen\n");
     addToString(2, "POPS LF@VarStrlen\n");
     addToString(2, "DEFVAR LF@Length\n");
     addToString(2, "STRLEN LF@Length LF@VarStrlen\n");
-    addToString(2, "WRITE LF@Length\n"); // vypise na vystup
+    addToString(2, "PUSHS LF@Length\n"); // vypise na vystup
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
@@ -421,22 +427,23 @@ void SUBSTRING()
 // function ord(string $c) : int –
 void ORD()
 {
-    addToString(2, "LABEL $ORD \n");
+    addToString(2, "LABEL ord \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarOrd\n");
     addToString(2, "POPS LF@VarOrd\n");
     addToString(2, "DEFVAR LF@Length\n");
     addToString(2, "STRLEN LF@Length LF@VarOrd\n");
-
-    addToString(2, "JUMPIFEQ int@0 LF@Length END\n"); // string je prazdny
     addToString(2, "DEFVAR LF@Ord\n");
 
-    addToString(2, "GETCHAR LF@Ord LF@VarOrd int@0\n"); // ziskani prvniho znaku
-    addToString(2, "WRITE LF@Ord\n");                   // vypise na vystup
+    addToString(2, "JUMPIFEQ $ORDEND LF@Length int@0\n"); // string je prazdny
+
+    addToString(2, "STRI2INT LF@Ord LF@VarOrd int@0\n"); // ziskani prvniho znaku
+    // addToString(2, "WRITE LF@Ord\n");                   // vypise na vystup
 
     // END
-    addToString(2, "LABEL $END\n");
+    addToString(2, "LABEL $ORDEND\n");
+    addToString(2,"PUSHS LF@Ord\n");
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
@@ -445,11 +452,14 @@ void ORD()
 // todo doresit
 void CHR()
 {
-    addToString(2, "LABEL $CHR \n");
+    addToString(2, "LABEL chr \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@VarChr\n");
     addToString(2, "POPS LF@VarChr\n");
+    addToString(2, "DEFVAR LF@Result\n");
+    addToString(2, "INT2CHAR LF@Result LF@VarChr\n");
+    addToString(2, "PUSHS LF@Result\n");
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
