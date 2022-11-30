@@ -671,6 +671,7 @@ void storeBuildInParams(char *val)
 
 
 void writeAndFreeBuildInParams(int frame, char *frameStr) {
+
     if (buildInFunctionsParams != NULL) {
         for (int i = functionCallParamsCounter-1; i >= 0; i--) {
             if (buildInFunctionsParams[i] != NULL) {
@@ -682,11 +683,7 @@ void writeAndFreeBuildInParams(int frame, char *frameStr) {
                 addToString(frame, "PUSHS ");
                 if (buildInFunctionsParams[i][0] == '-')
                 {
-                    if (callingFromGF) {
-                        addToString(frame, " GF@");
-                    } else {
-                        addToString(frame, frameStr);
-                    }
+                    addToString(frame, frameStr); //bol tu if callingfromGF
                 }
                 else
                 {
@@ -745,7 +742,7 @@ void checkStorage()
 {
     int frameStr = 0;
     char frame[] = " GF@";
-    if (IAmInFunction)
+    if (IAmInFunction )
     {
         frameStr = 1; // inFunctionString
         strcpy(frame, " LF@");
@@ -1259,15 +1256,24 @@ void codeGeneration(Token *token)
         { // float -> float@3.42
             strcpy(var, " float@");
             strcat(var, token->val);
-        } else if (token->t == NULL_KEYWORD){
+        } else if (token->t == NULL_KEYWORD) {
             strcpy(var, " int@0");
         } else
         {
             strcpy(var, token->val);
         }
 
+            if (buildInCalled) {
+                storeBuildInParams(var);
+            } else {
+                store(var);
+            }
+
         if (token->t == VAR_ID)
         { // token is variable -> setting up correct frame
+            
+            // storing variable
+
             if (IAmInFunction)
             {
                 strcat(tmp, " LF@");
@@ -1299,21 +1305,14 @@ void codeGeneration(Token *token)
         {
             defined = 1; // not variable
         }
-
-        // storing variable
-        if (buildInCalled) {
-            storeBuildInParams(var);
-        } else {
-            store(var);
-        }
-
+  
         // variable wasn't defined -> define it
         if (!defined)
         {
-            addToString(frameStr, "DEFVAR");
-            addToString(frameStr, frame);
-            addToString(frameStr, var);
-            addToString(frameStr, "\n");
+            // addToString(frameStr, "DEFVAR");
+            // addToString(frameStr, frame);
+            addToString(frameStr, tmp);
+            //addToString(frameStr, "\n");
         }
 
             // if operator was set (it means that in storage we have at least 2 items)
@@ -1998,8 +1997,8 @@ void codeGeneration(Token *token)
         }
 
         if (storageLen == 1 && !buildInCalled)
-        { // if ($var1)
-            if (functionLabelCreated) {
+        { // if ($var1), while, foo(), return?
+            if (functionLabelCreated) { //in function
                 addToString(1, "PUSHS");
                 if (storage[0][0] == '-')
                 {
@@ -2015,6 +2014,22 @@ void codeGeneration(Token *token)
                     addToString(1, "PUSHS int@0\n");
                     addToString(1, "LTS\n");
                 }
+           } else if (IAmInFunctionCall) {
+                addToString(frameStr, "PUSHS"); //pushing single param
+                if (storage[0][0] == '-')
+                {
+                    if (callingFromGF && IAmInFunctionCall) {
+                        addToString(frameStr, " GF@");
+                    } else {
+                        addToString(frameStr, frame);
+                    }
+                }
+                else
+                {
+                    addToString(frameStr, " ");
+                }
+                addToString(frameStr, storage[0]);
+                addToString(frameStr, "\n");
             } else {
                 addToString(3, "PUSHS"); //todo tu mozno chyba pri pushovani jedneho parametru 
                 if (storage[0][0] == '-')
