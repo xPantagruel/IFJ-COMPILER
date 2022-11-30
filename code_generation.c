@@ -527,7 +527,7 @@ int GetNumberOfDigets(){
 }
 
 void AddLForFG(int frameStr,int IAmInFunction){
-    if (IAmInFunction)
+    if (IAmInFunction && !cparCounter)
     {
         addToString(frameStr, "LF@");
     }
@@ -1224,6 +1224,11 @@ void codeGeneration(Token *token)
     case VAR_ID:
     case INT:
     case FLOAT:
+    case NULL_KEYWORD:
+        if (token->t == NULL_KEYWORD && functionLabelCreated) {
+            break;
+        }
+
         if (IAmInFunction) {
             frameStr = 1;
         }
@@ -1254,8 +1259,9 @@ void codeGeneration(Token *token)
         { // float -> float@3.42
             strcpy(var, " float@");
             strcat(var, token->val);
-        }
-        else
+        } else if (token->t == NULL_KEYWORD){
+            strcpy(var, " int@0");
+        } else
         {
             strcpy(var, token->val);
         }
@@ -2010,24 +2016,24 @@ void codeGeneration(Token *token)
                     addToString(1, "LTS\n");
                 }
             } else {
-                addToString(frameStr, "PUSHS");
+                addToString(3, "PUSHS"); //todo tu mozno chyba pri pushovani jedneho parametru 
                 if (storage[0][0] == '-')
                 {
                     if (callingFromGF && IAmInFunctionCall) {
-                        addToString(frameStr, " GF@");
+                        addToString(3, " GF@");
                     } else {
-                        addToString(frameStr, frame);
+                        addToString(3, frame);
                     }
                 }
                 else
                 {
-                    addToString(frameStr, " ");
+                    addToString(3, " ");
                 }
-                addToString(frameStr, storage[0]);
-                addToString(frameStr, "\n");
+                addToString(3, storage[0]);
+                addToString(3, "\n");
                 if (inIf || inWhile) {
-                    addToString(frameStr, "PUSHS int@0\n");
-                    addToString(frameStr, "LTS\n");
+                    addToString(3, "PUSHS int@0\n");
+                    addToString(3, "LTS\n");
                 }
             }
             removeLastFromStorage();
@@ -2149,6 +2155,9 @@ void codeGeneration(Token *token)
         break;
 
     case SEMICOL:
+        if (!cparCounter && IAmInFunction) {
+            IAmInFunction = 0;
+        }
         checkStorage();
         resetGlobalValues(); 
         Return = false;
