@@ -78,6 +78,8 @@ static int UniqueName = 0;
 /** int to get unique names of var, labels, function, ...*/
 static int UniqueVarName = 0;
 
+static enum type previousTokenType = NOT_DEFINED;
+
 /** bool if in if body*/
 static bool Return = 0;
 
