@@ -150,9 +150,8 @@ bool prog(Token *token)
                 return false;
             } else {
                 codeGeneration(token);
-            }
-            
-        }
+            }        
+        } 
         else if (statement(token) == 0)
         {                 //<prog> -> <statement>
             return false; // invalid statement
@@ -1052,8 +1051,6 @@ int statement(Token *token)
         if (token->t == R_CPAR)
         {
             ungetc('}', stdin);
-        } else {
-            exit(2);
         }
         return 2;
     }
