@@ -150,8 +150,7 @@ bool prog(Token *token)
                 return false;
             } else {
                 codeGeneration(token);
-            }
-            
+            }        
         }
         else if (statement(token) == 0)
         {                 //<prog> -> <statement>
@@ -386,6 +385,7 @@ int expression(Token *token)
         token = getToken();
     }
 
+
     if (token->t == SEMICOL)
     {
         ungetc(';', stdin);
@@ -395,16 +395,25 @@ int expression(Token *token)
         ungetc(')', stdin);
     }
 
+
+
     if (exp->arrayLen == 1)
     {
-        codeGeneration(exp->tokenArray[0]);
-        if (currentSymbol)
-        {
-            currentSymbol->variable->t = exp->tokenArray[0]->t;
+        if (exp->tokenArray[0]->val == NULL) {
+            
+            exp->tokenArray[0]->t = INT;
+            addCharToToken('0', exp->tokenArray[0]);
+            codeGeneration(exp->tokenArray[0]);
+        } else {
+            codeGeneration(exp->tokenArray[0]);
+            if (currentSymbol)
+            {
+                currentSymbol->variable->t = exp->tokenArray[0]->t;
+            }
         }
 
         return 1;
-    }
+    } 
 
     if (exp->arrayLen != 0)
     {
@@ -1047,13 +1056,29 @@ int statement(Token *token)
             return 0;
         }
     }
+    // <statement> ; <statement>
+    else if ((token->t == SLASH) || (SEMICOL <= token->t && token->t <= MUL) || (ELSE <= token->t && token->t <= FLOAT_TYPE) || (token->t == INT_TYPE) || (token->t == RETURN) || (token->t == STRING_TYPE) || (token->t == VOID) || (EQ <= token->t && token->t <= NOT_EQ) || (token->t == COLON)) {
+        return 0;
+    } else if ((token->t == NULL_KEYWORD) || (token->t == INT) || (token->t == FLOAT) || (token->t == STRING) ) {
+        dtorToken(token);
+        token = getToken();
+        if (token->t != SEMICOL) {
+            return 0;
+        } else {
+            dtorToken(token);
+            token = getToken();
+            if (statement(token) == 0) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+    }
     else
     { // epsilon
         if (token->t == R_CPAR)
         {
             ungetc('}', stdin);
-        } else {
-            exit(2);
         }
         return 2;
     }

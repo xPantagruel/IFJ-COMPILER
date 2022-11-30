@@ -1,4 +1,7 @@
 <?php
 declare(strict_types=1);
-
-write("hello"};
+if("") {
+    write("BAD\n");
+} else {
+    write("GOOD\n");
+}
