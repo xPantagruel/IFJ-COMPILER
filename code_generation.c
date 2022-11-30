@@ -1872,13 +1872,13 @@ void codeGeneration(Token *token)
         inWhile -= 1;
         GetUniqueVarName();
         addToString(frameStr, "JUMP $");
-        if(listWhileLabels->firstElement->nextElement->nextElement!=NULL){
+        if(listWhileLabels->firstElement!=NULL){
             addToString(frameStr, listWhileLabels->firstElement->nextElement->nextElement->data);//JUMP WHILESTART UniqueName
         }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        if(listWhileLabels->firstElement->nextElement != NULL){
+        if(listWhileLabels->firstElement != NULL){
             addToString(frameStr, listWhileLabels->firstElement->nextElement->data);//LABEL $LOOPCOND UniqueName
         }
         addToString(frameStr, "\n");
@@ -1930,7 +1930,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        if(listIfLabels->firstElement->nextElement->nextElement != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//LABEL IFCOND UniqueName
         }
         addToString(frameStr, "\n");
@@ -1954,7 +1954,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMPIFEQ $");
-        if(listIfLabels->firstElement->nextElement != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->data);
         }
         addToString(frameStr, " ");
@@ -1966,7 +1966,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMP $");
-        if(listIfLabels->firstElement->nextElement->nextElement->nextElement != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);//LABEL ELSE UniqueName
         }
         addToString(frameStr, "\n");
@@ -2414,15 +2414,21 @@ void codeGeneration(Token *token)
         free(WhileNames);
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
+        }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMP $");
-        addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
+        }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frameStr,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
+        }
         addToString(frameStr, "\n");
 
         break;
@@ -2477,13 +2483,13 @@ void codeGeneration(Token *token)
         free(WhileNames);
 
         addToString(frameStr, "JUMP $");
-        if(listIfLabels->firstElement->nextElement->nextElement->data != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//JUMP IFCOND
         }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        if(listIfLabels->firstElement->nextElement->data != NULL){
+        if(listIfLabels->firstElement!= NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->data);//LABEL $STARTIF
         }
         addToString(frameStr, "\n");
@@ -2491,13 +2497,13 @@ void codeGeneration(Token *token)
         break;
     case ELSE:
         addToString(frameStr, "JUMP $");
-        if(listIfLabels->firstElement->data != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->data);//JUMP AFTERELSE
         }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        if(listIfLabels->firstElement->nextElement->nextElement->nextElement->data != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
         }
         addToString(frameStr, "\n");
