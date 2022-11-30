@@ -409,7 +409,6 @@ int expression(Token *token)
     if (exp->arrayLen != 0)
     {
         int resultType;
-
         if (bottomUp(exp, &resultType))
         {
             if (currentSymbol)
@@ -1053,6 +1052,8 @@ int statement(Token *token)
         if (token->t == R_CPAR)
         {
             ungetc('}', stdin);
+        } else {
+            exit(2);
         }
         return 2;
     }
