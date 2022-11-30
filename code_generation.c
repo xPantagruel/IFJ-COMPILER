@@ -862,17 +862,6 @@ void threeAddressWithoutRemove(int frameStr, char *frame)
 void pushStorage(int frameStr, char *frame)
 {
     addToString(frameStr, "PUSHS");
-    if (storage[0] != NULL && storage[0][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
-    }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[0]);
-    addToString(frameStr, "\n");
-    addToString(frameStr, "PUSHS");
     if (storage[1] != NULL && storage[1][0] == '-')
     { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
@@ -882,6 +871,18 @@ void pushStorage(int frameStr, char *frame)
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[1]);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "PUSHS");
+    if (storage[0] != NULL && storage[0][0] == '-')
+    { // if first letter is '-' -> it is variable
+        addToString(frameStr, frame);
+    }
+    else
+    {
+        addToString(frameStr, " ");
+    }
+    addToString(frameStr, storage[0]);
     addToString(frameStr, "\n");
 
     removeLastFromStorage();
@@ -892,17 +893,6 @@ void pushStorage(int frameStr, char *frame)
 void pushWithoutDeleting(int frameStr, char *frame)
 {
     addToString(frameStr, "PUSHS");
-    if (storage[0] != NULL && storage[0][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
-    }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[0]);
-    addToString(frameStr, "\n");
-    addToString(frameStr, "PUSHS");
     if (storage[1] != NULL && storage[1][0] == '-')
     { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
@@ -912,6 +902,18 @@ void pushWithoutDeleting(int frameStr, char *frame)
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[1]);
+    addToString(frameStr, "\n");
+
+    addToString(frameStr, "PUSHS");
+    if (storage[0] != NULL && storage[0][0] == '-')
+    { // if first letter is '-' -> it is variable
+        addToString(frameStr, frame);
+    }
+    else
+    {
+        addToString(frameStr, " ");
+    }
+    addToString(frameStr, storage[0]);
     addToString(frameStr, "\n");
 }
 
@@ -1110,12 +1112,12 @@ void divIdiv(int frameStr, char *frame)
             pushStorage(frameStr, frame);
             addToString(frameStr, "DIVS\n");
             addToString(frameStr, "PUSHS int@0\n");
-            addToString(frameStr, "LTS\n");
+            addToString(frameStr, "GTS\n");
         } else {
             pushStorage(3, frame);
             addToString(3, "DIVS\n");
             addToString(3, "PUSHS int@0\n");
-            addToString(3, "LTS\n");
+            addToString(3, "GTS\n");
         }
     }
 
@@ -1138,12 +1140,12 @@ void divIdiv(int frameStr, char *frame)
             pushStorage(frameStr, frame);
             addToString(frameStr, "IDIVS\n");
             addToString(frameStr, "PUSHS int@0\n");
-            addToString(frameStr, "LTS\n");
+            addToString(frameStr, "GTS\n");
         } else {
             pushStorage(3, frame);
             addToString(3, "IDIVS\n");
             addToString(3, "PUSHS int@0\n");
-            addToString(3, "LTS\n");
+            addToString(3, "GTS\n");
         }
     }
 
@@ -1333,12 +1335,12 @@ void codeGeneration(Token *token)
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "ADDS\n");
                         addToString(frameStr, "PUSHS int@0\n");
-                        addToString(frameStr, "LTS\n");
+                        addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "ADDS\n");
                         addToString(3, "PUSHS int@0\n");
-                        addToString(3, "LTS\n");
+                        addToString(3, "GTS\n");
                     }
                 }
                 break;
@@ -1354,12 +1356,12 @@ void codeGeneration(Token *token)
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "SUBS\n");
                         addToString(frameStr, "PUSHS int@0\n");
-                        addToString(frameStr, "LTS\n");
+                        addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "SUBS\n");
                         addToString(3, "PUSHS int@0\n");
-                        addToString(3, "LTS\n");
+                        addToString(3, "GTS\n");
                     }
                 }
                 break;
@@ -1378,12 +1380,12 @@ void codeGeneration(Token *token)
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "MULS\n");
                         addToString(frameStr, "PUSHS int@0\n");
-                        addToString(frameStr, "LTS\n");
+                        addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "MULS\n");
                         addToString(3, "PUSHS int@0\n");
-                        addToString(3, "LTS\n");
+                        addToString(3, "GTS\n");
                     }
                 }
                 break;
@@ -1435,7 +1437,7 @@ void codeGeneration(Token *token)
                 {
                     if (Return) {
                         pushStorage(frameStr, frame);
-                        addToString(frameStr, "GTS\n");
+                        addToString(frameStr, "GTS\n"); 
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "GTS\n");
@@ -1596,7 +1598,7 @@ void codeGeneration(Token *token)
                     } else {
                         pushWithoutDeleting(3, frame);
 
-                        addToString(3, "LTS\n"); // LESS
+                        addToString(3, "LTS\n"); // LESS 
                         addToString(3, "POPS");  // STORE
                         addToString(3, frame);
                         addToString(3, randomVar1);
@@ -2012,7 +2014,7 @@ void codeGeneration(Token *token)
                 addToString(1, "\n");
                 if (inIf || inWhile) {
                     addToString(1, "PUSHS int@0\n");
-                    addToString(1, "LTS\n");
+                    addToString(1, "GTS\n");
                 }
            } else if (IAmInFunctionCall) {
                 addToString(frameStr, "PUSHS"); //pushing single param
@@ -2048,7 +2050,7 @@ void codeGeneration(Token *token)
                 addToString(3, "\n");
                 if (inIf || inWhile) {
                     addToString(3, "PUSHS int@0\n");
-                    addToString(3, "LTS\n");
+                    addToString(3, "GTS\n");
                 }
             }
             removeLastFromStorage();
