@@ -419,14 +419,15 @@ int expression(Token *token)
     if (exp->arrayLen != 0)
     {
 
-        // for (int i = 0; i<exp->arrayLen; i++) {
-        //     printf("%s exp\n", exp->tokenArray[i]->val);
-        // }
+        /* for (int i = 0; i < exp->arrayLen; i++)
+        {
+            printf("%s exp\n", exp->tokenArray[i]->val);
+        } */
 
         int resultType;
         if (bottomUp(exp, &resultType))
         {
-            if (currentSymbol)
+            if (currentSymbol && currentSymbol->variable)
             {
                 currentSymbol->variable->t = resultType;
             }

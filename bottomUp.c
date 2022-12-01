@@ -186,7 +186,6 @@ bool reduce(Stack *stack)
             {
                 if (term->childTerms[i]->originalToken && term->childTerms[i]->value && term->childTerms[i]->type != L_BRACKET && term->childTerms[i]->type != R_BRACKET)
                 {
-
                     codeGeneration(term->childTerms[i]->originalToken);
                 }
             }
@@ -446,9 +445,9 @@ bool bottomUp(Expression *exp, int *resultType)
 
     Term *startTerm = initTerm("$", TOP_BOTTOM, NULL);
     Token *endToken = tokenInit();
+
     addCharToToken('$', endToken);
     endToken->t = -1;
-
     addTokenToExpression(exp, endToken);
 
     StackNode *startNode = initNode(startTerm);
@@ -457,6 +456,7 @@ bool bottomUp(Expression *exp, int *resultType)
 
     while (currentExpPos < exp->arrayLen)
     {
+
         Term *newTerm;
         StackNode *newStackNode;
         int expType;
