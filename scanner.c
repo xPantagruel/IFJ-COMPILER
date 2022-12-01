@@ -491,15 +491,24 @@ Token *getToken()
                         }
                         else
                         { // end of string
-                            addTypeToToken(STRING, token);
-                            addRowToToken(row, token);
-
+                            if (token->val == NULL) {
+                                addCharToToken('n', token);
+                                addCharToToken('u', token);
+                                addCharToToken('l', token);
+                                addCharToToken('l', token);
+                                addTypeToToken(NULL_KEYWORD, token);
+                                addRowToToken(row, token);
+                            } else {
+                                addTypeToToken(STRING, token);
+                                addRowToToken(row, token);
+                            }
+                            
                             actualState = START;
                             tokenFound = 1;
                         }
                         break;
                     case '$':
-                        if (token->val[strlen(token->val) - 1] == '\\')
+                        if (token->val != NULL && token->val[strlen(token->val) - 1] == '\\')
                         { // $ in string must be like "\$"
                             addCharToToken(c, token);
                         }
