@@ -395,12 +395,9 @@ int expression(Token *token)
         ungetc(')', stdin);
     }
 
-
-
     if (exp->arrayLen == 1)
     {
-        if (exp->tokenArray[0]->val == NULL) {
-            
+        if (exp->tokenArray[0]->val == NULL) {       
             exp->tokenArray[0]->t = INT;
             addCharToToken('0', exp->tokenArray[0]);
             codeGeneration(exp->tokenArray[0]);
@@ -415,11 +412,12 @@ int expression(Token *token)
         return 1;
     } 
 
+
     if (exp->arrayLen != 0)
     {
 
         // for (int i = 0; i<exp->arrayLen; i++) {
-        //     printf("%s exp\n", exp->tokenArray[i]);
+        //     printf("%s exp\n", exp->tokenArray[i]->val);
         // }
 
         int resultType;
@@ -927,7 +925,6 @@ int statement(Token *token)
             {
                 addCharToToken(token->val[i], tmp);
             }
-
             codeGeneration(token);
             dtorToken(token);
             token = getToken();
@@ -961,12 +958,12 @@ int statement(Token *token)
         }
         else if (var_rule(token) == 2)
         {
-            codeGeneration(token);
-            dtorToken(token);
-            token = getToken();
+            //codeGeneration(token);
+            // dtorToken(token);
+            //token = getToken();
             if (expression(token) == 1)
             { // RETURN <expression>
-                // dtorToken(token);
+                // dtorToken(token); //todo tu mozno leak
                 token = getToken();
                 if (token->t == SEMICOL)
                 {                          // RETURN <expression>;

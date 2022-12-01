@@ -64,6 +64,8 @@ void setFloatIntOperatorVariable();
 
 void pushZero(int frame);
 
+void createCallLabel(int frame);
+
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
 

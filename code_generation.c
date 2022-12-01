@@ -1210,9 +1210,15 @@ void pushZero(int frame) {
     }
 }
 
+void createCallLabel(int frame) {
+    addToString(frame, "CALL ");
+    addToString(frame, functionName);
+    addToString(frame, "\n");
+}
+
 void codeGeneration(Token *token)
 {
-    // if prolog not added
+    //if prolog not added
     if (allFunctionsString == NULL) {
         addToString(2, ".IFJcode22\nJUMP $main\n");
     }
@@ -2016,7 +2022,7 @@ void codeGeneration(Token *token)
                 addToString(1, "POPFRAME\n");
                 addToString(1, "RETURN\n");
                 functionLabelCreated = 0;
-                //todo nedostane sa sem
+                //nedostane sa sem
             }
 
             IAmInFunction = 0;
@@ -2067,11 +2073,19 @@ void codeGeneration(Token *token)
             }
         }
 
-        if (storageLen == 1 && !buildInCalled)
+        int x;
+        if (eqSymbolFound) {
+            x = 1;
+        } else {
+            x = 0;
+        }
+
+
+        if (storageLen > 0 && storage[x] != NULL && storageLen == 1 && !buildInCalled)
         { // if ($var1), while, foo(), return?
             if (functionLabelCreated) { //in function
                 addToString(1, "PUSHS");
-                if (storage[0][0] == '-')
+                if (storage[x][0] == '-')
                 {
                     addToString(1, " LF@");
                 }
@@ -2079,14 +2093,14 @@ void codeGeneration(Token *token)
                 {
                     addToString(1, " ");
                 }
-                if (strstr(storage[0], "string@") == NULL) {
-                    addToString(1, storage[0]);
+                if (strstr(storage[x], "string@") == NULL) {
+                    addToString(1, storage[x]);
                 } else {
                     addToString(1, "int@1");
                 }
                 addToString(1, "\n");
                 if (inIf || inWhile) {
-                    if (strstr(storage[0], "float@") != NULL) { //float
+                    if (strstr(storage[x], "float@") != NULL) { //float
                         addToString(3, "PUSHS float@0x0p+0\n");
                     } else {
                         addToString(1, "PUSHS int@0\n");
@@ -2094,8 +2108,8 @@ void codeGeneration(Token *token)
                     addToString(1, "GTS\n");
                 }
            } else if (IAmInFunctionCall) {
-                addToString(frameStr, "PUSHS"); //pushing single param
-                if (storage[0][0] == '-')
+                addToString(frameStr, "PUSHS"); //pushing single param                
+                if (storage[x][0] == '-')
                 {
                     if (callingFromGF && IAmInFunctionCall) {
                         addToString(frameStr, " GF@");
@@ -2108,15 +2122,15 @@ void codeGeneration(Token *token)
                     addToString(frameStr, " ");
                 }
 
-                if (strstr(storage[0], "string@") == NULL) {
-                    addToString(frameStr, storage[0]);
+                if (strstr(storage[x], "string@") == NULL) {
+                    addToString(frameStr, storage[x]);
                 } else {
                     addToString(frameStr, "int@1");
                 }
                 addToString(frameStr, "\n");
             } else {
                 addToString(3, "PUSHS"); //todo tu mozno chyba pri pushovani jedneho parametru 
-                if (storage[0][0] == '-')
+                if (storage[x][0] == '-')
                 {
                     if (callingFromGF && IAmInFunctionCall) {
                         addToString(3, " GF@");
@@ -2128,14 +2142,14 @@ void codeGeneration(Token *token)
                 {
                     addToString(3, " ");
                 }
-                if (strstr(storage[0], "string@") == NULL) {
-                    addToString(3, storage[0]); // not string
+                if (strstr(storage[x], "string@") == NULL) {
+                    addToString(3, storage[x]); // not string
                 } else {  // string -> true
                     addToString(3, "int@1");
                 }
                 addToString(3, "\n");
                 if (inIf || inWhile) {
-                    if (strstr(storage[0], "float@") != NULL) { //float
+                    if (strstr(storage[x], "float@") != NULL) { //float
                         addToString(3, "PUSHS float@0x0p+0\n");
                     } else {
                         addToString(3, "PUSHS int@0\n");
@@ -2145,9 +2159,9 @@ void codeGeneration(Token *token)
             }
             removeLastFromStorage();
         } 
-        if (storageLen == 2 && IAmInFunctionCall && !buildInCalled) {
+        if (storageLen > 0 && storage[x] != NULL && storageLen == 2 && IAmInFunctionCall && !buildInCalled) {
             addToString(frameStr, "PUSHS ");
-            if (storage[0][0] == '-')
+            if (storage[x][0] == '-')
             {
                 if (callingFromGF) {
                     addToString(frameStr, " GF@");
@@ -2236,13 +2250,9 @@ void codeGeneration(Token *token)
             }
 
             if (functionLabelCreated) {
-                addToString(1, "CALL ");
-                addToString(1, functionName);
-                addToString(1, "\n");
+                createCallLabel(1);
             } else {
-                addToString(frameStr, "CALL ");
-                addToString(frameStr, functionName);
-                addToString(frameStr, "\n");
+                createCallLabel(frameStr);
             }
 
             if (storage != NULL && storage[0] != NULL) {
@@ -2264,12 +2274,23 @@ void codeGeneration(Token *token)
         break;
 
     case SEMICOL:
+            // todoo
+            // return vo vnutri vyriesit
+            // return string
+            // return $x
+            // return 2;
+            // return; (void pop nic) -> nil@nil
+            // return v ife ??
+        if (Return) {
+            
+        }
+
         if (!cparCounter && IAmInFunction) {
             IAmInFunction = 0;
         }
         checkStorage();
         resetGlobalValues(); 
-        Return = false;
+        Return = false; 
         break;
     case FUNCTION:
         IAmInFunctionDeclaration = 1;
@@ -2343,8 +2364,6 @@ void codeGeneration(Token *token)
                 }
             }
         }
-
-
         break;
 
     case ID:
