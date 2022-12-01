@@ -1216,7 +1216,7 @@ void codeGeneration(Token *token)
     char randomVar2[11];
 
     // checking if we are in function -> chaning frame
-    if (IAmInFunction)
+    if (IAmInFunction && !callingFromGF)
     {
         strcpy(frame, " LF@");
     }
@@ -1305,10 +1305,8 @@ void codeGeneration(Token *token)
 
         if (token->t == VAR_ID)
         { // token is variable -> setting up correct frame
-            
             // storing variable
-
-            if (IAmInFunction)
+            if (IAmInFunction && !callingFromGF)
             {
                 strcat(tmp, " LF@");
                 strcat(tmp, var);
@@ -2126,7 +2124,7 @@ void codeGeneration(Token *token)
 
         if (IAmInFunctionCall)
         {
-            if (previousTokenType == L_PAR) {
+            if (previousTokenType != L_PAR) {
                 functionCallParamsCounter++;
             }
             if (buildInCalled) {
@@ -2279,7 +2277,7 @@ void codeGeneration(Token *token)
             store(var);
         }
 
-        if (operator== DOT)
+        if (operator == DOT)
         {
             addToString(frameStr, "CONCAT");
             threeAddress(frameStr, frame);

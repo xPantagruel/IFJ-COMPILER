@@ -417,6 +417,11 @@ int expression(Token *token)
 
     if (exp->arrayLen != 0)
     {
+
+        // for (int i = 0; i<exp->arrayLen; i++) {
+        //     printf("%s exp\n", exp->tokenArray[i]);
+        // }
+
         int resultType;
         if (bottomUp(exp, &resultType))
         {
