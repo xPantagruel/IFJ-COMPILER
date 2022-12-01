@@ -567,10 +567,10 @@ Token *getToken()
                 }
                 else
                 {
-                    if (c == 'n' && token->valLen >= 4 && token->val[token->valLen-4] == '\\') {
-                                token->val[token->valLen-1] = '0';
-                                token->val[token->valLen-2] = '1';
-                                token->val[token->valLen-3] = '0';
+                    if (c == 'n' && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2') {
+                            token->val[token->valLen-1] = '0';
+                            token->val[token->valLen-2] = '1';
+                            token->val[token->valLen-3] = '0';
                     } else {
                         addCharToToken(c, token);
                     }
