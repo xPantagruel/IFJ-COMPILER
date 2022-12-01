@@ -356,8 +356,19 @@ void FLOATVAL()
     addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarFloatval\n");
     addToString(2, "POPS LF@VarFloatval\n");
+    //typova kontrola 
+    addToString(2, "DEFVAR LF@Type\n");
+    addToString(2, "TYPE LF@Type LF@VarFloatval\n");
+    addToString(2, "JUMPIFEQ FLOAT LF@Type string@float\n");
+
     addToString(2, "INT2FLOAT LF@VarFloatval LF@VarFloatval\n"); // konvert na float
-    addToString(2, "PUSHS LF@VarWrite\n");                       // vypise na vystup
+    addToString(2, "PUSHS LF@VarFloatval\n");                       
+    addToString(2, "JUMP 2END\n");
+
+    addToString(2, "LABEL FLOAT\n");
+    addToString(2, "PUSHS LF@VarFloatval\n");
+
+    addToString(2, "LABEL 2END\n");
 
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
@@ -374,9 +385,20 @@ void INTVAL()
     addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarIntval\n");
     addToString(2, "POPS LF@VarIntval\n");
+    addToString(2, "DEFVAR LF@Type\n");
+    addToString(2, "TYPE LF@Type LF@VarIntval\n");
+    addToString(2, "JUMPIFEQ INT LF@Type string@int\n");
+    
     addToString(2, "FLOAT2INT LF@VarIntval LF@VarIntval\n"); // konvert na int
-    addToString(2, "PUSHS LF@VarWrite\n");                   // vypise na vystup
+    addToString(2, "PUSHS LF@VarIntval\n"); 
+    addToString(2, "JUMP 1END\n");
 
+    addToString(2, "LABEL INT\n");
+    addToString(2, "PUSHS LF@VarIntval\n");
+
+    addToString(2, "LABEL 1END\n");
+
+                       
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
