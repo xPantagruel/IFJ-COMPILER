@@ -49,11 +49,11 @@ typedef struct symItem
     SymItem *next;
 } SymItem;
 
-typedef union symTableUnion
+typedef union symUnion
 {
     SymFunction *function;
     SymVariable *variable;
-} SymTableUnion;
+} SymUnion;
 
 typedef struct frame
 {
@@ -65,7 +65,8 @@ typedef struct symTable
 {
     Frame *topFrame;
     Frame *mainFrame;
-    SymTableUnion *currentlyDeclared;
+    SymUnion **currentlyDeclared;
+    int currentlyDeclaredCount;
 } SymTable;
 
 /**
@@ -135,13 +136,23 @@ SymFunction *addSymFunction(char *key);
 SymVariable *addSymVariable(char *key);
 
 /**
- * @brief Add new param to an existing function
+ * @brief Add new param with its type to an existing function
  *
  * @param function to add param to
- * @param name of the param
+ * @param type of the param
+ * @param canBeNull indicated if null can be passed as param
  * @return pointer to initialized function
  */
-SymFunctionParam *addSymFunctionParam(SymFunction *function, char *name);
+SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, bool canBeNull);
+
+/**
+ * @brief names function param
+ *
+ * @param param to name
+ * @param name what to name param
+ * @return pointer to initialized function
+ */
+void nameSymFunctionParam(SymFunction *function, SymFunctionParam *param, char *name);
 
 /**
  * @brief Searches top frame inside symtable for item with key
@@ -165,7 +176,7 @@ SymFunction *getFunction(char *key);
  * @param key searched key
  * @return pointer to variable or null if item doesn't exits
  */
-SymFunction *getVariable(char *key);
+SymVariable *getVariable(char *key);
 
 /**
  * @brief frees allocated resources of the function
@@ -200,5 +211,31 @@ void freeFrame(Frame *frame);
  *
  */
 void freeSymTable();
+
+/**
+ * @brief pushes variable or function to currentlyDeclared array in symTable
+ *
+ * @param object var or function to push
+ */
+void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable);
+
+/**
+ * @brief peeks variable or function from currentlyDeclared array in symTable
+ *
+ * @return var or function on top of currentlyDeclared stack
+ */
+SymUnion *peekCurrentlyDeclared();
+
+/**
+ * @brief pops variable or function from currentlyDeclared array in symTable
+ *
+ */
+void popCurrentlyDeclared();
+
+void printSymVariable(SymVariable *variable);
+
+void printSymFunction(SymFunction *function);
+
+void printSymTable();
 
 #endif

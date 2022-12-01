@@ -177,7 +177,6 @@ int params(Token *token, int paramIndex)
 {
     if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT)
     { // VAR_ID OR STRING OR INT/FLOAT
-
         codeGeneration(token);
         dtorToken(token);
         token = getToken();
@@ -206,13 +205,29 @@ int params(Token *token, int paramIndex)
     else if (type(token) == 1)
     { // <type>
 
+        // gets function which is currently being declared
+        SymUnion *currentlyDeclared = peekCurrentlyDeclared();
+        if (!currentlyDeclared->function)
+        {
+            FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+        }
+        // adds param to function with its type
+        SymFunction *currentlyDeclaredFunction = currentlyDeclared->function;
+        SymFunctionParam *param = addSymFunctionParam(currentlyDeclaredFunction, token->t, token->val[0] == '?');
+        printSymTable();
+        // param with type added to function
+
         codeGeneration(token);
         dtorToken(token);
 
         token = getToken();
-        if (token->t == VAR_ID || token->t == STRING || token->t == FLOAT || token->t == INT)
-        { //<type> VAR_ID OR <type> STRING OR <type> INT/FLOAT
-
+        // passed only if token-> == VAR_ID, possible error
+        if (token->t == VAR_ID)
+        {
+            //<type> VAR_ID
+            printf("TOKEN: %s\n", token->val);
+            nameSymFunctionParam(currentlyDeclaredFunction, param, token->val);
+            printSymTable();
             codeGeneration(token);
             dtorToken(token);
             token = getToken();
@@ -447,9 +462,19 @@ int function_call(Token *token, bool isDeclaration)
 
         if (isDeclaration)
         {
-        }
-        else
-        {
+            // checks if function with same name exists
+            SymFunction *function = getFunction(token->val);
+            if (function)
+            {
+                FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, function->name);
+            }
+            // adds function with name to symtable
+            else
+            {
+                function = addSymFunction(token->val);
+                pushCurrentlyDeclared(function, NULL);
+                printSymTable();
+            }
         }
 
         codeGeneration(token);
@@ -937,6 +962,7 @@ int statement(Token *token)
 int main()
 {
     symTable = initSymTable();
+    printSymTable();
     // addBuiltInToSymtable();
     //  Example how parser can be called.
     DLL_Init(0);

@@ -21,6 +21,8 @@ SymTable *initSymTable()
         exit(99);
     }
     symTable->mainFrame = frame;
+    symTable->topFrame = symTable->mainFrame;
+    symTable->currentlyDeclaredCount = 0;
     return symTable;
 }
 
@@ -38,8 +40,7 @@ Frame *initFrame(char *name)
     }
     strcpy(frame->name, name);
     frame->size = SYMTABLE_SIZE;
-    frame->items = calloc(SYMTABLE_SIZE, sizeof(SymItem *));
-    // TODO attach frame to symtable
+    frame->items = calloc(SYMTABLE_SIZE, sizeof(SymItem));
     return frame;
 }
 
@@ -97,7 +98,7 @@ SymItem *addSymItem(char *key, SymFunction *function, SymVariable *variable)
     item->function = function;
     item->variable = variable;
 
-    int index = htab_hash_function(key);
+    int index = htab_hash_function(key) % SYMTABLE_SIZE;
 
     SymItem *tmp = symTable->topFrame->items[index];
     if (!tmp)
@@ -164,7 +165,7 @@ SymVariable *addSymVariable(char *key)
     }
 }
 
-SymFunctionParam *addSymFunctionParam(SymFunction *function, char *name)
+SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, bool canBeNull)
 {
     if (function)
     {
@@ -173,15 +174,45 @@ SymFunctionParam *addSymFunctionParam(SymFunction *function, char *name)
         {
             exit(99);
         }
-        param->name = calloc(strlen(name) + 1, 1);
-        if (!param->name)
+        switch (type)
         {
-            exit(99);
+        case INT_TYPE:
+            param->type = INT;
+            break;
+        case FLOAT_TYPE:
+            param->type = FLOAT;
+            break;
+        case STRING_TYPE:
+            param->type = STRING;
+            break;
+        default:
+            break;
         }
-        strcpy(param->name, name);
-        function->params = realloc(function->params, function->paramCount + 1);
+        param->name = NULL;
+        param->canBeNull = canBeNull;
+        function->params = realloc(function->params, (function->paramCount + 1) * sizeof(SymFunctionParam *));
         function->params[function->paramCount] = param;
+        function->paramCount++;
+        return param;
     }
+    return NULL;
+}
+
+void nameSymFunctionParam(SymFunction *function, SymFunctionParam *param, char *name)
+{
+    for (int i = 0; i < function->paramCount; i++)
+    {
+        if (function->params[i]->name)
+        {
+            if (strcmp(function->params[i]->name, name) == 0)
+            {
+                exit(8);
+            }
+        }
+    }
+
+    param->name = calloc(strlen(name) + 1, 1);
+    strcpy(param->name, name);
 }
 
 SymItem *getItem(char *key)
@@ -192,7 +223,7 @@ SymItem *getItem(char *key)
 
     while (tmp)
     {
-        if (strcmp(tmp, key) == 0)
+        if (strcmp(tmp->key, key) == 0)
         {
             return tmp;
         }
@@ -212,7 +243,7 @@ SymFunction *getFunction(char *key)
     return item->function;
 }
 
-SymFunction *getVariable(char *key)
+SymVariable *getVariable(char *key)
 {
     SymItem *item = getItem(key);
     if (!item)
@@ -297,4 +328,135 @@ void freeSymTable()
     free(symTable);
 }
 
-void freeSymTable();
+void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable)
+{
+    SymUnion *uni = calloc(1, sizeof(SymUnion));
+    if (function)
+    {
+
+        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount + 1) * sizeof(SymUnion *));
+        symTable->currentlyDeclared[symTable->currentlyDeclaredCount] = uni;
+        symTable->currentlyDeclared[symTable->currentlyDeclaredCount]->function = function;
+    }
+    else if (variable)
+    {
+        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount + 1) * sizeof(SymUnion));
+        symTable->currentlyDeclared[symTable->currentlyDeclaredCount] = uni;
+        symTable->currentlyDeclared[symTable->currentlyDeclaredCount]->variable = variable;
+    }
+    else
+    {
+        exit(99);
+    }
+
+    symTable->currentlyDeclaredCount++;
+}
+
+SymUnion *peekCurrentlyDeclared()
+{
+    if (symTable->currentlyDeclaredCount)
+    {
+        return symTable->currentlyDeclared[symTable->currentlyDeclaredCount - 1];
+    }
+    return NULL;
+}
+
+void popCurrentlyDeclared()
+{
+    if (symTable->currentlyDeclaredCount)
+    {
+        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount - 1) * sizeof(SymUnion));
+    }
+    symTable->currentlyDeclaredCount--;
+}
+
+void printSymFunction(SymFunction *function)
+{
+    printf("-----\n");
+    printf("function: %s\n", function->name);
+    if (function->returnType)
+    {
+        printf("type: %d\n", function->returnType->type);
+
+        printf("canReturnNull: %d\n", function->returnType->canBeNull);
+    }
+
+    if (function->paramCount > 0)
+    {
+        printf("params:\n");
+    }
+
+    for (int i = 0; i < function->paramCount; i++)
+    {
+        if (function->params[i]->name)
+        {
+            printf("\t[%d]: %s\n", i, function->params[i]->name);
+        }
+
+        printf("\ttype: %d\n", function->params[i]->type);
+        printf("\tcanBeNull?: %d\n", function->params[i]->canBeNull);
+        printf("\n");
+    }
+
+    printf("-----\n");
+}
+
+void printSymVariable(SymVariable *variable)
+{
+    printf("-----\n");
+    printf("variable: %s\n", variable->name);
+    printf("type: %d\n", variable->type);
+    printf("canBeNull?:%d\n", variable->canBeNull);
+    printf("-----\n");
+}
+
+void printSymTable()
+{
+    printf("--CURRENTLY DECLARED--\n");
+    for (int i = 0; i < symTable->currentlyDeclaredCount; i++)
+    {
+        SymUnion *item = symTable->currentlyDeclared[i];
+        if (item->function)
+        {
+            printSymFunction(item->function);
+        }
+        else if (item->variable)
+        {
+            printSymVariable(item->variable);
+        }
+        else
+        {
+            printf("none\n");
+        }
+    }
+
+    printf("--MAIN FRAME--\n");
+    for (int i = 0; i < symTable->mainFrame->size; i++)
+    {
+        SymItem *tmp = symTable->mainFrame->items[i];
+        while (tmp)
+        {
+            if (tmp->function)
+                printSymFunction(tmp->function);
+            if (tmp->variable)
+                printSymVariable(tmp->variable);
+            tmp = tmp->next;
+        }
+    }
+    if (symTable->topFrame != symTable->mainFrame)
+    {
+        printf("--TOP FRAME--\n");
+        for (int i = 0; i < symTable->topFrame->size; i++)
+        {
+            SymItem *tmp = symTable->topFrame->items[i];
+            while (tmp)
+            {
+                if (tmp->function)
+                    printSymFunction(tmp->function);
+                if (tmp->variable)
+                    printSymVariable(tmp->variable);
+                tmp = tmp->next;
+            }
+        }
+    }
+}

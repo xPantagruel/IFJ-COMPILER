@@ -22,7 +22,7 @@
 #define ERROR_6_FUNCTION_INCORRECT_RETURN
 #define ERROR_7_INCOMPATIBLE_TYPE
 #define ERROR_8_OTHER_SEMANTIC
-#define ERROR_99_INTERNAL_ERROR
+#define ERROR_99_INTERNAL_ERROR "Internal error %s"
 /**
  * @brief Frees global resources, prints status message, exits with code
  *
@@ -33,7 +33,7 @@
 #define FREE_EXIT(code, message, object)      \
     if ((message))                            \
         fprintf(stderr, (message), (object)); \
-    htab_free(symTable);                      \
+    freeSymTable(symTable);                   \
     exit(code);
 
 #include "scanner.h"
