@@ -66,6 +66,8 @@ void pushZero(int frame);
 
 void createCallLabel(int frame);
 
+void createReturnCode(int frame, char *frameStr);
+
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
 

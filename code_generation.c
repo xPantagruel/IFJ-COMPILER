@@ -1240,6 +1240,7 @@ void createCallLabel(int frame) {
 
 void codeGeneration(Token *token)
 {
+    //printf("%s\n", token->val);
     //if prolog not added
     if (allFunctionsString == NULL) {
         addToString(2, ".IFJcode22\nJUMP $main\n");
@@ -2299,12 +2300,14 @@ void codeGeneration(Token *token)
             // todoo
             // return vo vnutri vyriesit
             //
+            // return 2 + 4; (berem z topu iba??)
             // return string
             // return $x
             // return 2;
             // return; (void pop nic) -> nil@nil
             // return v ife/while ??
         if (Return) {
+            // zavolat podla situacie 
             //createReturnCode();
         }
 
