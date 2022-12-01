@@ -60,6 +60,10 @@ void GetUniqueVarName();
 
 void GetUniqueName();
 
+void setFloatIntOperatorVariable();
+
+void pushZero(int frame);
+
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
 
@@ -77,6 +81,9 @@ static int UniqueName = 0;
 
 /** int to get unique names of var, labels, function, ...*/
 static int UniqueVarName = 0;
+
+/** float = 0, int = 1*/
+static int floatIntOperator = 0;
 
 static enum type previousTokenType = NOT_DEFINED;
 

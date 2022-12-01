@@ -1140,15 +1140,16 @@ void divIdiv(int frameStr, char *frame)
     }
     else
     {
+        setFloatIntOperatorVariable();
         if (Return) {
             pushStorage(frameStr, frame);
             addToString(frameStr, "DIVS\n");
-            addToString(frameStr, "PUSHS int@0\n");
+            pushZero(frameStr);
             addToString(frameStr, "GTS\n");
         } else {
             pushStorage(3, frame);
             addToString(3, "DIVS\n");
-            addToString(3, "PUSHS int@0\n");
+            pushZero(3);
             addToString(3, "GTS\n");
         }
     }
@@ -1168,15 +1169,16 @@ void divIdiv(int frameStr, char *frame)
     }
     else
     {
+        setFloatIntOperatorVariable();
         if (Return) {
             pushStorage(frameStr, frame);
             addToString(frameStr, "IDIVS\n");
-            addToString(frameStr, "PUSHS int@0\n");
+            pushZero(frameStr);
             addToString(frameStr, "GTS\n");
         } else {
             pushStorage(3, frame);
             addToString(3, "IDIVS\n");
-            addToString(3, "PUSHS int@0\n");
+            pushZero(3);
             addToString(3, "GTS\n");
         }
     }
@@ -1188,6 +1190,24 @@ void divIdiv(int frameStr, char *frame)
     addToString(frameStr, "LABEL "); // end
     addToString(frameStr, endLabel);
     addToString(frameStr, "\n");
+}
+
+void setFloatIntOperatorVariable() {
+    if (strstr(storage[0], "float@") == NULL) {
+        // int 
+        floatIntOperator = 1;
+    } else {
+        // float
+        floatIntOperator = 0;
+    }
+}
+
+void pushZero(int frame) {
+    if (strstr(storage[0], "float@") != NULL) { //float
+        addToString(frame, "PUSHS float@0x0p+0\n");
+    } else {
+        addToString(frame, "PUSHS int@0\n");
+    }
 }
 
 void codeGeneration(Token *token)
@@ -1361,15 +1381,16 @@ void codeGeneration(Token *token)
                 }
                 else
                 { // $var1 + 2 (without '=' -> it means that we are for example in condition, so we store result to stack)
+                    setFloatIntOperatorVariable();
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "ADDS\n");
-                        addToString(frameStr, "PUSHS int@0\n");
+                        pushZero(frameStr);
                         addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "ADDS\n");
-                        addToString(3, "PUSHS int@0\n");
+                        pushZero(3);
                         addToString(3, "GTS\n");
                     }
                 }
@@ -1382,15 +1403,16 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
+                    setFloatIntOperatorVariable();
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "SUBS\n");
-                        addToString(frameStr, "PUSHS int@0\n");
+                        pushZero(frameStr);
                         addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "SUBS\n");
-                        addToString(3, "PUSHS int@0\n");
+                        pushZero(3);
                         addToString(3, "GTS\n");
                     }
                 }
@@ -1406,15 +1428,16 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
+                    setFloatIntOperatorVariable();
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "MULS\n");
-                        addToString(frameStr, "PUSHS int@0\n");
+                        pushZero(frameStr);
                         addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "MULS\n");
-                        addToString(3, "PUSHS int@0\n");
+                        pushZero(3);
                         addToString(3, "GTS\n");
                     }
                 }
@@ -2056,10 +2079,18 @@ void codeGeneration(Token *token)
                 {
                     addToString(1, " ");
                 }
-                addToString(1, storage[0]);
+                if (strstr(storage[0], "string@") == NULL) {
+                    addToString(1, storage[0]);
+                } else {
+                    addToString(1, "int@1");
+                }
                 addToString(1, "\n");
                 if (inIf || inWhile) {
-                    addToString(1, "PUSHS int@0\n");
+                    if (strstr(storage[0], "float@") != NULL) { //float
+                        addToString(3, "PUSHS float@0x0p+0\n");
+                    } else {
+                        addToString(1, "PUSHS int@0\n");
+                    }
                     addToString(1, "GTS\n");
                 }
            } else if (IAmInFunctionCall) {
@@ -2076,7 +2107,12 @@ void codeGeneration(Token *token)
                 {
                     addToString(frameStr, " ");
                 }
-                addToString(frameStr, storage[0]);
+
+                if (strstr(storage[0], "string@") == NULL) {
+                    addToString(frameStr, storage[0]);
+                } else {
+                    addToString(frameStr, "int@1");
+                }
                 addToString(frameStr, "\n");
             } else {
                 addToString(3, "PUSHS"); //todo tu mozno chyba pri pushovani jedneho parametru 
@@ -2092,10 +2128,18 @@ void codeGeneration(Token *token)
                 {
                     addToString(3, " ");
                 }
-                addToString(3, storage[0]);
+                if (strstr(storage[0], "string@") == NULL) {
+                    addToString(3, storage[0]); // not string
+                } else {  // string -> true
+                    addToString(3, "int@1");
+                }
                 addToString(3, "\n");
                 if (inIf || inWhile) {
-                    addToString(3, "PUSHS int@0\n");
+                    if (strstr(storage[0], "float@") != NULL) { //float
+                        addToString(3, "PUSHS float@0x0p+0\n");
+                    } else {
+                        addToString(3, "PUSHS int@0\n");
+                    }
                     addToString(3, "GTS\n");
                 }
             }
