@@ -526,28 +526,34 @@ Token *getToken()
                     }
                     break;
                 // end of case 0
-                case 1: // is number
+                default: // is number
                     // check hex. escape seq.
-                    if (token->val[strlen(token->val) - 1] == 'x' && token->val[strlen(token->val) - 2] == '\\')
-                    { // "\xNN"
-                        hexEscCount = 0;
-                        actualState = GET_HEX_S;
-                        unGetC(c);
-                        // check okt. escape seq.
-                    }
-                    else if (token->val[strlen(token->val) - 1] == '\\')
-                    { // "\NNN"
-                        oktEscCount = 0;
-                        actualState = GET_OKT_S;
-                        unGetC(c);
-                        // just number in string
-                    }
-                    else
-                    {
+                    if (token->val != NULL && strlen(token->val) != 0) {
+                        if (token->val[strlen(token->val) - 1] == 'x' && token->val[strlen(token->val) - 2] == '\\')
+                        { // "\xNN"
+
+                            hexEscCount = 0;
+                            actualState = GET_HEX_S;
+                            unGetC(c);
+                            // check okt. escape seq.
+                        }
+                        else if (token->val[strlen(token->val) - 1] == '\\')
+                        { // "\NNN"
+                            oktEscCount = 0;
+                            actualState = GET_OKT_S;
+                            unGetC(c);
+                            // just number in string
+                        }
+                        else
+                        {
+                            addCharToToken(c, token);
+                        }
+                    } else {
                         addCharToToken(c, token);
                     }
                     break;
                 }
+
                 // end of switch by isdigit()
                 break;
             // end of case 0
