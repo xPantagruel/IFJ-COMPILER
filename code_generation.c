@@ -1166,8 +1166,8 @@ void divIdiv(int frameStr, char *frame)
         if (Return) {
             pushStorage(frameStr, frame);
             addToString(frameStr, "DIVS\n");
-            pushZero(frameStr);
-            addToString(frameStr, "GTS\n");
+            // pushZero(frameStr);
+            // addToString(frameStr, "GTS\n");
         } else {
             pushStorage(3, frame);
             addToString(3, "DIVS\n");
@@ -1195,8 +1195,8 @@ void divIdiv(int frameStr, char *frame)
         if (Return) {
             pushStorage(frameStr, frame);
             addToString(frameStr, "IDIVS\n");
-            pushZero(frameStr);
-            addToString(frameStr, "GTS\n");
+            // pushZero(frameStr);
+            // addToString(frameStr, "GTS\n");
         } else {
             pushStorage(3, frame);
             addToString(3, "IDIVS\n");
@@ -1225,10 +1225,12 @@ void setFloatIntOperatorVariable() {
 }
 
 void pushZero(int frame) {
-    if (strstr(storage[0], "float@") != NULL) { //float
-        addToString(frame, "PUSHS float@0x0p+0\n");
-    } else {
-        addToString(frame, "PUSHS int@0\n");
+    if (storageLen != 0) {
+        if (strstr(storage[0], "float@") != NULL) { //float
+            addToString(frame, "PUSHS float@0x0p+0\n");
+        } else {
+            addToString(frame, "PUSHS int@0\n");
+        }
     }
 }
 
@@ -1414,8 +1416,8 @@ void codeGeneration(Token *token)
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "ADDS\n");
-                        pushZero(frameStr);
-                        addToString(frameStr, "GTS\n");
+                        // pushZero(frameStr);
+                        // addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "ADDS\n");
@@ -1436,8 +1438,8 @@ void codeGeneration(Token *token)
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "SUBS\n");
-                        pushZero(frameStr);
-                        addToString(frameStr, "GTS\n");
+                        // pushZero(frameStr);
+                        // addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "SUBS\n");
@@ -1461,8 +1463,8 @@ void codeGeneration(Token *token)
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "MULS\n");
-                        pushZero(frameStr);
-                        addToString(frameStr, "GTS\n");
+                        // pushZero(frameStr);
+                        // addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "MULS\n");

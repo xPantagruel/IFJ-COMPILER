@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
-$n = ord("");
-if($n === 0) {
-    write("Ord is 0\n");
-} else {
-    write("Not 0\n");
+
+function hello() : string {
+    write("Hello world\n");
+    return 2 + 4;
 }
+
+write(hello);

@@ -1124,7 +1124,7 @@ Token *getToken()
         }
     }
 
-    //printf("%s\n", token->val);
+    //printf("%s-SCANNER\n", token->val);
     return token;
 }
 /*** End of scanner.c ***/
