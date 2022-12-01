@@ -223,10 +223,10 @@ int skipLineComment()
         row++;
     }
 
-    if (c == EOF)
-    { // comment like: //this is my commentEOF
-        return 0;
-    }
+    // if (c == EOF)
+    // { // comment like: //this is my commentEOF
+    //     return 0;
+    // }
     return 1;
 }
 
