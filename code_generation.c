@@ -2298,13 +2298,14 @@ void codeGeneration(Token *token)
     case SEMICOL:
             // todoo
             // return vo vnutri vyriesit
+            //
             // return string
             // return $x
             // return 2;
             // return; (void pop nic) -> nil@nil
-            // return v ife ??
+            // return v ife/while ??
         if (Return) {
-            
+            //createReturnCode();
         }
 
         if (!cparCounter && IAmInFunction) {
