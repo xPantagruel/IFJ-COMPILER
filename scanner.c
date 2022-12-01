@@ -567,10 +567,10 @@ Token *getToken()
                 }
                 else
                 {
-                    if (c == 'n' && token->valLen >= 4 && token->val[token->valLen-4] == '\\') {
-                                token->val[token->valLen-1] = '0';
-                                token->val[token->valLen-2] = '1';
-                                token->val[token->valLen-3] = '0';
+                    if (c == 'n' && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2') {
+                            token->val[token->valLen-1] = '0';
+                            token->val[token->valLen-2] = '1';
+                            token->val[token->valLen-3] = '0';
                     } else {
                         addCharToToken(c, token);
                     }
@@ -912,21 +912,22 @@ Token *getToken()
                     actualState = NUM_OR_PLUSMIN_NEEDED_S;
                     addCharToToken(c, token);
                     break;
-                case '+':
-                    // if (token->val[strlen(token->val) - 1] != 'e')
-                    // { // must be e before +
-                    //     error(1, token);
-                    // }
-                    actualState = NUM_NEEDED_S;
-                    addCharToToken(c, token);
-                    break;
                 case '-':
+                case '+':
                     // if (token->val[strlen(token->val) - 1] != 'e')
                     // { // must be e before -
                     //     error(1, token);
                     // }
-                    actualState = NUM_NEEDED_S;
-                    addCharToToken(c, token);
+                    if (token->val[strlen(token->val) - 1] == 'e') {
+                        actualState = NUM_NEEDED_S;
+                        addCharToToken(c, token);
+                    } else {
+                        actualState = START;
+                        addRowToToken(row, token);
+                        addTypeToToken(t, token);
+                        tokenFound = 1;
+                        unGetC(c);
+                    }
                     break;
                 default:
                     if (isOkAfterNum(c))

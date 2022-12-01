@@ -1,3 +1,8 @@
 <?php
 declare(strict_types=1);
-// hello there!!!
+function f() : int {
+    return;
+}
+
+$x = f();
+$y = "hell \nnot\n";
