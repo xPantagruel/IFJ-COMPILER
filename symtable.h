@@ -13,9 +13,9 @@
 
 typedef enum
 {
-    CURRENTLY_DECLARED_FUNCTION,
-    CURRENTLY_DECLARED_VARIABLE
-} currentlyDeclaredType;
+    DECLARED_FUNCTION,
+    DECLARED_VARIABLE
+} DeclaredType;
 
 typedef struct symTable SymTable;
 extern SymTable *symTable;
@@ -57,7 +57,7 @@ typedef struct symItem
 
 typedef struct currentlyDeclaredObject
 {
-    currentlyDeclaredType objectType;
+    DeclaredType objectType;
     union
     {
         SymFunction *function;
@@ -244,7 +244,7 @@ void freeSymTable();
  *
  * @param object var or function to push
  */
-void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, currentlyDeclaredType objectType);
+void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, DeclaredType objectType);
 
 /**
  * @brief peeks variable or function from currentlyDeclared array in symTable

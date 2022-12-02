@@ -379,17 +379,17 @@ void freeSymTable()
     free(symTable);
 }
 
-void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, currentlyDeclaredType objectType)
+void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, DeclaredType objectType)
 {
     CurrentlyDeclaredObject *object = calloc(1, sizeof(CurrentlyDeclaredObject));
     object->objectType = objectType;
-    if (objectType == CURRENTLY_DECLARED_FUNCTION)
+    if (objectType == DECLARED_FUNCTION)
     {
         symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount + 1) * sizeof(CurrentlyDeclaredObject *));
         symTable->currentlyDeclared[symTable->currentlyDeclaredCount] = object;
         object->function = function;
     }
-    else if (objectType == CURRENTLY_DECLARED_VARIABLE)
+    else if (objectType == DECLARED_VARIABLE)
     {
         symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount + 1) * sizeof(CurrentlyDeclaredObject *));
         symTable->currentlyDeclared[symTable->currentlyDeclaredCount] = object;
@@ -415,7 +415,7 @@ CurrentlyDeclaredObject *peekCurrentlyDeclared()
 SymFunction *peekCurrentlyDeclaredFunction()
 {
     CurrentlyDeclaredObject *currentlyDeclared = peekCurrentlyDeclared();
-    if (!currentlyDeclared || (currentlyDeclared->objectType != CURRENTLY_DECLARED_FUNCTION))
+    if (!currentlyDeclared || (currentlyDeclared->objectType != DECLARED_FUNCTION))
     {
         FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
@@ -426,7 +426,7 @@ SymFunction *peekCurrentlyDeclaredFunction()
 SymVariable *peekCurrentlyDeclaredVariable()
 {
     CurrentlyDeclaredObject *currentlyDeclared = peekCurrentlyDeclared();
-    if (!currentlyDeclared || (currentlyDeclared->objectType != CURRENTLY_DECLARED_VARIABLE))
+    if (!currentlyDeclared || (currentlyDeclared->objectType != DECLARED_VARIABLE))
     {
         FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
@@ -488,11 +488,11 @@ void printSymTable()
     for (int i = 0; i < symTable->currentlyDeclaredCount; i++)
     {
         CurrentlyDeclaredObject *object = symTable->currentlyDeclared[i];
-        if (object->objectType == CURRENTLY_DECLARED_FUNCTION)
+        if (object->objectType == DECLARED_FUNCTION)
         {
             printSymFunction(object->function);
         }
-        else if (object->objectType == CURRENTLY_DECLARED_VARIABLE)
+        else if (object->objectType == DECLARED_VARIABLE)
         {
             printSymVariable(object->variable);
         }

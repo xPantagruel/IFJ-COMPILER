@@ -477,7 +477,7 @@ int function_call(Token *token, bool isDeclaration)
             else
             {
                 function = addSymFunction(token->val);
-                pushCurrentlyDeclared(function, NULL, CURRENTLY_DECLARED_FUNCTION);
+                pushCurrentlyDeclared(function, NULL, DECLARED_FUNCTION);
             }
         }
 
@@ -660,7 +660,7 @@ int statement(Token *token)
         // check if variable exists
 
         SymVariable *variable = addSymVariable(token->val);
-        pushCurrentlyDeclared(NULL, variable, CURRENTLY_DECLARED_VARIABLE);
+        pushCurrentlyDeclared(NULL, variable, DECLARED_VARIABLE);
         printSymTable();
         codeGeneration(token);
         dtorToken(token);
