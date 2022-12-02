@@ -142,6 +142,21 @@ SymFunction *addSymFunction(char *key)
     }
 }
 
+SymFunction *declareFunction(char *name)
+{
+    SymFunction *function = getFunction(name);
+    if (function)
+    {
+        FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, function->name);
+    }
+    // adds function with name to symtable
+    else
+    {
+        function = addSymFunction(name);
+        pushCurrentlyDeclared(function, NULL, DECLARED_FUNCTION);
+    }
+}
+
 SymVariable *addSymVariable(char *key)
 {
     SymItem *item = getItem(key);
@@ -197,6 +212,44 @@ SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, boo
     }
     FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     return NULL;
+}
+
+SymFunctionParam *checkFunctionParam(SymFunction *function, char *value, enum type type, int paramIndex)
+{
+    if (!function)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "checkFunctionParam");
+    }
+
+    if (type == VAR_ID)
+    {
+        SymVariable *variable = getVariable(value);
+        if (!variable)
+        {
+            FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, value);
+        }
+
+        type = variable->type;
+    }
+
+    if (function->params[paramIndex]->type != type)
+    {
+        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
+    }
+    return function->params[paramIndex];
+}
+
+void checkFunctionParamCount(SymFunction *function, int paramCount)
+{
+    if (!function)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "checkFunctionParamCount");
+    }
+
+    if (function->paramCount != paramCount)
+    {
+        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
+    }
 }
 
 SymFunctionReturn *addSymFunctionReturn(SymFunction *function, enum type type, bool canBeNull)
@@ -303,6 +356,16 @@ SymVariable *getVariable(char *key)
     }
 
     return item->variable;
+}
+
+SymFunction *checkFunctionCall(char *name)
+{
+    SymFunction *function = getFunction(name);
+    if (!function)
+    {
+        FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, name);
+    }
+    return function;
 }
 
 void checkReturnType(SymFunction *function, enum type type)

@@ -106,7 +106,6 @@ bool function_declaration(Token *token)
 
     // create local variables from params
     addFunctionLocalVariables(function);
-    printSymTable();
 
     codeGeneration(token);
     dtorToken(token);
@@ -122,6 +121,17 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> : <type> { <statement> }
         return false; // missing R_CPAR
     }
+
+    // remove local variables, delete currentFrame
+    Frame *topFrame = symTable->topFrame;
+    if (topFrame == symTable->mainFrame)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    freeFrame(topFrame);
+    // pop currently declared function
+    popCurrentlyDeclared();
+    // removed
 
     iAmInConditionWhileFunRule = 0; // I am out of function declaration
     return true;
@@ -192,6 +202,18 @@ int params(Token *token, int paramIndex)
 {
     if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT)
     { // VAR_ID OR STRING OR INT/FLOAT
+
+        printf("HERE[2]\n");
+
+        SymFunction *function = peekCurrentlyDeclaredFunction();
+        if (!function)
+        {
+            FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "params")
+        }
+
+        // check if param passed has correct type
+        checkFunctionParam(function, token->val, token->t, paramIndex);
+
         codeGeneration(token);
         dtorToken(token);
         token = getToken();
@@ -203,12 +225,15 @@ int params(Token *token, int paramIndex)
             }
             else
             {
+                printf("HERE[3]\n");
                 return 0;
             }
         }
         else if (params_n(token) == 2)
         { // epsilon
             ungetc(')', stdin);
+            printf("HERE[4]\n");
+            checkFunctionParamCount(function, paramIndex + 1);
 
             return 1;
         }
@@ -237,6 +262,7 @@ int params(Token *token, int paramIndex)
             // names param of the function
             nameSymFunctionParam(currentlyDeclaredFunction, param, token->val);
             // param named
+
             codeGeneration(token);
             dtorToken(token);
             token = getToken();
@@ -471,19 +497,16 @@ int function_call(Token *token, bool isDeclaration)
 
         if (isDeclaration)
         {
-            // checks if function with same name exists
-            SymFunction *function = getFunction(token->val);
-            if (function)
-            {
-                FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, function->name);
-            }
-            // adds function with name to symtable
-            else
-            {
-                function = addSymFunction(token->val);
-                pushCurrentlyDeclared(function, NULL, DECLARED_FUNCTION);
-            }
+            // declares function with its name
+            declareFunction(token->val);
         }
+        else
+        {
+            // checks if function exists
+            SymFunction *function = checkFunctionCall(token->val);
+            pushCurrentlyDeclared(function, NULL, DECLARED_FUNCTION);
+        }
+        printf("HERE[0]\n");
 
         codeGeneration(token);
         dtorToken(token);
@@ -494,6 +517,7 @@ int function_call(Token *token, bool isDeclaration)
             codeGeneration(token);
             dtorToken(token);
             token = getToken();
+            printf("HERE[1]\n");
             if (params(token, 0))
             { // ID ( <params>
 
@@ -503,6 +527,7 @@ int function_call(Token *token, bool isDeclaration)
                 if (token->t == R_PAR)
                 { // ID ( <params> )
                     // function checked - OK
+                    printf("HERE[5]\n");
                     return 1;
                 }
                 else
@@ -661,11 +686,10 @@ int statement(Token *token)
     else if (token->t == VAR_ID)
     { // VAR_ID
 
-        // check if variable exists
-
+        // add variable or
         SymVariable *variable = addSymVariable(token->val);
         pushCurrentlyDeclared(NULL, variable, DECLARED_VARIABLE);
-        printSymTable();
+
         codeGeneration(token);
         dtorToken(token);
         token = getToken();
@@ -707,7 +731,6 @@ int statement(Token *token)
                     variable->type = assignedVariable->type;
                     free(tmpString);
                     // variable added
-                    printSymTable();
 
                     dtorToken(tmp);
                     codeGeneration(token);
@@ -968,6 +991,7 @@ int statement(Token *token)
                 token = getToken();
                 if (statement(token))
                 { // <function_call> ; <statement>
+                    printf("HERE[6]\n");
                     return 1;
                 }
                 else
@@ -1019,6 +1043,7 @@ int main()
         {
             free(generatedString);
         }
+        printSymTable();
         return 0; // exit code 0
     }
     else

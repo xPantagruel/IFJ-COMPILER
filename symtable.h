@@ -70,6 +70,7 @@ typedef struct frame
     int size;
     SymItem **items;
     char *name;
+    bool returnFound;
 } Frame;
 typedef struct symTable
 {
@@ -138,6 +139,17 @@ SymItem *addSymItem(char *key, SymFunction *function, SymVariable *variable);
 SymFunction *addSymFunction(char *key);
 
 /**
+ * @brief Declares function
+ *
+ * @param name function name
+ *
+ * @throw 3 if function is already declared
+ *
+ * @return pointer to added function
+ */
+SymFunction *declareFunction(char *name);
+
+/**
  * @brief Adds variable to top frame inside symTable, if the variable already exists returns it
  *
  * @param key function name
@@ -154,6 +166,24 @@ SymVariable *addSymVariable(char *key);
  * @return added param
  */
 SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, bool canBeNull);
+
+/**
+ * @brief Checks if param has correct type
+ *
+ * @param function to check param against
+ * @param type of the param
+ * @param paramIndex index of param inside function call
+ * @return checked param
+ */
+SymFunctionParam *checkFunctionParam(SymFunction *function, char *value, enum type type, int paramIndex);
+
+/**
+ * @brief Checks if function call has correct number of params
+ *
+ * @param function to check param count against
+ * @param paramCount number of params inside function call
+ */
+void checkFunctionParamCount(SymFunction *function, int paramCount);
 
 /**
  * @brief Add new param with its type to an existing function
@@ -204,6 +234,13 @@ SymFunction *getFunction(char *key);
  * @return pointer to variable or null if item doesn't exits
  */
 SymVariable *getVariable(char *key);
+
+/**
+ * @brief checks if function if correctly called
+ *
+ * @throw 3 if function doesn't exist
+ */
+SymFunction *checkFunctionCall(char *name);
 
 /**
  * @brief checks if function returs correct type
