@@ -206,20 +206,16 @@ int params(Token *token, int paramIndex)
         printf("HERE[2]\n");
 
         SymFunction *function = peekCurrentlyDeclaredFunction();
-        if (!function)
-        {
-            FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "params")
-        }
-
         // check if param passed has correct type
         checkFunctionParam(function, token->val, token->t, paramIndex);
+        paramIndex++;
 
         codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (params_n(token) == 1)
         { // (VAR_ID OR STRING OR INT/FLOAT) <params_n>
-            if (params(token, ++paramIndex))
+            if (params(token, paramIndex))
             {
                 return 1;
             }
@@ -232,8 +228,7 @@ int params(Token *token, int paramIndex)
         else if (params_n(token) == 2)
         { // epsilon
             ungetc(')', stdin);
-            printf("HERE[4]\n");
-            checkFunctionParamCount(function, paramIndex + 1);
+            checkFunctionParamCount(function, paramIndex);
 
             return 1;
         }
@@ -294,7 +289,8 @@ int params(Token *token, int paramIndex)
     }
     else
     { // epsilon
-
+        SymFunction *function = peekCurrentlyDeclaredFunction();
+        checkFunctionParamCount(function, 0);
         ungetc(')', stdin);
         return 2;
     }
@@ -549,8 +545,6 @@ int function_call(Token *token, bool isDeclaration)
 
                 if (token->t == R_PAR)
                 { // ID ( <params> )
-                    // function checked - OK
-                    printf("HERE[5]\n");
                     return 1;
                 }
                 else
@@ -1082,6 +1076,7 @@ int main()
     Token *token = getToken();
     if (prog(token))
     {
+        printSymTable();
         codeGeneration(token);
         dtorToken(token);
 
@@ -1089,7 +1084,6 @@ int main()
         {
             free(generatedString);
         }
-        printSymTable();
         return 0; // exit code 0
     }
     else

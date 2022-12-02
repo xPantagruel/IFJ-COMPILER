@@ -497,7 +497,7 @@ SymFunction *peekCurrentlyDeclaredFunction()
     CurrentlyDeclaredObject *currentlyDeclared = peekCurrentlyDeclared();
     if (!currentlyDeclared || (currentlyDeclared->objectType != DECLARED_FUNCTION))
     {
-        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "peekCurrentlyDeclared");
     }
     // adds param to function with its type
     return currentlyDeclared->function;
