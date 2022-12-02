@@ -1,9 +1,7 @@
 <?php
 declare(strict_types=1);
-
-function hello(): void {
-    $x = "hello";
-    return $x.$x;
+if(1) {
+    $x = 5;
+} else {
+    $x = 6;
 }
-
-$x = hello();

@@ -2182,7 +2182,11 @@ void codeGeneration(Token *token)
                 if (strstr(storage[x], "string@") == NULL) {
                     addToString(1, storage[x]);
                 } else {
-                    addToString(1, "int@1");
+                    if (!inIf && !inWhile) {
+                        addToString(1, storage[x]);
+                    } else {
+                        addToString(1, "int@1"); 
+                    }
                 }
                 addToString(1, "\n");
                 if (inIf || inWhile) {
@@ -2211,7 +2215,11 @@ void codeGeneration(Token *token)
                 if (strstr(storage[x], "string@") == NULL) {
                     addToString(frameStr, storage[x]);
                 } else {
-                    addToString(frameStr, "int@1");
+                    if (!inIf && !inWhile) {
+                        addToString(frameStr, storage[x]);
+                    } else {
+                        addToString(frameStr, "int@1"); 
+                    }
                 }
                 addToString(frameStr, "\n");
             } else {
@@ -2231,7 +2239,11 @@ void codeGeneration(Token *token)
                 if (strstr(storage[x], "string@") == NULL) {
                     addToString(3, storage[x]); // not string
                 } else {  // string -> true
-                    addToString(3, "int@1");
+                    if (!inIf && !inWhile) {
+                        addToString(3, storage[x]);
+                    } else {
+                        addToString(3, "int@1"); 
+                    }
                 }
                 addToString(3, "\n");
                 if (inIf || inWhile) {
