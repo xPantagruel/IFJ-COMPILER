@@ -221,6 +221,11 @@ SymFunctionParam *checkFunctionParam(SymFunction *function, char *value, enum ty
         FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "checkFunctionParam");
     }
 
+    if (paramIndex >= function->paramCount)
+    {
+        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
+    }
+
     if (type == VAR_ID)
     {
         SymVariable *variable = getVariable(value);
@@ -489,7 +494,8 @@ CurrentlyDeclaredObject *peekCurrentlyDeclared()
     {
         return symTable->currentlyDeclared[symTable->currentlyDeclaredCount - 1];
     }
-    return NULL;
+
+    FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "peekCurrentlyDeclared\n");
 }
 
 SymFunction *peekCurrentlyDeclaredFunction()
@@ -497,7 +503,7 @@ SymFunction *peekCurrentlyDeclaredFunction()
     CurrentlyDeclaredObject *currentlyDeclared = peekCurrentlyDeclared();
     if (!currentlyDeclared || (currentlyDeclared->objectType != DECLARED_FUNCTION))
     {
-        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "peekCurrentlyDeclared");
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "peekCurrentlyDeclaredFunction\n");
     }
     // adds param to function with its type
     return currentlyDeclared->function;
@@ -508,7 +514,7 @@ SymVariable *peekCurrentlyDeclaredVariable()
     CurrentlyDeclaredObject *currentlyDeclared = peekCurrentlyDeclared();
     if (!currentlyDeclared || (currentlyDeclared->objectType != DECLARED_VARIABLE))
     {
-        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "peekCurrentlyDeclaredVariable\n");
     }
     // adds param to function with its type
     return currentlyDeclared->variable;
