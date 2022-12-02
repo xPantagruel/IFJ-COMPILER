@@ -165,6 +165,8 @@ bool reduce(Stack *stack)
             }
             else if (term->childTerms[0]->type == I_FLOAT || term->childTerms[2]->type == I_FLOAT)
             {
+                term->childTerms[0]->type = I_FLOAT;
+                term->childTerms[2]->type = I_FLOAT;
                 term->type = I_FLOAT;
             }
             else if (term->childTerms[0]->type == I_INT || term->childTerms[2]->type == I_INT)
@@ -186,6 +188,10 @@ bool reduce(Stack *stack)
             {
                 if (term->childTerms[i]->originalToken && term->childTerms[i]->value && term->childTerms[i]->type != L_BRACKET && term->childTerms[i]->type != R_BRACKET)
                 {
+                    if (term->childTerms[i]->type == I_FLOAT)
+                    {
+                        term->childTerms[i]->originalToken->t = FLOAT;
+                    }
                     codeGeneration(term->childTerms[i]->originalToken);
                 }
             }
