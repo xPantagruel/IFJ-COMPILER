@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
-function hello(?string $text, int $number, ?float $decimal): string{
-
+function hello(string $text) : void{
+$x = $b;
+return;
 }
+

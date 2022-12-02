@@ -85,6 +85,12 @@ bool function_declaration(Token *token)
         return false; // wrong type
     }
 
+    // add return type to function
+    SymFunction *function = peekCurrentlyDeclaredFunction();
+    addSymFunctionReturn(function, token->t, token->val[0] == '?');
+    // added return type to the function
+    // function header done
+
     codeGeneration(token);
     dtorToken(token);
     token = getToken();
@@ -92,6 +98,11 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> : <type> {
         return false; // missing L_CPAR
     }
+
+    // attach function frame
+    Frame *frame = initFrame(function->name);
+    symTable->topFrame = frame;
+    // function frame attached to symtable
 
     codeGeneration(token);
     dtorToken(token);
@@ -206,15 +217,9 @@ int params(Token *token, int paramIndex)
     { // <type>
 
         // gets function which is currently being declared
-        SymUnion *currentlyDeclared = peekCurrentlyDeclared();
-        if (!currentlyDeclared->function)
-        {
-            FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
-        }
+        SymFunction *currentlyDeclaredFunction = peekCurrentlyDeclaredFunction();
         // adds param to function with its type
-        SymFunction *currentlyDeclaredFunction = currentlyDeclared->function;
         SymFunctionParam *param = addSymFunctionParam(currentlyDeclaredFunction, token->t, token->val[0] == '?');
-        printSymTable();
         // param with type added to function
 
         codeGeneration(token);
@@ -225,9 +230,9 @@ int params(Token *token, int paramIndex)
         if (token->t == VAR_ID)
         {
             //<type> VAR_ID
-            printf("TOKEN: %s\n", token->val);
+            // names param of the function
             nameSymFunctionParam(currentlyDeclaredFunction, param, token->val);
-            printSymTable();
+            // param named
             codeGeneration(token);
             dtorToken(token);
             token = getToken();
@@ -472,8 +477,7 @@ int function_call(Token *token, bool isDeclaration)
             else
             {
                 function = addSymFunction(token->val);
-                pushCurrentlyDeclared(function, NULL);
-                printSymTable();
+                pushCurrentlyDeclared(function, NULL, CURRENTLY_DECLARED_FUNCTION);
             }
         }
 
@@ -653,6 +657,11 @@ int statement(Token *token)
     else if (token->t == VAR_ID)
     { // VAR_ID
 
+        // check if variable exists
+
+        SymVariable *variable = addSymVariable(token->val);
+        pushCurrentlyDeclared(NULL, variable, CURRENTLY_DECLARED_VARIABLE);
+        printSymTable();
         codeGeneration(token);
         dtorToken(token);
         token = getToken();
@@ -664,6 +673,8 @@ int statement(Token *token)
 
             if (token->t == VAR_ID)
             { // VAR_ID = VAR_ID
+                char *tmpString = calloc(strlen(token->val) + 1, 1);
+                strcpy(tmpString, token->val);
                 // if token == var_id -> can be <expression>
                 // storing previous token
                 Token *tmp = tokenInit();
@@ -673,21 +684,34 @@ int statement(Token *token)
                 {
                     addCharToToken(token->val[i], tmp);
                 }
-                char *tmpStr = calloc(token->valLen + 1, sizeof(char));
-                strcpy(tmpStr, token->val);
+
                 codeGeneration(token);
                 dtorToken(token);
                 token = getToken();
+
                 if (token->t == SEMICOL)
                 { // VAR_ID = VAR_ID;
 
-                    free(tmpStr);
+                    // check if variable being assigned exists
+                    SymVariable *assignedVariable = getVariable(tmpString);
+                    if (!assignedVariable)
+                    {
+                        // assigned variable doesn't exist
+                        FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, tmpString);
+                    }
+                    // assigned variable exists, assign it's type to variable
+                    variable->type = assignedVariable->type;
+                    free(tmpString);
+                    // variable added
+                    printSymTable();
+
                     dtorToken(tmp);
                     codeGeneration(token);
                     dtorToken(token);
                     token = getToken();
                     if (statement(token))
                     { // VAR_ID = VAR_ID; <statement>
+
                         return 1;
                     }
                     else
@@ -797,8 +821,20 @@ int statement(Token *token)
         token = getToken();
         if (token->t == SEMICOL)
         { // RETURN ;
+
+            // check if return type is void
+
+            if (symTable->topFrame != symTable->mainFrame)
+            {
+                // gets function which is currently being declared
+                SymFunction *function = peekCurrentlyDeclaredFunction();
+                // check if return type of that function is void
+                checkReturnType(function, VOID);
+            }
+
             return 1;
         }
+
         else if (var_rule(token) == 1)
         { // RETURN <var_rule>
 

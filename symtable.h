@@ -7,8 +7,15 @@
 #include <stdio.h>
 
 #include "scanner.h"
+#include "parser.h"
 
 #define SYMTABLE_SIZE 100
+
+typedef enum
+{
+    CURRENTLY_DECLARED_FUNCTION,
+    CURRENTLY_DECLARED_VARIABLE
+} currentlyDeclaredType;
 
 typedef struct symTable SymTable;
 extern SymTable *symTable;
@@ -28,7 +35,6 @@ typedef struct symVariable
 {
     char *name;
     enum type type;
-    bool canBeNull;
 } SymVariable;
 
 typedef struct symFunction
@@ -49,11 +55,15 @@ typedef struct symItem
     SymItem *next;
 } SymItem;
 
-typedef union symUnion
+typedef struct currentlyDeclaredObject
 {
-    SymFunction *function;
-    SymVariable *variable;
-} SymUnion;
+    currentlyDeclaredType objectType;
+    union
+    {
+        SymFunction *function;
+        SymVariable *variable;
+    };
+} CurrentlyDeclaredObject;
 
 typedef struct frame
 {
@@ -65,7 +75,7 @@ typedef struct symTable
 {
     Frame *topFrame;
     Frame *mainFrame;
-    SymUnion **currentlyDeclared;
+    CurrentlyDeclaredObject **currentlyDeclared;
     int currentlyDeclaredCount;
 } SymTable;
 
@@ -140,10 +150,20 @@ SymVariable *addSymVariable(char *key);
  *
  * @param function to add param to
  * @param type of the param
- * @param canBeNull indicated if null can be passed as param
- * @return pointer to initialized function
+ * @param canBeNull indicates if null can be passed as param
+ * @return added param
  */
 SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, bool canBeNull);
+
+/**
+ * @brief Add new param with its type to an existing function
+ *
+ * @param function to add return to
+ * @param type of the return
+ * @param canBeNull indicates if null can be returned
+ * @return added return
+ */
+SymFunctionReturn *addSymFunctionReturn(SymFunction *function, enum type type, bool canBeNull);
 
 /**
  * @brief names function param
@@ -177,6 +197,13 @@ SymFunction *getFunction(char *key);
  * @return pointer to variable or null if item doesn't exits
  */
 SymVariable *getVariable(char *key);
+
+/**
+ * @brief checks if function returs correct type
+ *
+ * @throw 2 when types doesn't match
+ */
+void checkReturnType(SymFunction *function, enum type type);
 
 /**
  * @brief frees allocated resources of the function
@@ -217,14 +244,28 @@ void freeSymTable();
  *
  * @param object var or function to push
  */
-void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable);
+void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, currentlyDeclaredType objectType);
 
 /**
  * @brief peeks variable or function from currentlyDeclared array in symTable
  *
  * @return var or function on top of currentlyDeclared stack
  */
-SymUnion *peekCurrentlyDeclared();
+CurrentlyDeclaredObject *peekCurrentlyDeclared();
+
+/**
+ * @brief peeks function from currentlyDeclared array in symTable
+ *
+ * @return function on top of currentlyDeclared stack or null when top not function
+ */
+SymFunction *peekCurrentlyDeclaredFunction();
+
+/**
+ * @brief peeks variable from currentlyDeclared array in symTable
+ *
+ * @return function on top of currentlyDeclared stack or null when top not variable
+ */
+SymVariable *peekCurrentlyDeclaredVariable();
 
 /**
  * @brief pops variable or function from currentlyDeclared array in symTable

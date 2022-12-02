@@ -18,7 +18,7 @@ SymTable *initSymTable()
     SymTable *symTable = calloc(1, sizeof(SymTable));
     if (!symTable)
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
     symTable->mainFrame = frame;
     symTable->topFrame = symTable->mainFrame;
@@ -31,12 +31,12 @@ Frame *initFrame(char *name)
     Frame *frame = calloc(1, sizeof(Frame));
     if (!frame)
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
     frame->name = calloc(strlen(name) + 1, 1);
     if (!frame->name)
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
     strcpy(frame->name, name);
     frame->size = SYMTABLE_SIZE;
@@ -49,12 +49,12 @@ SymItem *initSymItem(char *key)
     SymItem *item = calloc(1, sizeof(SymItem));
     if (!item)
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
     item->key = calloc(strlen(key) + 1, 1);
     if (!item->key)
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
     strcpy(item->key, key);
     return item;
@@ -65,12 +65,12 @@ SymFunction *initSymFunction(char *name)
     SymFunction *function = calloc(1, sizeof(SymFunction));
     if (!function)
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
     function->name = calloc(strlen(name) + 1, 1);
     if (!function->name)
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
     strcpy(function->name, name);
     return function;
@@ -81,12 +81,12 @@ SymVariable *initSymVariable(char *name)
     SymVariable *variable = calloc(1, sizeof(SymVariable));
     if (!variable)
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
     variable->name = calloc(strlen(name) + 1, 1);
     if (!variable->name)
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
     strcpy(variable->name, name);
     return variable;
@@ -172,7 +172,7 @@ SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, boo
         SymFunctionParam *param = calloc(1, sizeof(SymFunctionParam));
         if (!param)
         {
-            exit(99);
+            FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
         }
         switch (type)
         {
@@ -194,6 +194,40 @@ SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, boo
         function->params[function->paramCount] = param;
         function->paramCount++;
         return param;
+    }
+    FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    return NULL;
+}
+
+SymFunctionReturn *addSymFunctionReturn(SymFunction *function, enum type type, bool canBeNull)
+{
+    if (function)
+    {
+        SymFunctionReturn *returnType = calloc(1, sizeof(SymFunctionReturn));
+        if (!returnType)
+        {
+            FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+        }
+        switch (type)
+        {
+        case INT_TYPE:
+            returnType->type = INT;
+            break;
+        case FLOAT_TYPE:
+            returnType->type = FLOAT;
+            break;
+        case STRING_TYPE:
+            returnType->type = STRING;
+            break;
+        case VOID:
+            returnType->type = VOID;
+            break;
+        default:
+            break;
+        }
+        returnType->canBeNull = canBeNull;
+        function->returnType = returnType;
+        return returnType;
     }
     return NULL;
 }
@@ -252,6 +286,23 @@ SymVariable *getVariable(char *key)
     }
 
     return item->variable;
+}
+
+void checkReturnType(SymFunction *function, enum type type)
+{
+    SymFunctionReturn *functionReturn = function->returnType;
+
+    if (type == NULL_KEYWORD && functionReturn->canBeNull)
+    {
+        return;
+    }
+
+    if (functionReturn->type == type)
+    {
+        return;
+    }
+
+    FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
 }
 
 void freeSymFunction(SymFunction *function)
@@ -328,31 +379,31 @@ void freeSymTable()
     free(symTable);
 }
 
-void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable)
+void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, currentlyDeclaredType objectType)
 {
-    SymUnion *uni = calloc(1, sizeof(SymUnion));
-    if (function)
+    CurrentlyDeclaredObject *object = calloc(1, sizeof(CurrentlyDeclaredObject));
+    object->objectType = objectType;
+    if (objectType == CURRENTLY_DECLARED_FUNCTION)
     {
-
-        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount + 1) * sizeof(SymUnion *));
-        symTable->currentlyDeclared[symTable->currentlyDeclaredCount] = uni;
-        symTable->currentlyDeclared[symTable->currentlyDeclaredCount]->function = function;
+        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount + 1) * sizeof(CurrentlyDeclaredObject *));
+        symTable->currentlyDeclared[symTable->currentlyDeclaredCount] = object;
+        object->function = function;
     }
-    else if (variable)
+    else if (objectType == CURRENTLY_DECLARED_VARIABLE)
     {
-        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount + 1) * sizeof(SymUnion));
-        symTable->currentlyDeclared[symTable->currentlyDeclaredCount] = uni;
-        symTable->currentlyDeclared[symTable->currentlyDeclaredCount]->variable = variable;
+        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount + 1) * sizeof(CurrentlyDeclaredObject *));
+        symTable->currentlyDeclared[symTable->currentlyDeclaredCount] = object;
+        object->variable = variable;
     }
     else
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
 
     symTable->currentlyDeclaredCount++;
 }
 
-SymUnion *peekCurrentlyDeclared()
+CurrentlyDeclaredObject *peekCurrentlyDeclared()
 {
     if (symTable->currentlyDeclaredCount)
     {
@@ -361,11 +412,33 @@ SymUnion *peekCurrentlyDeclared()
     return NULL;
 }
 
+SymFunction *peekCurrentlyDeclaredFunction()
+{
+    CurrentlyDeclaredObject *currentlyDeclared = peekCurrentlyDeclared();
+    if (!currentlyDeclared || (currentlyDeclared->objectType != CURRENTLY_DECLARED_FUNCTION))
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    // adds param to function with its type
+    return currentlyDeclared->function;
+}
+
+SymVariable *peekCurrentlyDeclaredVariable()
+{
+    CurrentlyDeclaredObject *currentlyDeclared = peekCurrentlyDeclared();
+    if (!currentlyDeclared || (currentlyDeclared->objectType != CURRENTLY_DECLARED_VARIABLE))
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    // adds param to function with its type
+    return currentlyDeclared->variable;
+}
+
 void popCurrentlyDeclared()
 {
     if (symTable->currentlyDeclaredCount)
     {
-        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount - 1) * sizeof(SymUnion));
+        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount - 1) * sizeof(CurrentlyDeclaredObject));
     }
     symTable->currentlyDeclaredCount--;
 }
@@ -406,7 +479,6 @@ void printSymVariable(SymVariable *variable)
     printf("-----\n");
     printf("variable: %s\n", variable->name);
     printf("type: %d\n", variable->type);
-    printf("canBeNull?:%d\n", variable->canBeNull);
     printf("-----\n");
 }
 
@@ -415,14 +487,14 @@ void printSymTable()
     printf("--CURRENTLY DECLARED--\n");
     for (int i = 0; i < symTable->currentlyDeclaredCount; i++)
     {
-        SymUnion *item = symTable->currentlyDeclared[i];
-        if (item->function)
+        CurrentlyDeclaredObject *object = symTable->currentlyDeclared[i];
+        if (object->objectType == CURRENTLY_DECLARED_FUNCTION)
         {
-            printSymFunction(item->function);
+            printSymFunction(object->function);
         }
-        else if (item->variable)
+        else if (object->objectType == CURRENTLY_DECLARED_VARIABLE)
         {
-            printSymVariable(item->variable);
+            printSymVariable(object->variable);
         }
         else
         {
