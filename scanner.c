@@ -90,7 +90,8 @@ void changeLastChar(int c, Token *token)
 {
     char tmpStr[strlen(token->val)];
     strcpy(tmpStr, token->val);
-    tmpStr[strlen(tmpStr) - 1] = c;
+    tmpStr[strlen(tmpStr) - 4] = c;
+    tmpStr[strlen(tmpStr) - 3] = '\0';
 
     free(token->val);
     token->val = malloc((1 + strlen(tmpStr)) * sizeof(char));
@@ -100,7 +101,7 @@ void changeLastChar(int c, Token *token)
     }
     strcpy(token->val, tmpStr);
 
-    token->valLen = token->valLen - 1;
+    token->valLen = token->valLen - 4;
 }
 
 void addCharToToken(int c, Token *token)
@@ -124,30 +125,34 @@ void addCharToToken(int c, Token *token)
             exit(99);
         }
 
-        if (c == 'n' && token->val[strlen(token->val) - 1] == '\\')
-        { // {\,n} -> {\n}
-            changeLastChar('\n', token);
-        }
-        else if (c == '\\' && token->val[strlen(token->val) - 1] == '\\' && backslashset == 0)
-        { // {\,\} -> {\}
-            changeLastChar('\\', token);
-            backslashset = 1;
-        }
-        else if (c == 't' && token->val[strlen(token->val) - 1] == '\\')
+        // if (c == 'n' && token->val[strlen(token->val) - 1] == '\\')
+        // { // {\,n} -> {\n}
+        //     changeLastChar('\n', token);
+        // }
+        // if (c == '\\' && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2')
+        // { // {\,\} -> {\}
+        //     changeLastChar('\\', token);
+        //     backslashset = 1;
+        // }
+
+        if (c == 't' && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2')
         { // {\,t} -> {\t}
-            changeLastChar('\t', token);
+            //changeLastChar('\t', token);
+            token->val[token->valLen-3] = '0';
+            token->val[token->valLen-2] = '0';
+            token->val[token->valLen-1] = '9';
         }
-        else if (c == '"' && token->val[strlen(token->val) - 1] == '\\')
-        { // {\,"} -> {"}
-            changeLastChar('"', token);
-        }
-        else
-        {
-            backslashset = 0;
+        // else if (c == '"' && token->val[strlen(token->val) - 1] == '\\')
+        // { // {\,"} -> {"}
+        //     changeLastChar('"', token);
+        // }
+        // else
+        else {
+            //backslashset = 0;
             token->val = strncat(token->val, tmp, 1);
         }
     }
-    token->valLen = token->valLen + 1;
+    token->valLen = strlen(token->val);
 }
 
 Token *tokenInit()
@@ -337,7 +342,6 @@ Token *getToken()
     while (!tokenFound)
     {
         c = getchar();
-
         if (c == '\n')
         { // counting rows (stdin)
             row++;
@@ -484,10 +488,12 @@ Token *getToken()
                 case 0: // not number
                     switch (c)
                     {
+
                     case '"':
-                        if (token->val != NULL && token->val[strlen(token->val) - 1] == '\\')
+                        if (token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2')
                         { // char " in string
-                            addCharToToken(c, token);
+                            changeLastChar('"', token);
+                            //addCharToToken(c, token);
                         }
                         else
                         { // end of string
@@ -520,6 +526,13 @@ Token *getToken()
                     default: // other chars
                         if ((0 <= c && c <= 32) || c == 35 || c == 92)
                         {
+                            if (c == 92 && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2' && backslashset == 0) {
+                                backslashset = 1;
+                                break;
+                            } else {
+                                backslashset = 0;
+                            }
+
                             addCharToToken('\\', token);
                             char snum[3];
                             sprintf(snum, "%d", c);

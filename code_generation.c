@@ -963,32 +963,36 @@ void threeAddressWithoutRemove(int frameStr, char *frame)
 
 void pushStorage(int frameStr, char *frame)
 {
-    addToString(frameStr, "PUSHS");
-    if (storage[1] != NULL && storage[1][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
+    if (storage[1] != NULL) {
+        addToString(frameStr, "PUSHS");
+        if (storage[1][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[1]);
+        addToString(frameStr, "\n");
+        removeLastFromStorage();
     }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[1]);
-    addToString(frameStr, "\n");
 
-    addToString(frameStr, "PUSHS");
-    if (storage[0] != NULL && storage[0][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
+    if (storage[0] != NULL) {
+        addToString(frameStr, "PUSHS");
+        if (storage[0] != NULL && storage[0][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[0]);
+        addToString(frameStr, "\n");
+        removeLastFromStorage();
     }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[0]);
-    addToString(frameStr, "\n");
 
-    removeLastFromStorage();
-    removeLastFromStorage();
     removeOperator();
 }
 

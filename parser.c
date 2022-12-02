@@ -1065,30 +1065,37 @@ int statement(Token *token)
         }
     }
     // <statement> ; <statement>
-    else if ((token->t == SLASH) || (SEMICOL <= token->t && token->t <= MUL) || (ELSE <= token->t && token->t <= FLOAT_TYPE) || (token->t == INT_TYPE) || (token->t == RETURN) || (token->t == STRING_TYPE) || (token->t == VOID) || (EQ <= token->t && token->t <= NOT_EQ) || (token->t == COLON))
+    else if ((token->t == SLASH) || (COMMA <= token->t && token->t <= MUL) || (ELSE <= token->t && token->t <= FLOAT_TYPE) || (token->t == INT_TYPE) || (token->t == RETURN) || (token->t == STRING_TYPE) || (token->t == VOID) || (EQ <= token->t && token->t <= NOT_EQ) || (token->t == COLON))
     {
         return 0;
     }
-    else if ((token->t == NULL_KEYWORD) || (token->t == INT) || (token->t == FLOAT) || (token->t == STRING))
+    else if ((token->t == NULL_KEYWORD) || (token->t == INT) || (token->t == FLOAT) || (token->t == STRING) || (token->t == SEMICOL) || (token->t == EOF_T))
     {
+        if (token->t == EOF_T && iAmInConditionWhileFunRule) {
+            exit(2);
+        }
+
+        if (token->t == SEMICOL) {
+            codeGeneration(token);
+        } else {
+            codeGeneration(token);
+            dtorToken(token);
+            token = getToken();
+            if (token->t != SEMICOL)
+            {
+                return 0;
+            }
+        }
+        
         dtorToken(token);
         token = getToken();
-        if (token->t != SEMICOL)
+        if (statement(token) == 0)
         {
             return 0;
         }
         else
         {
-            dtorToken(token);
-            token = getToken();
-            if (statement(token) == 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return 1;
-            }
+            return 1;
         }
     }
     else
