@@ -2188,6 +2188,8 @@ void codeGeneration(Token *token)
                 } else {
                     if (!inIf && !inWhile) {
                         addToString(1, storage[x]);
+                    } else if (!strcmp(storage[x], " string@0")) {
+                        addToString(1, "int@0"); 
                     } else {
                         addToString(1, "int@1"); 
                     }
@@ -2221,6 +2223,8 @@ void codeGeneration(Token *token)
                 } else {
                     if (!inIf && !inWhile) {
                         addToString(frameStr, storage[x]);
+                    } else if (!strcmp(storage[x], " string@0")) {
+                        addToString(frameStr, "int@0"); 
                     } else {
                         addToString(frameStr, "int@1"); 
                     }
@@ -2245,6 +2249,8 @@ void codeGeneration(Token *token)
                 } else {  // string -> true
                     if (!inIf && !inWhile) {
                         addToString(3, storage[x]);
+                    } else if (!strcmp(storage[x], " string@0")) {
+                        addToString(3, "int@0"); 
                     } else {
                         addToString(3, "int@1"); 
                     }
