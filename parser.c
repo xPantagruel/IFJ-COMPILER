@@ -915,6 +915,7 @@ int statement(Token *token)
         token = getToken();
         if (token->t == SEMICOL)
         { // RETURN ;
+            codeGeneration(token);
             return 1;
         }
         else if (var_rule(token) == 1)

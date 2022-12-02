@@ -1,13 +1,9 @@
 <?php
 declare(strict_types=1);
 
-function hello() : string {
-    write("Hello world\n");
-<<<<<<< HEAD
-    return 2 + 4;
-=======
-    return 2+4;
->>>>>>> fix bottomUp
+function hello(): void {
+    $x = "hello";
+    return $x.$x;
 }
 
-write(hello);
+$x = hello();
