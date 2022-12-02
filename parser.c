@@ -350,18 +350,41 @@ int expression(Token *token)
         ungetc(')', stdin);
     }
 
-    if (exp->arrayLen == 1)
+    /* if (exp->arrayLen == 1)
     {
-        codeGeneration(exp->tokenArray[0]);
+        if (exp->tokenArray[0]->val == NULL)
+        {
+            exp->tokenArray[0]->t = INT;
+            addCharToToken('0', exp->tokenArray[0]);
+            codeGeneration(exp->tokenArray[0]);
+        }
+        else
+        {
+            codeGeneration(exp->tokenArray[0]);
+            if (currentSymbol && currentSymbol->variable)
+            {
+                currentSymbol->variable->t = exp->tokenArray[0]->t;
+            }
+        }
 
         return 1;
-    }
+    } */
 
     if (exp->arrayLen != 0)
     {
+
+        /* for (int i = 0; i < exp->arrayLen; i++)
+        {
+            printf("%s exp\n", exp->tokenArray[i]->val);
+        } */
+
         int resultType;
         if (bottomUp(exp, &resultType))
         {
+            /* if (currentSymbol && currentSymbol->variable)
+            {
+                currentSymbol->variable->t = resultType;
+            } */
 
             dtorExpression(exp);
             return 1;
@@ -859,6 +882,7 @@ int statement(Token *token)
                 checkReturnType(function, VOID);
             }
 
+            codeGeneration(token);
             return 1;
         }
 
@@ -874,7 +898,6 @@ int statement(Token *token)
             {
                 addCharToToken(token->val[i], tmp);
             }
-
             codeGeneration(token);
             dtorToken(token);
             token = getToken();
@@ -908,12 +931,12 @@ int statement(Token *token)
         }
         else if (var_rule(token) == 2)
         {
-            codeGeneration(token);
-            dtorToken(token);
-            token = getToken();
+            // codeGeneration(token);
+            //  dtorToken(token);
+            // token = getToken();
             if (expression(token) == 1)
             { // RETURN <expression>
-                // dtorToken(token);
+                // dtorToken(token); //todo tu mozno leak
                 token = getToken();
                 if (token->t == SEMICOL)
                 {                          // RETURN <expression>;
@@ -1009,15 +1032,38 @@ int statement(Token *token)
             return 0;
         }
     }
+    // <statement> ; <statement>
+    else if ((token->t == SLASH) || (SEMICOL <= token->t && token->t <= MUL) || (ELSE <= token->t && token->t <= FLOAT_TYPE) || (token->t == INT_TYPE) || (token->t == RETURN) || (token->t == STRING_TYPE) || (token->t == VOID) || (EQ <= token->t && token->t <= NOT_EQ) || (token->t == COLON))
+    {
+        return 0;
+    }
+    else if ((token->t == NULL_KEYWORD) || (token->t == INT) || (token->t == FLOAT) || (token->t == STRING))
+    {
+        dtorToken(token);
+        token = getToken();
+        if (token->t != SEMICOL)
+        {
+            return 0;
+        }
+        else
+        {
+            dtorToken(token);
+            token = getToken();
+            if (statement(token) == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+    }
     else
     { // epsilon
         if (token->t == R_CPAR)
         {
             ungetc('}', stdin);
-        }
-        else
-        {
-            exit(2);
         }
         return 2;
     }

@@ -239,8 +239,9 @@ void READS()
     addToString(2, "LABEL reads \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarReadS\n");
-    addToString(2, "POPS LF@VarReadS\n");
     addToString(2, "READ LF@VarReadS string\n");
     addToString(2, "PUSHS LF@VarReadS\n");
 
@@ -255,8 +256,9 @@ void READI()
     addToString(2, "LABEL readi \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarReadI\n");
-    addToString(2, "POPS LF@VarReadI\n");
     addToString(2, "READ LF@VarReadI int\n");
     addToString(2, "PUSHS LF@VarReadI\n");
 
@@ -271,8 +273,9 @@ void READF()
     addToString(2, "LABEL readf\n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarReadF\n");
-    addToString(2, "POPS LF@VarReadF\n");
     addToString(2, "READ LF@VarReadF float\n");
     addToString(2, "PUSHS LF@VarReadF\n");
     
@@ -349,10 +352,23 @@ void FLOATVAL()
     addToString(2, "LABEL floatval \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarFloatval\n");
     addToString(2, "POPS LF@VarFloatval\n");
+    //typova kontrola 
+    addToString(2, "DEFVAR LF@Type\n");
+    addToString(2, "TYPE LF@Type LF@VarFloatval\n");
+    addToString(2, "JUMPIFEQ FLOAT LF@Type string@float\n");
+
     addToString(2, "INT2FLOAT LF@VarFloatval LF@VarFloatval\n"); // konvert na float
-    addToString(2, "PUSHS LF@VarWrite\n");                       // vypise na vystup
+    addToString(2, "PUSHS LF@VarFloatval\n");                       
+    addToString(2, "JUMP 2END\n");
+
+    addToString(2, "LABEL FLOAT\n");
+    addToString(2, "PUSHS LF@VarFloatval\n");
+
+    addToString(2, "LABEL 2END\n");
 
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
@@ -365,11 +381,24 @@ void INTVAL()
     addToString(2, "LABEL intval \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarIntval\n");
     addToString(2, "POPS LF@VarIntval\n");
+    addToString(2, "DEFVAR LF@Type\n");
+    addToString(2, "TYPE LF@Type LF@VarIntval\n");
+    addToString(2, "JUMPIFEQ INT LF@Type string@int\n");
+    
     addToString(2, "FLOAT2INT LF@VarIntval LF@VarIntval\n"); // konvert na int
-    addToString(2, "PUSHS LF@VarWrite\n");                   // vypise na vystup
+    addToString(2, "PUSHS LF@VarIntval\n"); 
+    addToString(2, "JUMP 1END\n");
 
+    addToString(2, "LABEL INT\n");
+    addToString(2, "PUSHS LF@VarIntval\n");
+
+    addToString(2, "LABEL 1END\n");
+
+                       
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
@@ -380,6 +409,8 @@ void STRVAL()
     addToString(2, "LABEL strval \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarStrval\n");
     addToString(2, "POPS LF@VarStrval\n");
     addToString(2, "DEFVAR LF@VarType\n");
@@ -410,6 +441,8 @@ void STRLEN()
     addToString(2, "LABEL strlen \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarStrlen\n");
     addToString(2, "POPS LF@VarStrlen\n");
     addToString(2, "DEFVAR LF@Length\n");
@@ -430,6 +463,8 @@ void ORD()
     addToString(2, "LABEL ord \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarOrd\n");
     addToString(2, "POPS LF@VarOrd\n");
     addToString(2, "DEFVAR LF@Length\n");
@@ -455,11 +490,30 @@ void CHR()
     addToString(2, "LABEL chr \n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@LenParametr\n");
+    addToString(2, "POPS LF@LenParametr\n");
+    addToString(2, "DEFVAR LF@Condition\n");
     addToString(2, "DEFVAR LF@VarChr\n");
     addToString(2, "POPS LF@VarChr\n");
+
+    // //vetsi nez 255
+    // addToString(2, "GT LF@Condition LF@VarChr int@255\n");
+    // addToString(2, "JUMPIFEQ END LF@Condition bool@true\n");
+
+    // //mensi nez 0
+    // addToString(2, "LT LF@Condition LF@VarChr int@0\n");
+    // addToString(2, "JUMPIFEQ END LF@Condition bool@true\n");
+
     addToString(2, "DEFVAR LF@Result\n");
     addToString(2, "INT2CHAR LF@Result LF@VarChr\n");
     addToString(2, "PUSHS LF@Result\n");
+    // addToString(2, "JUMP DEFINITIVEEND\n");
+
+    // addToString(2, "LABEL END\n");
+    // addToString(2, "DPRINT int@58\n");
+
+    // addToString(2, "LABEL DEFINITIVEEND\n");
+
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
@@ -624,7 +678,8 @@ void store(char *val)
     }
     else
     {
-        storage = realloc(storage, (storageLen + 1) * sizeof(char *));
+        // + 2 because we want to set next->next element to NULL
+        storage = realloc(storage, (storageLen + 2) * sizeof(char *));
     }
 
     if (storage == NULL)
@@ -639,6 +694,8 @@ void store(char *val)
     }
 
     strcpy(storage[storageLen], val);
+
+    storage[storageLen+1] = NULL; 
 
     storageLen++;
 }
@@ -705,7 +762,7 @@ void writeAndFreeBuildInParams(int frame, char *frameStr) {
 void removeLastFromStorage()
 {
     if (storageLen)
-    {
+    { 
         free(storage[storageLen - 1]);
         storage[storageLen - 1] = NULL;
         storageLen--;
@@ -730,7 +787,7 @@ void resetGlobalValues()
         removeLastFromStorage();
         if (storageLen == 0)
         {
-            free(storage);
+            free(storage);        
             storage = NULL;
         }
     }
@@ -825,6 +882,47 @@ void threeAddress(int frameStr, char *frame)
     removeLastFromStorage();
     removeLastFromStorage();
     removeOperator();
+}
+
+void returnConcat() {
+    char randomConcatString[11];
+    randStr(randomConcatString, 10);
+
+    addToString(1, "DEFVAR LF@");
+    addToString(1, randomConcatString);
+    addToString(1, "\n");
+
+    addToString(1, "CONCAT LF@");
+    addToString(1, randomConcatString);
+
+    if (storage[0] != NULL && storage[0][0] == '-')
+    { // if first letter is '-' -> it is variable
+        addToString(1, " LF@");
+    }
+    else
+    {
+        addToString(1, " ");
+    }
+    addToString(1, storage[0]);
+
+    if (storage[1] != NULL && storage[1][0] == '-')
+    { // if first letter is '-' -> it is variable
+        addToString(1, " LF@");
+    }
+    else
+    {
+        addToString(1, " ");
+    }
+    addToString(1, storage[1]);
+    addToString(1, "\n");
+
+    removeLastFromStorage();
+    removeLastFromStorage();
+    removeOperator();
+
+    addToString(1, "PUSHS LF@");
+    addToString(1, randomConcatString);
+    addToString(1, "\n");
 }
 
 void threeAddressWithoutRemove(int frameStr, char *frame)
@@ -1108,15 +1206,17 @@ void divIdiv(int frameStr, char *frame)
     }
     else
     {
+        setFloatIntOperatorVariable();
         if (Return) {
             pushStorage(frameStr, frame);
             addToString(frameStr, "DIVS\n");
-            addToString(frameStr, "PUSHS int@0\n");
-            addToString(frameStr, "GTS\n");
+            returnedToStack = 1;
+            // pushZero(frameStr);
+            // addToString(frameStr, "GTS\n");
         } else {
             pushStorage(3, frame);
             addToString(3, "DIVS\n");
-            addToString(3, "PUSHS int@0\n");
+            pushZero(3);
             addToString(3, "GTS\n");
         }
     }
@@ -1136,15 +1236,16 @@ void divIdiv(int frameStr, char *frame)
     }
     else
     {
+        setFloatIntOperatorVariable();
         if (Return) {
             pushStorage(frameStr, frame);
             addToString(frameStr, "IDIVS\n");
-            addToString(frameStr, "PUSHS int@0\n");
-            addToString(frameStr, "GTS\n");
+            // pushZero(frameStr);
+            // addToString(frameStr, "GTS\n");
         } else {
             pushStorage(3, frame);
             addToString(3, "IDIVS\n");
-            addToString(3, "PUSHS int@0\n");
+            pushZero(3);
             addToString(3, "GTS\n");
         }
     }
@@ -1158,9 +1259,43 @@ void divIdiv(int frameStr, char *frame)
     addToString(frameStr, "\n");
 }
 
+void setFloatIntOperatorVariable() {
+    if (strstr(storage[0], "float@") == NULL) {
+        // int 
+        floatIntOperator = 1;
+    } else {
+        // float
+        floatIntOperator = 0;
+    }
+}
+
+void pushZero(int frame) {
+    if (storageLen != 0) {
+        if (strstr(storage[0], "float@") != NULL) { //float
+            addToString(frame, "PUSHS float@0x0p+0\n");
+        } else {
+            addToString(frame, "PUSHS int@0\n");
+        }
+    }
+}
+
+void createCallLabel(int frame) {
+    addToString(frame, "CALL ");
+    addToString(frame, functionName);
+    addToString(frame, "\n");
+}
+
+void createReturnCode(int frame, char *frameStr) {    
+        addToString(frame, "PUSHS ");
+        addToString(frame, storage[storageLen-1]);
+        addToString(frame, "\n");
+        removeLastFromStorage();        
+}
+
 void codeGeneration(Token *token)
 {
-    // if prolog not added
+    //printf("%s\n", token->val);
+    //if prolog not added
     if (allFunctionsString == NULL) {
         addToString(2, ".IFJcode22\nJUMP $main\n");
     }
@@ -1184,7 +1319,7 @@ void codeGeneration(Token *token)
     char randomVar2[11];
 
     // checking if we are in function -> chaning frame
-    if (IAmInFunction)
+    if (IAmInFunction && !callingFromGF)
     {
         strcpy(frame, " LF@");
     }
@@ -1273,10 +1408,8 @@ void codeGeneration(Token *token)
 
         if (token->t == VAR_ID)
         { // token is variable -> setting up correct frame
-            
             // storing variable
-
-            if (IAmInFunction)
+            if (IAmInFunction && !callingFromGF)
             {
                 strcat(tmp, " LF@");
                 strcat(tmp, var);
@@ -1331,15 +1464,18 @@ void codeGeneration(Token *token)
                 }
                 else
                 { // $var1 + 2 (without '=' -> it means that we are for example in condition, so we store result to stack)
+                    setFloatIntOperatorVariable();
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "ADDS\n");
-                        addToString(frameStr, "PUSHS int@0\n");
-                        addToString(frameStr, "GTS\n");
+
+                        returnedToStack = 1;
+                        // pushZero(frameStr);
+                        // addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "ADDS\n");
-                        addToString(3, "PUSHS int@0\n");
+                        pushZero(3);
                         addToString(3, "GTS\n");
                     }
                 }
@@ -1352,15 +1488,17 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
+                    setFloatIntOperatorVariable();
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "SUBS\n");
-                        addToString(frameStr, "PUSHS int@0\n");
-                        addToString(frameStr, "GTS\n");
+                        returnedToStack = 1;
+                        // pushZero(frameStr);
+                        // addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "SUBS\n");
-                        addToString(3, "PUSHS int@0\n");
+                        pushZero(3);
                         addToString(3, "GTS\n");
                     }
                 }
@@ -1376,22 +1514,29 @@ void codeGeneration(Token *token)
                 }
                 else
                 {
+                    setFloatIntOperatorVariable();
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "MULS\n");
-                        addToString(frameStr, "PUSHS int@0\n");
-                        addToString(frameStr, "GTS\n");
+                        returnedToStack = 1;
+                        // pushZero(frameStr);
+                        // addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "MULS\n");
-                        addToString(3, "PUSHS int@0\n");
+                        pushZero(3);
                         addToString(3, "GTS\n");
                     }
                 }
                 break;
             case DOT:
-                addToString(frameStr, "CONCAT");
-                threeAddress(frameStr, frame);
+                if (Return) {
+                    returnConcat();
+                    returnedToStack = 1;
+                } else {
+                    addToString(frameStr, "CONCAT");
+                    threeAddress(frameStr, frame);
+                }
                 break;
             case THREE_EQ:
                 if (eqSymbolFound)
@@ -1837,13 +1982,13 @@ void codeGeneration(Token *token)
         inWhile -= 1;
         GetUniqueVarName();
         addToString(frameStr, "JUMP $");
-        if(listWhileLabels->firstElement->nextElement->nextElement!=NULL){
+        if(listWhileLabels->firstElement!=NULL){
             addToString(frameStr, listWhileLabels->firstElement->nextElement->nextElement->data);//JUMP WHILESTART UniqueName
         }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        if(listWhileLabels->firstElement->nextElement != NULL){
+        if(listWhileLabels->firstElement != NULL){
             addToString(frameStr, listWhileLabels->firstElement->nextElement->data);//LABEL $LOOPCOND UniqueName
         }
         addToString(frameStr, "\n");
@@ -1895,7 +2040,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        if(listIfLabels->firstElement->nextElement->nextElement != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//LABEL IFCOND UniqueName
         }
         addToString(frameStr, "\n");
@@ -1919,7 +2064,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMPIFEQ $");
-        if(listIfLabels->firstElement->nextElement != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->data);
         }
         addToString(frameStr, " ");
@@ -1931,7 +2076,7 @@ void codeGeneration(Token *token)
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMP $");
-        if(listIfLabels->firstElement->nextElement->nextElement->nextElement != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);//LABEL ELSE UniqueName
         }
         addToString(frameStr, "\n");
@@ -1963,7 +2108,7 @@ void codeGeneration(Token *token)
                 addToString(1, "POPFRAME\n");
                 addToString(1, "RETURN\n");
                 functionLabelCreated = 0;
-                //todo nedostane sa sem
+                //nedostane sa sem
             }
 
             IAmInFunction = 0;
@@ -2014,11 +2159,19 @@ void codeGeneration(Token *token)
             }
         }
 
-        if (storageLen == 1 && !buildInCalled)
+        int x;
+        if (eqSymbolFound) {
+            x = 1;
+        } else {
+            x = 0;
+        }
+
+
+        if (storageLen > 0 && storage[x] != NULL && storageLen == 1 && !buildInCalled)
         { // if ($var1), while, foo(), return?
             if (functionLabelCreated) { //in function
                 addToString(1, "PUSHS");
-                if (storage[0][0] == '-')
+                if (storage[x][0] == '-')
                 {
                     addToString(1, " LF@");
                 }
@@ -2026,15 +2179,23 @@ void codeGeneration(Token *token)
                 {
                     addToString(1, " ");
                 }
-                addToString(1, storage[0]);
+                if (strstr(storage[x], "string@") == NULL) {
+                    addToString(1, storage[x]);
+                } else {
+                    addToString(1, "int@1");
+                }
                 addToString(1, "\n");
                 if (inIf || inWhile) {
-                    addToString(1, "PUSHS int@0\n");
+                    if (strstr(storage[x], "float@") != NULL) { //float
+                        addToString(3, "PUSHS float@0x0p+0\n");
+                    } else {
+                        addToString(1, "PUSHS int@0\n");
+                    }
                     addToString(1, "GTS\n");
                 }
            } else if (IAmInFunctionCall) {
-                addToString(frameStr, "PUSHS"); //pushing single param
-                if (storage[0][0] == '-')
+                addToString(frameStr, "PUSHS"); //pushing single param                
+                if (storage[x][0] == '-')
                 {
                     if (callingFromGF && IAmInFunctionCall) {
                         addToString(frameStr, " GF@");
@@ -2046,11 +2207,16 @@ void codeGeneration(Token *token)
                 {
                     addToString(frameStr, " ");
                 }
-                addToString(frameStr, storage[0]);
+
+                if (strstr(storage[x], "string@") == NULL) {
+                    addToString(frameStr, storage[x]);
+                } else {
+                    addToString(frameStr, "int@1");
+                }
                 addToString(frameStr, "\n");
             } else {
                 addToString(3, "PUSHS"); //todo tu mozno chyba pri pushovani jedneho parametru 
-                if (storage[0][0] == '-')
+                if (storage[x][0] == '-')
                 {
                     if (callingFromGF && IAmInFunctionCall) {
                         addToString(3, " GF@");
@@ -2062,18 +2228,26 @@ void codeGeneration(Token *token)
                 {
                     addToString(3, " ");
                 }
-                addToString(3, storage[0]);
+                if (strstr(storage[x], "string@") == NULL) {
+                    addToString(3, storage[x]); // not string
+                } else {  // string -> true
+                    addToString(3, "int@1");
+                }
                 addToString(3, "\n");
                 if (inIf || inWhile) {
-                    addToString(3, "PUSHS int@0\n");
+                    if (strstr(storage[x], "float@") != NULL) { //float
+                        addToString(3, "PUSHS float@0x0p+0\n");
+                    } else {
+                        addToString(3, "PUSHS int@0\n");
+                    }
                     addToString(3, "GTS\n");
                 }
             }
             removeLastFromStorage();
         } 
-        if (storageLen == 2 && IAmInFunctionCall && !buildInCalled) {
+        if (storageLen > 0 && storage[x] != NULL && storageLen == 2 && IAmInFunctionCall && !buildInCalled) {
             addToString(frameStr, "PUSHS ");
-            if (storage[0][0] == '-')
+            if (storage[x][0] == '-')
             {
                 if (callingFromGF) {
                     addToString(frameStr, " GF@");
@@ -2094,7 +2268,9 @@ void codeGeneration(Token *token)
 
         if (IAmInFunctionCall)
         {
-            functionCallParamsCounter++;
+            if (previousTokenType != L_PAR) {
+                functionCallParamsCounter++;
+            }
             if (buildInCalled) {
                 if (!strcmp(functionName, "reads")) {
                     if (strstr(allFunctionsString, "LABEL reads") == NULL) {
@@ -2160,13 +2336,9 @@ void codeGeneration(Token *token)
             }
 
             if (functionLabelCreated) {
-                addToString(1, "CALL ");
-                addToString(1, functionName);
-                addToString(1, "\n");
+                createCallLabel(1);
             } else {
-                addToString(frameStr, "CALL ");
-                addToString(frameStr, functionName);
-                addToString(frameStr, "\n");
+                createCallLabel(frameStr);
             }
 
             if (storage != NULL && storage[0] != NULL) {
@@ -2182,18 +2354,33 @@ void codeGeneration(Token *token)
                 functionName = NULL;
             }
             IAmInFunctionCall = 0;
-        }
 
+            if (functionLabelCreated) {
+                callingFromGF = 0;
+            }
+        }
         resetGlobalValues();
         break;
 
     case SEMICOL:
+        if (Return) {
+            if (returnedToStack) {
+                returnedToStack = 0;
+            } else {
+                if (previousTokenType == RETURN) {
+                    addToString(1, "PUSHS nil@nil\n");
+                } else {
+                    createReturnCode(1, frame);
+                }
+            }
+        }
+
         if (!cparCounter && IAmInFunction) {
             IAmInFunction = 0;
         }
         checkStorage();
         resetGlobalValues(); 
-        Return = false;
+        Return = false; 
         break;
     case FUNCTION:
         IAmInFunctionDeclaration = 1;
@@ -2245,13 +2432,34 @@ void codeGeneration(Token *token)
             store(var);
         }
 
-        if (operator== DOT)
+        if (operator == DOT)
         {
-            addToString(frameStr, "CONCAT");
-            threeAddress(frameStr, frame);
-            removeOperator();
-        }
+            if (Return) {
+                returnConcat();
+                returnedToStack = 1;
+            } else {
+                addToString(frameStr, "CONCAT");
+                threeAddress(frameStr, frame);
+                removeOperator();
+            }
 
+        } else if (operator == THREE_EQ) {
+            if (eqSymbolFound)
+            {
+                addToString(frameStr, "EQ");
+                threeAddress(frameStr, frame);
+            }
+            else
+            {
+                if (Return) {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "EQS\n");
+                } else {
+                    pushStorage(3, frame);
+                    addToString(3, "EQS\n");
+                }
+            }
+        }
         break;
 
     case ID:
@@ -2379,15 +2587,21 @@ void codeGeneration(Token *token)
         free(WhileNames);
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
+        }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "JUMP $");
-        addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
+        }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        addToString(frameStr,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frameStr,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
+        }
         addToString(frameStr, "\n");
 
         break;
@@ -2442,13 +2656,13 @@ void codeGeneration(Token *token)
         free(WhileNames);
 
         addToString(frameStr, "JUMP $");
-        if(listIfLabels->firstElement->nextElement->nextElement->data != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//JUMP IFCOND
         }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        if(listIfLabels->firstElement->nextElement->data != NULL){
+        if(listIfLabels->firstElement!= NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->data);//LABEL $STARTIF
         }
         addToString(frameStr, "\n");
@@ -2456,13 +2670,13 @@ void codeGeneration(Token *token)
         break;
     case ELSE:
         addToString(frameStr, "JUMP $");
-        if(listIfLabels->firstElement->data != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->data);//JUMP AFTERELSE
         }
         addToString(frameStr, "\n");
 
         addToString(frameStr, "LABEL $");
-        if(listIfLabels->firstElement->nextElement->nextElement->nextElement->data != NULL){
+        if(listIfLabels->firstElement != NULL){
             addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
         }
         addToString(frameStr, "\n");
@@ -2473,6 +2687,7 @@ void codeGeneration(Token *token)
         break;
     }
 
+    previousTokenType = token->t;
     free(var);
     free(tmp);
 }

@@ -223,10 +223,10 @@ int skipLineComment()
         row++;
     }
 
-    if (c == EOF)
-    { // comment like: //this is my commentEOF
-        return 0;
-    }
+    // if (c == EOF)
+    // { // comment like: //this is my commentEOF
+    //     return 0;
+    // }
     return 1;
 }
 
@@ -491,15 +491,24 @@ Token *getToken()
                         }
                         else
                         { // end of string
-                            addTypeToToken(STRING, token);
-                            addRowToToken(row, token);
-
+                            if (token->val == NULL) {
+                                addCharToToken('n', token);
+                                addCharToToken('u', token);
+                                addCharToToken('l', token);
+                                addCharToToken('l', token);
+                                addTypeToToken(NULL_KEYWORD, token);
+                                addRowToToken(row, token);
+                            } else {
+                                addTypeToToken(STRING, token);
+                                addRowToToken(row, token);
+                            }
+                            
                             actualState = START;
                             tokenFound = 1;
                         }
                         break;
                     case '$':
-                        if (token->val[strlen(token->val) - 1] == '\\')
+                        if (token->val != NULL && token->val[strlen(token->val) - 1] == '\\')
                         { // $ in string must be like "\$"
                             addCharToToken(c, token);
                         }
@@ -526,28 +535,34 @@ Token *getToken()
                     }
                     break;
                 // end of case 0
-                case 1: // is number
+                default: // is number
                     // check hex. escape seq.
-                    if (token->val[strlen(token->val) - 1] == 'x' && token->val[strlen(token->val) - 2] == '\\')
-                    { // "\xNN"
-                        hexEscCount = 0;
-                        actualState = GET_HEX_S;
-                        unGetC(c);
-                        // check okt. escape seq.
-                    }
-                    else if (token->val[strlen(token->val) - 1] == '\\')
-                    { // "\NNN"
-                        oktEscCount = 0;
-                        actualState = GET_OKT_S;
-                        unGetC(c);
-                        // just number in string
-                    }
-                    else
-                    {
+                    if (token->val != NULL && strlen(token->val) != 0) {
+                        if (token->val[strlen(token->val) - 1] == 'x' && token->val[strlen(token->val) - 2] == '\\')
+                        { // "\xNN"
+
+                            hexEscCount = 0;
+                            actualState = GET_HEX_S;
+                            unGetC(c);
+                            // check okt. escape seq.
+                        }
+                        else if (token->val[strlen(token->val) - 1] == '\\')
+                        { // "\NNN"
+                            oktEscCount = 0;
+                            actualState = GET_OKT_S;
+                            unGetC(c);
+                            // just number in string
+                        }
+                        else
+                        {
+                            addCharToToken(c, token);
+                        }
+                    } else {
                         addCharToToken(c, token);
                     }
                     break;
                 }
+
                 // end of switch by isdigit()
                 break;
             // end of case 0
@@ -561,10 +576,10 @@ Token *getToken()
                 }
                 else
                 {
-                    if (c == 'n' && token->valLen >= 4 && token->val[token->valLen-4] == '\\') {
-                                token->val[token->valLen-1] = '0';
-                                token->val[token->valLen-2] = '1';
-                                token->val[token->valLen-3] = '0';
+                    if (c == 'n' && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2') {
+                            token->val[token->valLen-1] = '0';
+                            token->val[token->valLen-2] = '1';
+                            token->val[token->valLen-3] = '0';
                     } else {
                         addCharToToken(c, token);
                     }
@@ -906,21 +921,22 @@ Token *getToken()
                     actualState = NUM_OR_PLUSMIN_NEEDED_S;
                     addCharToToken(c, token);
                     break;
-                case '+':
-                    // if (token->val[strlen(token->val) - 1] != 'e')
-                    // { // must be e before +
-                    //     error(1, token);
-                    // }
-                    actualState = NUM_NEEDED_S;
-                    addCharToToken(c, token);
-                    break;
                 case '-':
+                case '+':
                     // if (token->val[strlen(token->val) - 1] != 'e')
                     // { // must be e before -
                     //     error(1, token);
                     // }
-                    actualState = NUM_NEEDED_S;
-                    addCharToToken(c, token);
+                    if (token->val[strlen(token->val) - 1] == 'e') {
+                        actualState = NUM_NEEDED_S;
+                        addCharToToken(c, token);
+                    } else {
+                        actualState = START;
+                        addRowToToken(row, token);
+                        addTypeToToken(t, token);
+                        tokenFound = 1;
+                        unGetC(c);
+                    }
                     break;
                 default:
                     if (isOkAfterNum(c))
@@ -1107,6 +1123,8 @@ Token *getToken()
             // end of switch by actualState
         }
     }
+
+    //printf("%s-SCANNER\n", token->val);
     return token;
 }
 /*** End of scanner.c ***/

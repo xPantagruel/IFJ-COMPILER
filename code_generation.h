@@ -60,6 +60,14 @@ void GetUniqueVarName();
 
 void GetUniqueName();
 
+void setFloatIntOperatorVariable();
+
+void pushZero(int frame);
+
+void createCallLabel(int frame);
+
+void createReturnCode(int frame, char *frameStr);
+
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
 
@@ -78,8 +86,15 @@ static int UniqueName = 0;
 /** int to get unique names of var, labels, function, ...*/
 static int UniqueVarName = 0;
 
+/** float = 0, int = 1*/
+static int floatIntOperator = 0;
+
+static enum type previousTokenType = NOT_DEFINED;
+
 /** bool if in if body*/
 static bool Return = 0;
+
+static int returnedToStack = 0;
 
 /** int if in if body*/
 static int inIf = 0;
@@ -153,6 +168,8 @@ void addToString(int str, char *newStr);
  * @param token token
  */
 void codeGeneration(Token *token);
+
+void returnConcatString();
 
 /**
  * @brief Function which we use to store values to storage.
