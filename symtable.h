@@ -175,6 +175,13 @@ SymFunctionReturn *addSymFunctionReturn(SymFunction *function, enum type type, b
 void nameSymFunctionParam(SymFunction *function, SymFunctionParam *param, char *name);
 
 /**
+ * @brief creates varibles from function params and attaches them to symtable
+ *
+ * @param function to create variables in
+ */
+void addFunctionLocalVariables(SymFunction *function);
+
+/**
  * @brief Searches top frame inside symtable for item with key
  *
  * @param key searched key

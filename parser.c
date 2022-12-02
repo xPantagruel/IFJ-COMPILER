@@ -104,6 +104,10 @@ bool function_declaration(Token *token)
     symTable->topFrame = frame;
     // function frame attached to symtable
 
+    // create local variables from params
+    addFunctionLocalVariables(function);
+    printSymTable();
+
     codeGeneration(token);
     dtorToken(token);
     token = getToken();

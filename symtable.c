@@ -249,6 +249,23 @@ void nameSymFunctionParam(SymFunction *function, SymFunctionParam *param, char *
     strcpy(param->name, name);
 }
 
+void addFunctionLocalVariables(SymFunction *function)
+{
+    if (!function)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+
+    SymFunctionParam *param;
+    SymVariable *var;
+    for (int i = 0; i < function->paramCount; i++)
+    {
+        param = function->params[i];
+        var = addSymVariable(param->name);
+        var->type = param->type;
+    }
+}
+
 SymItem *getItem(char *key)
 {
     int index = htab_hash_function(key) % symTable->topFrame->size;
