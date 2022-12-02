@@ -480,7 +480,7 @@ int condition(Token *token)
                             token = getToken();
                             if (token->t == R_CPAR)
                             { // IF ( <expression> ) { <statement> }
-                                // codeGeneration(token);
+                                codeGeneration(token);
                                 dtorToken(token);
                                 token = getToken();
                                 if (token->t == ELSE)
@@ -495,11 +495,12 @@ int condition(Token *token)
                                         token = getToken();
                                         if (statement(token))
                                         { // IF ( <expression> ) { <statement> } ELSE { <statement>
-                                            codeGeneration(token);
+                                            //codeGeneration(token);
                                             dtorToken(token);
                                             token = getToken();
                                             if (token->t == R_CPAR)
                                             { // IF ( <expression> ) { <statement> } ELSE { <statement> }
+                                                codeGeneration(token);
                                                 iAmInConditionWhileFunRule = 0;
                                                 return 1;
                                             }
