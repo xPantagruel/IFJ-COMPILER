@@ -740,7 +740,11 @@ void writeAndFreeBuildInParams(int frame, char *frameStr) {
                 addToString(frame, "PUSHS ");
                 if (buildInFunctionsParams[i][0] == '-')
                 {
-                    addToString(frame, frameStr); //bol tu if callingfromGF
+                    if (functionLabelCreated) {
+                        addToString(frame, " LF@");
+                    } else {
+                        addToString(frame, frameStr);
+                    }
                 }
                 else
                 {
@@ -1409,7 +1413,7 @@ void codeGeneration(Token *token)
         if (token->t == VAR_ID)
         { // token is variable -> setting up correct frame
             // storing variable
-            if (IAmInFunction && !callingFromGF)
+            if ((IAmInFunction && !callingFromGF) || functionLabelCreated)
             {
                 strcat(tmp, " LF@");
                 strcat(tmp, var);
