@@ -678,7 +678,8 @@ void store(char *val)
     }
     else
     {
-        storage = realloc(storage, (storageLen + 1) * sizeof(char *));
+        // + 2 because we want to set next->next element to NULL
+        storage = realloc(storage, (storageLen + 2) * sizeof(char *));
     }
 
     if (storage == NULL)
@@ -693,6 +694,8 @@ void store(char *val)
     }
 
     strcpy(storage[storageLen], val);
+
+    storage[storageLen+1] = NULL; 
 
     storageLen++;
 }
@@ -759,7 +762,7 @@ void writeAndFreeBuildInParams(int frame, char *frameStr) {
 void removeLastFromStorage()
 {
     if (storageLen)
-    {
+    { 
         free(storage[storageLen - 1]);
         storage[storageLen - 1] = NULL;
         storageLen--;
@@ -784,7 +787,7 @@ void resetGlobalValues()
         removeLastFromStorage();
         if (storageLen == 0)
         {
-            free(storage);
+            free(storage);        
             storage = NULL;
         }
     }
@@ -879,6 +882,47 @@ void threeAddress(int frameStr, char *frame)
     removeLastFromStorage();
     removeLastFromStorage();
     removeOperator();
+}
+
+void returnConcat() {
+    char randomConcatString[11];
+    randStr(randomConcatString, 10);
+
+    addToString(1, "DEFVAR LF@");
+    addToString(1, randomConcatString);
+    addToString(1, "\n");
+
+    addToString(1, "CONCAT LF@");
+    addToString(1, randomConcatString);
+
+    if (storage[0] != NULL && storage[0][0] == '-')
+    { // if first letter is '-' -> it is variable
+        addToString(1, " LF@");
+    }
+    else
+    {
+        addToString(1, " ");
+    }
+    addToString(1, storage[0]);
+
+    if (storage[1] != NULL && storage[1][0] == '-')
+    { // if first letter is '-' -> it is variable
+        addToString(1, " LF@");
+    }
+    else
+    {
+        addToString(1, " ");
+    }
+    addToString(1, storage[1]);
+    addToString(1, "\n");
+
+    removeLastFromStorage();
+    removeLastFromStorage();
+    removeOperator();
+
+    addToString(1, "PUSHS LF@");
+    addToString(1, randomConcatString);
+    addToString(1, "\n");
 }
 
 void threeAddressWithoutRemove(int frameStr, char *frame)
@@ -1166,8 +1210,9 @@ void divIdiv(int frameStr, char *frame)
         if (Return) {
             pushStorage(frameStr, frame);
             addToString(frameStr, "DIVS\n");
-            pushZero(frameStr);
-            addToString(frameStr, "GTS\n");
+            returnedToStack = 1;
+            // pushZero(frameStr);
+            // addToString(frameStr, "GTS\n");
         } else {
             pushStorage(3, frame);
             addToString(3, "DIVS\n");
@@ -1195,8 +1240,8 @@ void divIdiv(int frameStr, char *frame)
         if (Return) {
             pushStorage(frameStr, frame);
             addToString(frameStr, "IDIVS\n");
-            pushZero(frameStr);
-            addToString(frameStr, "GTS\n");
+            // pushZero(frameStr);
+            // addToString(frameStr, "GTS\n");
         } else {
             pushStorage(3, frame);
             addToString(3, "IDIVS\n");
@@ -1225,10 +1270,12 @@ void setFloatIntOperatorVariable() {
 }
 
 void pushZero(int frame) {
-    if (strstr(storage[0], "float@") != NULL) { //float
-        addToString(frame, "PUSHS float@0x0p+0\n");
-    } else {
-        addToString(frame, "PUSHS int@0\n");
+    if (storageLen != 0) {
+        if (strstr(storage[0], "float@") != NULL) { //float
+            addToString(frame, "PUSHS float@0x0p+0\n");
+        } else {
+            addToString(frame, "PUSHS int@0\n");
+        }
     }
 }
 
@@ -1236,6 +1283,13 @@ void createCallLabel(int frame) {
     addToString(frame, "CALL ");
     addToString(frame, functionName);
     addToString(frame, "\n");
+}
+
+void createReturnCode(int frame, char *frameStr) {    
+        addToString(frame, "PUSHS ");
+        addToString(frame, storage[storageLen-1]);
+        addToString(frame, "\n");
+        removeLastFromStorage();        
 }
 
 void codeGeneration(Token *token)
@@ -1414,8 +1468,10 @@ void codeGeneration(Token *token)
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "ADDS\n");
-                        pushZero(frameStr);
-                        addToString(frameStr, "GTS\n");
+
+                        returnedToStack = 1;
+                        // pushZero(frameStr);
+                        // addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "ADDS\n");
@@ -1436,8 +1492,9 @@ void codeGeneration(Token *token)
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "SUBS\n");
-                        pushZero(frameStr);
-                        addToString(frameStr, "GTS\n");
+                        returnedToStack = 1;
+                        // pushZero(frameStr);
+                        // addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "SUBS\n");
@@ -1461,8 +1518,9 @@ void codeGeneration(Token *token)
                     if (Return) {
                         pushStorage(frameStr, frame);
                         addToString(frameStr, "MULS\n");
-                        pushZero(frameStr);
-                        addToString(frameStr, "GTS\n");
+                        returnedToStack = 1;
+                        // pushZero(frameStr);
+                        // addToString(frameStr, "GTS\n");
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "MULS\n");
@@ -1472,8 +1530,13 @@ void codeGeneration(Token *token)
                 }
                 break;
             case DOT:
-                addToString(frameStr, "CONCAT");
-                threeAddress(frameStr, frame);
+                if (Return) {
+                    returnConcat();
+                    returnedToStack = 1;
+                } else {
+                    addToString(frameStr, "CONCAT");
+                    threeAddress(frameStr, frame);
+                }
                 break;
             case THREE_EQ:
                 if (eqSymbolFound)
@@ -2291,24 +2354,25 @@ void codeGeneration(Token *token)
                 functionName = NULL;
             }
             IAmInFunctionCall = 0;
-        }
 
+            if (functionLabelCreated) {
+                callingFromGF = 0;
+            }
+        }
         resetGlobalValues();
         break;
 
     case SEMICOL:
-            // todoo
-            // return vo vnutri vyriesit
-            //
-            // return 2 + 4; (berem z topu iba??)
-            // return string
-            // return $x
-            // return 2;
-            // return; (void pop nic) -> nil@nil
-            // return v ife/while ??
         if (Return) {
-            // zavolat podla situacie 
-            //createReturnCode();
+            if (returnedToStack) {
+                returnedToStack = 0;
+            } else {
+                if (previousTokenType == RETURN) {
+                    addToString(1, "PUSHS nil@nil\n");
+                } else {
+                    createReturnCode(1, frame);
+                }
+            }
         }
 
         if (!cparCounter && IAmInFunction) {
@@ -2370,9 +2434,15 @@ void codeGeneration(Token *token)
 
         if (operator == DOT)
         {
-            addToString(frameStr, "CONCAT");
-            threeAddress(frameStr, frame);
-            removeOperator();
+            if (Return) {
+                returnConcat();
+                returnedToStack = 1;
+            } else {
+                addToString(frameStr, "CONCAT");
+                threeAddress(frameStr, frame);
+                removeOperator();
+            }
+
         } else if (operator == THREE_EQ) {
             if (eqSymbolFound)
             {

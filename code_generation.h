@@ -94,6 +94,8 @@ static enum type previousTokenType = NOT_DEFINED;
 /** bool if in if body*/
 static bool Return = 0;
 
+static int returnedToStack = 0;
+
 /** int if in if body*/
 static int inIf = 0;
 
@@ -166,6 +168,8 @@ void addToString(int str, char *newStr);
  * @param token token
  */
 void codeGeneration(Token *token);
+
+void returnConcatString();
 
 /**
  * @brief Function which we use to store values to storage.
