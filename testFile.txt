@@ -1,5 +1,5 @@
 <?php
 declare(strict_types=1);
 
-if ("aa" > "") {} else { write("fail \"aa\" > \"\"\n"); }
-
+$x = 4;
+$y = 1 + 2 + 3 + 4;

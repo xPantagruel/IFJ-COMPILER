@@ -863,6 +863,7 @@ void threeAddress(int frameStr, char *frame)
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[0]);
+
     if (storage[1] != NULL && storage[1][0] == '-')
     { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
@@ -872,19 +873,34 @@ void threeAddress(int frameStr, char *frame)
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[1]);
-    if (storage[2] != NULL && storage[2][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
-    }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[2]);
-    addToString(frameStr, "\n");
 
-    removeLastFromStorage();
-    removeLastFromStorage();
+    if (storage[2] != NULL) {
+        if (storage[2][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[2]);
+        addToString(frameStr, "\n");
+        removeLastFromStorage();
+        removeLastFromStorage();
+    } else {
+        if (storage[0] != NULL && storage[0][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[0]);
+        addToString(frameStr, "\n");
+        removeLastFromStorage();
+    }
+
     removeOperator();
 }
 
