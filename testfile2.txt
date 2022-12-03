@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
-if(1) {
-    $x = 5;
+$x = substring("hello", 1, 1);
+if ($x === "") {
+    write("GOOD\n");
 } else {
-    $x = 6;
+    write("BAD\n");
 }

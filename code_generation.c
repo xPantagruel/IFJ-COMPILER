@@ -455,6 +455,94 @@ void STRLEN()
 //• function substring(string $𝑠, int $𝑖, int $𝑗) : ?string –
 void SUBSTRING()
 {
+    addToString(2, "LABEL substring\n");
+    addToString(2, "CREATEFRAME\n");
+    addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@ParamsLength\n");
+
+    addToString(2, "DEFVAR LF@i\n");
+    addToString(2, "DEFVAR LF@j\n");
+    addToString(2, "DEFVAR LF@string\n");
+    addToString(2, "DEFVAR LF@NewString\n");
+    addToString(2, "MOVE LF@NewString string@ \n");
+    addToString(2, "DEFVAR LF@TMP\n");
+    addToString(2, "DEFVAR LF@BOOL\n");
+    addToString(2, "DEFVAR LF@StrLength\n");
+    
+
+    addToString(2, "POPS LF@ParamsLength\n");
+    addToString(2, "POPS LF@string\n");
+    addToString(2, "POPS LF@i\n");
+    addToString(2, "POPS LF@j\n");
+
+    addToString(2, "STRLEN LF@StrLength LF@string\n");
+
+
+    addToString(2, "JUMP CONDLABEL\n");
+
+    // addToString(2, "JUMP CONDSUB\n");
+
+    addToString(2, "LABEL STARTS\n");
+    addToString(2, "GETCHAR LF@TMP LF@string LF@i\n");
+    addToString(2, "CONCAT LF@NewString LF@NewString LF@TMP\n");
+    addToString(2, "ADD LF@i LF@i int@1\n");
+
+    //condition
+    addToString(2, "LABEL CONDSUB\n");
+    addToString(2, "JUMPIFNEQ STARTS LF@i LF@j\n");
+    addToString(2, "PUSHS LF@NewString\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+
+
+    addToString(2, "LABEL CONDLABEL\n");
+    //$𝑖 < 0
+    addToString(2, "LT LF@BOOL LF@i int@0 \n");
+
+    addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+
+                   
+    //• $𝑗 < 0
+    addToString(2, "LT LF@BOOL LF@j int@0\n");
+    
+    addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+
+    //• $𝑖 > $j
+    addToString(2, "GT LF@BOOL LF@i LF@j\n");
+
+    addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+    
+    //$𝑖 ≥ strlen($𝑠)
+    addToString(2, "GT LF@BOOL LF@i LF@StrLength\n");
+    addToString(2, "JUMPIFEQ FALSESTRI LF@BOOL bool@true\n");
+    //i==strlen
+    addToString(2, "EQ LF@BOOL LF@i LF@StrLength\n");
+    addToString(2, "JUMPIFEQ FALSESTRI LF@BOOL bool@true\n");
+
+    addToString(2, "JUMP CONDSUB\n");
+
+    addToString(2, "LABEL FALSESTRI\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+
+    //$𝑗 > strlen($𝑠)
+    addToString(2, "GT LF@BOOL LF@j LF@StrLength\n");
+    
+    addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+
+    addToString(2, "JUMP CONDSUB\n");
+
+    //end
+    addToString(2, "LABEL DEFINITIVEND\n");
+    addToString(2, "POPFRAME\n");
+    addToString(2, "RETURN\n");    
 }
 
 // function ord(string $c) : int –
