@@ -98,3 +98,11 @@ POPS GF@CONDVAR1
 JUMPIFEQ $STARTIF1 GF@CONDVAR1 bool@true
 JUMP $ELSE1
 LABEL $AFTERELSE1
+
+function foo() : int {
+
+
+}
+
+
+if (1){} else {}
