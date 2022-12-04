@@ -1405,6 +1405,26 @@ void caseIfCreateIfCode(int frame) {
     addToString(frame, "\n");
 }
 
+void caseWhileCode(int frame) {
+            addToString(frame, "LABEL $");
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frame,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
+        }
+        addToString(frame, "\n");
+
+        addToString(frame, "JUMP $");
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frame,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
+        }
+        addToString(frame, "\n");
+
+        addToString(frame, "LABEL $");
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frame,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
+        }
+        addToString(frame, "\n");
+}
+
 void caseElseCreateElseCode(int frame) {
     addToString(frame, "JUMP $");
     if(listIfLabels->firstElement != NULL){
@@ -1417,6 +1437,56 @@ void caseElseCreateElseCode(int frame) {
         addToString(frame, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
     }
     addToString(frame, "\n");
+}
+void caseRcparCreateWhileCode(int frame){
+        inWhile -= 1;
+        GetUniqueVarName();
+        addToString(frame, "JUMP $");
+        if(listWhileLabels->firstElement!=NULL){
+            addToString(frame, listWhileLabels->firstElement->nextElement->nextElement->data);//JUMP WHILESTART UniqueName
+        }
+        addToString(frame, "\n");
+
+        addToString(frame, "LABEL $");
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frame, listWhileLabels->firstElement->nextElement->data);//LABEL $LOOPCOND UniqueName
+        }
+        addToString(frame, "\n");
+
+        //add from listCodeGen condition and delete it after
+        if (listCodeGen->firstElement != NULL) {
+            addToString(frame, listCodeGen->firstElement->data);//add condition
+        }
+            addToString(frame,"DEFVAR ");
+            AddLForFG(frame,IAmInFunction);
+            addToString(frame,"CONDVAR");
+            sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+            addToString(frame, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
+            addToString(frame, "\n");
+
+        addToString(frame, "POPS ");
+        AddLForFG(frame,IAmInFunction);
+        addToString(frame,"CONDVAR");
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frame, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
+        addToString(frame, "\n");
+
+        addToString(frame, "JUMPIFEQ $");
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frame, listWhileLabels->firstElement->data);
+        }
+        addToString(frame, " ");
+        AddLForFG(frame,IAmInFunction);
+        addToString(frame, "CONDVAR");
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frame, TmpWhileAndIf);
+        addToString(frame, " bool@true");//JUMPIFEQ LOOPBODY UNIQUENAME true
+        addToString(frame, "\n");
+
+        DLL_DeleteFirst(0);
+        DLL_DeleteFirst(2);
+        DLL_DeleteFirst(2);
+        DLL_DeleteFirst(2);
 }
 
 void caseRcparCreateIfElseCode(int frame) {
@@ -2185,54 +2255,11 @@ void codeGeneration(Token *token)
 
 //----------ADD BY MATEJ---------------------
     if(inWhile !=0){
-        inWhile -= 1;
-        GetUniqueVarName();
-        addToString(frameStr, "JUMP $");
-        if(listWhileLabels->firstElement!=NULL){
-            addToString(frameStr, listWhileLabels->firstElement->nextElement->nextElement->data);//JUMP WHILESTART UniqueName
+        if (functionLabelCreated) {
+            caseRcparCreateWhileCode(1);
+        } else {
+            caseRcparCreateWhileCode(frameStr);
         }
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "LABEL $");
-        if(listWhileLabels->firstElement != NULL){
-            addToString(frameStr, listWhileLabels->firstElement->nextElement->data);//LABEL $LOOPCOND UniqueName
-        }
-        addToString(frameStr, "\n");
-
-        //add from listCodeGen condition and delete it after
-        if (listCodeGen->firstElement != NULL) {
-            addToString(frameStr, listCodeGen->firstElement->data);//add condition
-        }
-            addToString(frameStr,"DEFVAR ");
-            AddLForFG(frameStr,IAmInFunction);
-            addToString(frameStr,"CONDVAR");
-            sprintf(TmpWhileAndIf, "%d", UniqueVarName);
-            addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
-            addToString(frameStr, "\n");
-
-        addToString(frameStr, "POPS ");
-        AddLForFG(frameStr,IAmInFunction);
-        addToString(frameStr,"CONDVAR");
-        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
-        addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "JUMPIFEQ $");
-        if(listWhileLabels->firstElement != NULL){
-            addToString(frameStr, listWhileLabels->firstElement->data);
-        }
-        addToString(frameStr, " ");
-        AddLForFG(frameStr,IAmInFunction);
-        addToString(frameStr, "CONDVAR");
-        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
-        addToString(frameStr, TmpWhileAndIf);
-        addToString(frameStr, " bool@true");//JUMPIFEQ LOOPBODY UNIQUENAME true
-        addToString(frameStr, "\n");
-
-        DLL_DeleteFirst(0);
-        DLL_DeleteFirst(2);
-        DLL_DeleteFirst(2);
-        DLL_DeleteFirst(2);
     }
 
     if(inIf !=0 && afterElse){//jsem za else vetvi
@@ -2750,23 +2777,29 @@ void codeGeneration(Token *token)
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
 
-        addToString(frameStr, "LABEL $");
-        if(listWhileLabels->firstElement != NULL){
-            addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
+        if (functionLabelCreated) {
+            caseWhileCode(1);
+        } else {
+            caseWhileCode(frameStr);
         }
-        addToString(frameStr, "\n");
 
-        addToString(frameStr, "JUMP $");
-        if(listWhileLabels->firstElement != NULL){
-            addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
-        }
-        addToString(frameStr, "\n");
+        // addToString(frameStr, "LABEL $");
+        // if(listWhileLabels->firstElement != NULL){
+        //     addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
+        // }
+        // addToString(frameStr, "\n");
 
-        addToString(frameStr, "LABEL $");
-        if(listWhileLabels->firstElement != NULL){
-            addToString(frameStr,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
-        }
-        addToString(frameStr, "\n");
+        // addToString(frameStr, "JUMP $");
+        // if(listWhileLabels->firstElement != NULL){
+        //     addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
+        // }
+        // addToString(frameStr, "\n");
+
+        // addToString(frameStr, "LABEL $");
+        // if(listWhileLabels->firstElement != NULL){
+        //     addToString(frameStr,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
+        // }
+        // addToString(frameStr, "\n");
 
         break;
     case RETURN:
@@ -2843,3 +2876,5 @@ void codeGeneration(Token *token)
     free(var);
     free(tmp);
 }
+
+
