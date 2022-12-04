@@ -172,6 +172,8 @@ void caseElseCreateElseCode(int frame);
 
 void caseRcparCreateIfElseCode(int frame);
 
+void checkOperator(int frame);
+
 static char TmpWhileAndIf[256];
 
 /**

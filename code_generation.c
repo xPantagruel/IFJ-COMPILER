@@ -1275,6 +1275,7 @@ void divIdiv(int frameStr, char *frame)
     randStr(startLabel, 10);
     randStr(endLabel, 10);
     randStr(eqLabel, 10);
+    randStr(neqLabel, 10);
 
     addToString(frameStr, "LABEL "); // start
     addToString(frameStr, startLabel);
@@ -1314,7 +1315,7 @@ void divIdiv(int frameStr, char *frame)
     if (eqSymbolFound)
     {
         addToString(frameStr, "DIV");
-        threeAddress(frameStr, frame);
+        threeAddressWithoutRemove(frameStr, frame);
     }
     else
     {
@@ -1328,8 +1329,8 @@ void divIdiv(int frameStr, char *frame)
         } else {
             pushStorage(3, frame);
             addToString(3, "DIVS\n");
-            pushZero(3);
-            addToString(3, "GTS\n");
+            // pushZero(3);
+            // addToString(3, "GTS\n");
         }
     }
 
@@ -1338,13 +1339,13 @@ void divIdiv(int frameStr, char *frame)
     addToString(frameStr, "\n");
 
     addToString(frameStr, "LABEL "); // neq
-    addToString(frameStr, eqLabel);
+    addToString(frameStr, neqLabel);
     addToString(frameStr, "\n");
 
     if (eqSymbolFound)
     {
         addToString(frameStr, "IDIV");
-        threeAddressWithoutRemove(frameStr, frame);
+        threeAddress(frameStr, frame);
     }
     else
     {
@@ -1555,6 +1556,37 @@ void caseRcparCreateIfElseCode(int frame) {
     DLL_DeleteFirst(1);
 }
 
+void checkOperator(int frame) {
+    switch (operator) {
+        case PLUS:
+            addToString(frame, "ADDS\n");
+            break;
+        case MINUS:
+            addToString(frame, "SUBS\n");
+            break;
+        case MUL:
+            addToString(frame, "MULS\n");
+            break;
+        case LESS:
+            addToString(frame, "LTS\n");
+            break;
+        case MORE:
+            addToString(frame, "GTS\n");
+            break;
+        case NOT_EQ:
+            addToString(frame, "EQS\n");
+            addToString(frame, "NOTS\n");
+            break;
+        case SLASH:
+            //todo
+            break;
+        default:
+            break;
+    }
+
+    removeOperator();
+}
+
 
 void createCallLabel(int frame) {
     addToString(frame, "CALL ");
@@ -1751,8 +1783,8 @@ void codeGeneration(Token *token)
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "ADDS\n");
-                        pushZero(3);
-                        addToString(3, "GTS\n");
+                        // pushZero(3);
+                        // addToString(3, "GTS\n");
                     }
                 }
                 break;
@@ -1774,8 +1806,8 @@ void codeGeneration(Token *token)
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "SUBS\n");
-                        pushZero(3);
-                        addToString(3, "GTS\n");
+                        // pushZero(3);
+                        // addToString(3, "GTS\n");
                     }
                 }
                 break;
@@ -1800,8 +1832,8 @@ void codeGeneration(Token *token)
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "MULS\n");
-                        pushZero(3);
-                        addToString(3, "GTS\n");
+                        // pushZero(3);
+                        // addToString(3, "GTS\n");
                     }
                 }
                 break;
@@ -2314,6 +2346,12 @@ void codeGeneration(Token *token)
         break;
 
     case R_PAR:
+        if(Return) {
+            checkOperator(frameStr);
+        } else {
+            checkOperator(3);
+        }
+
         if ((inIf || inWhile) && whileIfString != NULL) {
             DLL_InsertFirst(0, whileIfString);
             free(whileIfString);
@@ -2648,6 +2686,76 @@ void codeGeneration(Token *token)
                 } else {
                     pushStorage(3, frame);
                     addToString(3, "EQS\n");
+                }
+            }
+        } else if (operator == NOT_EQ) {
+            if (eqSymbolFound)
+            {
+                addToString(frameStr, "EQ");
+                threeAddress(frameStr, frame);
+                addToString(frameStr, "NOT");
+                    if (storage[0] != NULL && storage[0][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[0]);
+                    if (storage[0] != NULL && storage[0][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[0]);
+                    addToString(frameStr, "\n");
+            }
+            else
+            {
+                if (Return) {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "EQS\n");
+                    addToString(frameStr, "NOTS\n");
+                } else {
+                    pushStorage(3, frame);
+                    addToString(3, "EQS\n");
+                    addToString(frameStr, "NOTS\n");
+                }
+            }
+        } else if (operator == LESS) {
+            if (eqSymbolFound)
+            {
+                addToString(frameStr, "LT");
+                threeAddress(frameStr, frame);
+            }
+            else
+            {
+                if (Return) {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "LTS\n");
+                } else {
+                    pushStorage(3, frame);
+                    addToString(3, "LTS\n");
+                }
+            }
+        } else if (operator == MORE) {
+            if (eqSymbolFound)
+            {
+                addToString(frameStr, "GT");
+                threeAddress(frameStr, frame);
+            }
+            else
+            {
+                if (Return) {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "GTS\n");
+                } else {
+                    pushStorage(3, frame);
+                    addToString(3, "GTS\n");
                 }
             }
         }
