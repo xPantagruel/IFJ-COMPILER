@@ -15,14 +15,14 @@
 #define PARSER_H
 
 #define ERROR_1_LEXICAL
-#define ERROR_2_SYNTACTIC
+#define ERROR_2_SYNTACTIC "Syntax error %s\n"
 #define ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED "Function %s not defined or can't be redefined\n"
 #define ERROR_4_FUNCTION_INCORRECT_CALL "Wrong type or number of arguments or return type in %s\n"
 #define ERROR_5_VARIABLE_NOT_DEFINED "Variable %s not defined\n"
 #define ERROR_6_FUNCTION_INCORRECT_RETURN "Function %s does have incorrect number of returns\n"
-#define ERROR_7_INCOMPATIBLE_TYPE
+#define ERROR_7_INCOMPATIBLE_TYPE "Incompatible types in expression %s\n"
 #define ERROR_8_OTHER_SEMANTIC
-#define ERROR_99_INTERNAL_ERROR "Internal error %s"
+#define ERROR_99_INTERNAL_ERROR "Internal error %s\n"
 /**
  * @brief Frees global resources, prints status message, exits with code
  *

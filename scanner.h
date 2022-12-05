@@ -58,6 +58,7 @@ enum type
     STRING,           // "string \x1F"
     COLON,            // :
     DYNAMIC,
+    BOOL
 }; // end of enum type
 
 /** states of FSM */

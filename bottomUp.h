@@ -40,6 +40,24 @@ typedef struct term
 
 Term *initTerm(char *value, int type, Token *originalToken);
 
+void changeTermValue(Term *t, char *value);
+
+int loadTermsToExpression(Term *expression, Stack *stack);
+
+int convertTypesInReduce(Term *t1, Term *operator, Term * t2);
+
+int convertPlusMinusMul(Term *t1, Term *t2);
+
+int convertDiv(Term *t1, Term *t2);
+
+int convertDot(Term *t1, Term *t2);
+
+int convertCompareEquals(Term *t1, Term *t2);
+
+int convertBrackets(Term *t);
+
+int convertTermToTokenType(int type, int originalType);
+
 int convertTokenToTermType(int type);
 
 bool reduce(Stack *stack);

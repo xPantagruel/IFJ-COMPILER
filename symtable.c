@@ -237,7 +237,6 @@ SymFunctionParam *checkFunctionParam(SymFunction *function, char *value, enum ty
 
         type = variable->type;
     }
-    printf("TYPE: %d\n", type);
     if (function->paramCount == -1)
     {
         return NULL;
@@ -257,7 +256,6 @@ SymFunctionParam *checkFunctionParam(SymFunction *function, char *value, enum ty
     {
         return function->params[paramIndex];
     }
-    printf("FUCK\n");
     FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
 }
 

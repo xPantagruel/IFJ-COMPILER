@@ -135,20 +135,21 @@ void addCharToToken(int c, Token *token)
         //     backslashset = 1;
         // }
 
-        if (c == 't' && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2')
+        if (c == 't' && token->valLen >= 4 && token->val[token->valLen - 4] == '\\' && token->val[token->valLen - 3] == '0' && token->val[token->valLen - 2] == '9' && token->val[token->valLen - 1] == '2')
         { // {\,t} -> {\t}
-            //changeLastChar('\t', token);
-            token->val[token->valLen-3] = '0';
-            token->val[token->valLen-2] = '0';
-            token->val[token->valLen-1] = '9';
+            // changeLastChar('\t', token);
+            token->val[token->valLen - 3] = '0';
+            token->val[token->valLen - 2] = '0';
+            token->val[token->valLen - 1] = '9';
         }
         // else if (c == '"' && token->val[strlen(token->val) - 1] == '\\')
         // { // {\,"} -> {"}
         //     changeLastChar('"', token);
         // }
         // else
-        else {
-            //backslashset = 0;
+        else
+        {
+            // backslashset = 0;
             token->val = strncat(token->val, tmp, 1);
         }
     }
@@ -490,10 +491,10 @@ Token *getToken()
                     {
 
                     case '"':
-                        if (token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2')
+                        if (token->valLen >= 4 && token->val[token->valLen - 4] == '\\' && token->val[token->valLen - 3] == '0' && token->val[token->valLen - 2] == '9' && token->val[token->valLen - 1] == '2')
                         { // char " in string
                             changeLastChar('"', token);
-                            //addCharToToken(c, token);
+                            // addCharToToken(c, token);
                         }
                         else
                         { // end of string
@@ -529,10 +530,13 @@ Token *getToken()
                     default: // other chars
                         if ((0 <= c && c <= 32) || c == 35 || c == 92)
                         {
-                            if (c == 92 && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2' && backslashset == 0) {
+                            if (c == 92 && token->valLen >= 4 && token->val[token->valLen - 4] == '\\' && token->val[token->valLen - 3] == '0' && token->val[token->valLen - 2] == '9' && token->val[token->valLen - 1] == '2' && backslashset == 0)
+                            {
                                 backslashset = 1;
                                 break;
-                            } else {
+                            }
+                            else
+                            {
                                 backslashset = 0;
                             }
 
