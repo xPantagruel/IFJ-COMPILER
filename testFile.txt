@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .IFJcode22
 JUMP $main
 
@@ -79,3 +80,12 @@ POPS GF@CONDVAR1
 JUMPIFEQ $STARTIF1 GF@CONDVAR1 bool@true
 JUMP $ELSE1
 LABEL $AFTERELSE1
+=======
+<?php
+declare(strict_types=1);
+if(4) {
+    $y = "Hello " . "c";
+    write($y);
+} else {
+}
+>>>>>>> ea7ee8fd14384ce6a40d4de792b75b106b032248

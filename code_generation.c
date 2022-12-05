@@ -952,6 +952,18 @@ void threeAddress(int frameStr, char *frame)
     }
     addToString(frameStr, storage[0]);
 
+    if (storage[2] == NULL) {
+        if (storage[0] != NULL && storage[0][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[0]);
+    }
+
     if (storage[1] != NULL && storage[1][0] == '-')
     { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
@@ -976,19 +988,9 @@ void threeAddress(int frameStr, char *frame)
         removeLastFromStorage();
         removeLastFromStorage();
     } else {
-        if (storage[0] != NULL && storage[0][0] == '-')
-        { // if first letter is '-' -> it is variable
-            addToString(frameStr, frame);
-        }
-        else
-        {
-            addToString(frameStr, " ");
-        }
-        addToString(frameStr, storage[0]);
         addToString(frameStr, "\n");
         removeLastFromStorage();
     }
-
     removeOperator();
 }
 
@@ -2723,7 +2725,7 @@ void codeGeneration(Token *token)
                 } else {
                     pushStorage(3, frame);
                     addToString(3, "EQS\n");
-                    addToString(frameStr, "NOTS\n");
+                    addToString(3, "NOTS\n");
                 }
             }
         } else if (operator == LESS) {
