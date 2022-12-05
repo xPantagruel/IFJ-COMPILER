@@ -56,14 +56,14 @@ void addAllBuiltInFunctions()
     {
         char *paramNames[3] = {"s", "i", "j"};
         enum type paramTypes[3] = {STRING, INT, INT};
-        bool paramCanBeNUll[3] = {false, false, false};
+        bool paramCanBeNUll[3] = {true, false, false};
         addBuiltInFunction("substring", paramNames, paramTypes, paramCanBeNUll, 3, STRING, false);
     }
 
     {
         char *paramNames[1] = {"c"};
         enum type paramTypes[1] = {STRING};
-        bool paramCanBeNUll[1] = {false};
+        bool paramCanBeNUll[1] = {true};
         addBuiltInFunction("ord", paramNames, paramTypes, paramCanBeNUll, 1, INT, false);
     }
 
