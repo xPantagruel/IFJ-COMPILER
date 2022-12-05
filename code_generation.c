@@ -455,6 +455,94 @@ void STRLEN()
 //• function substring(string $𝑠, int $𝑖, int $𝑗) : ?string –
 void SUBSTRING()
 {
+    addToString(2, "LABEL substring\n");
+    addToString(2, "CREATEFRAME\n");
+    addToString(2, "PUSHFRAME\n");
+    addToString(2, "DEFVAR LF@ParamsLength\n");
+
+    addToString(2, "DEFVAR LF@i\n");
+    addToString(2, "DEFVAR LF@j\n");
+    addToString(2, "DEFVAR LF@string\n");
+    addToString(2, "DEFVAR LF@NewString\n");
+    addToString(2, "MOVE LF@NewString string@ \n");
+    addToString(2, "DEFVAR LF@TMP\n");
+    addToString(2, "DEFVAR LF@BOOL\n");
+    addToString(2, "DEFVAR LF@StrLength\n");
+    
+
+    addToString(2, "POPS LF@ParamsLength\n");
+    addToString(2, "POPS LF@string\n");
+    addToString(2, "POPS LF@i\n");
+    addToString(2, "POPS LF@j\n");
+
+    addToString(2, "STRLEN LF@StrLength LF@string\n");
+
+
+    addToString(2, "JUMP CONDLABEL\n");
+
+    // addToString(2, "JUMP CONDSUB\n");
+
+    addToString(2, "LABEL STARTS\n");
+    addToString(2, "GETCHAR LF@TMP LF@string LF@i\n");
+    addToString(2, "CONCAT LF@NewString LF@NewString LF@TMP\n");
+    addToString(2, "ADD LF@i LF@i int@1\n");
+
+    //condition
+    addToString(2, "LABEL CONDSUB\n");
+    addToString(2, "JUMPIFNEQ STARTS LF@i LF@j\n");
+    addToString(2, "PUSHS LF@NewString\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+
+
+    addToString(2, "LABEL CONDLABEL\n");
+    //$𝑖 < 0
+    addToString(2, "LT LF@BOOL LF@i int@0 \n");
+
+    addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+
+                   
+    //• $𝑗 < 0
+    addToString(2, "LT LF@BOOL LF@j int@0\n");
+    
+    addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+
+    //• $𝑖 > $j
+    addToString(2, "GT LF@BOOL LF@i LF@j\n");
+
+    addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+    
+    //$𝑖 ≥ strlen($𝑠)
+    addToString(2, "GT LF@BOOL LF@i LF@StrLength\n");
+    addToString(2, "JUMPIFEQ FALSESTRI LF@BOOL bool@true\n");
+    //i==strlen
+    addToString(2, "EQ LF@BOOL LF@i LF@StrLength\n");
+    addToString(2, "JUMPIFEQ FALSESTRI LF@BOOL bool@true\n");
+
+    addToString(2, "JUMP CONDSUB\n");
+
+    addToString(2, "LABEL FALSESTRI\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+
+    //$𝑗 > strlen($𝑠)
+    addToString(2, "GT LF@BOOL LF@j LF@StrLength\n");
+    
+    addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "JUMP DEFINITIVEND\n");
+
+    addToString(2, "JUMP CONDSUB\n");
+
+    //end
+    addToString(2, "LABEL DEFINITIVEND\n");
+    addToString(2, "POPFRAME\n");
+    addToString(2, "RETURN\n");    
 }
 
 // function ord(string $c) : int –
@@ -581,7 +669,7 @@ int GetNumberOfDigets(){
 }
 
 void AddLForFG(int frameStr,int IAmInFunction){
-    if (IAmInFunction && !cparCounter)
+    if ((IAmInFunction && !cparCounter) || functionLabelCreated)
     {
         addToString(frameStr, "LF@");
     }
@@ -740,7 +828,11 @@ void writeAndFreeBuildInParams(int frame, char *frameStr) {
                 addToString(frame, "PUSHS ");
                 if (buildInFunctionsParams[i][0] == '-')
                 {
-                    addToString(frame, frameStr); //bol tu if callingfromGF
+                    if (functionLabelCreated) {
+                        addToString(frame, " LF@");
+                    } else {
+                        addToString(frame, frameStr);
+                    }
                 }
                 else
                 {
@@ -859,6 +951,7 @@ void threeAddress(int frameStr, char *frame)
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[0]);
+
     if (storage[1] != NULL && storage[1][0] == '-')
     { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
@@ -868,19 +961,34 @@ void threeAddress(int frameStr, char *frame)
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[1]);
-    if (storage[2] != NULL && storage[2][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
-    }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[2]);
-    addToString(frameStr, "\n");
 
-    removeLastFromStorage();
-    removeLastFromStorage();
+    if (storage[2] != NULL) {
+        if (storage[2][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[2]);
+        addToString(frameStr, "\n");
+        removeLastFromStorage();
+        removeLastFromStorage();
+    } else {
+        if (storage[0] != NULL && storage[0][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[0]);
+        addToString(frameStr, "\n");
+        removeLastFromStorage();
+    }
+
     removeOperator();
 }
 
@@ -959,32 +1067,36 @@ void threeAddressWithoutRemove(int frameStr, char *frame)
 
 void pushStorage(int frameStr, char *frame)
 {
-    addToString(frameStr, "PUSHS");
-    if (storage[1] != NULL && storage[1][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
+    if (storage[1] != NULL) {
+        addToString(frameStr, "PUSHS");
+        if (storage[1][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[1]);
+        addToString(frameStr, "\n");
+        removeLastFromStorage();
     }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[1]);
-    addToString(frameStr, "\n");
 
-    addToString(frameStr, "PUSHS");
-    if (storage[0] != NULL && storage[0][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
+    if (storage[0] != NULL) {
+        addToString(frameStr, "PUSHS");
+        if (storage[0] != NULL && storage[0][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[0]);
+        addToString(frameStr, "\n");
+        removeLastFromStorage();
     }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[0]);
-    addToString(frameStr, "\n");
 
-    removeLastFromStorage();
-    removeLastFromStorage();
     removeOperator();
 }
 
@@ -1163,6 +1275,7 @@ void divIdiv(int frameStr, char *frame)
     randStr(startLabel, 10);
     randStr(endLabel, 10);
     randStr(eqLabel, 10);
+    randStr(neqLabel, 10);
 
     addToString(frameStr, "LABEL "); // start
     addToString(frameStr, startLabel);
@@ -1202,7 +1315,7 @@ void divIdiv(int frameStr, char *frame)
     if (eqSymbolFound)
     {
         addToString(frameStr, "DIV");
-        threeAddress(frameStr, frame);
+        threeAddressWithoutRemove(frameStr, frame);
     }
     else
     {
@@ -1216,8 +1329,8 @@ void divIdiv(int frameStr, char *frame)
         } else {
             pushStorage(3, frame);
             addToString(3, "DIVS\n");
-            pushZero(3);
-            addToString(3, "GTS\n");
+            // pushZero(3);
+            // addToString(3, "GTS\n");
         }
     }
 
@@ -1226,13 +1339,13 @@ void divIdiv(int frameStr, char *frame)
     addToString(frameStr, "\n");
 
     addToString(frameStr, "LABEL "); // neq
-    addToString(frameStr, eqLabel);
+    addToString(frameStr, neqLabel);
     addToString(frameStr, "\n");
 
     if (eqSymbolFound)
     {
         addToString(frameStr, "IDIV");
-        threeAddressWithoutRemove(frameStr, frame);
+        threeAddress(frameStr, frame);
     }
     else
     {
@@ -1279,6 +1392,202 @@ void pushZero(int frame) {
     }
 }
 
+void caseIfCreateIfCode(int frame) {
+    addToString(frame, "JUMP $");
+    if(listIfLabels->firstElement != NULL){
+        addToString(frame, listIfLabels->firstElement->nextElement->nextElement->data);//JUMP IFCOND
+    }
+    addToString(frame, "\n");
+
+    addToString(frame, "LABEL $");
+    if(listIfLabels->firstElement!= NULL){
+        addToString(frame, listIfLabels->firstElement->nextElement->data);//LABEL $STARTIF
+    }
+    addToString(frame, "\n");
+}
+
+void caseWhileCode(int frame) {
+            addToString(frame, "LABEL $");
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frame,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
+        }
+        addToString(frame, "\n");
+
+        addToString(frame, "JUMP $");
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frame,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
+        }
+        addToString(frame, "\n");
+
+        addToString(frame, "LABEL $");
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frame,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
+        }
+        addToString(frame, "\n");
+}
+
+void caseElseCreateElseCode(int frame) {
+    addToString(frame, "JUMP $");
+    if(listIfLabels->firstElement != NULL){
+        addToString(frame, listIfLabels->firstElement->data);//JUMP AFTERELSE
+    }
+    addToString(frame, "\n");
+
+    addToString(frame, "LABEL $");
+    if(listIfLabels->firstElement != NULL){
+        addToString(frame, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
+    }
+    addToString(frame, "\n");
+}
+void caseRcparCreateWhileCode(int frame){
+        inWhile -= 1;
+        GetUniqueVarName();
+        addToString(frame, "JUMP $");
+        if(listWhileLabels->firstElement!=NULL){
+            addToString(frame, listWhileLabels->firstElement->nextElement->nextElement->data);//JUMP WHILESTART UniqueName
+        }
+        addToString(frame, "\n");
+
+        addToString(frame, "LABEL $");
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frame, listWhileLabels->firstElement->nextElement->data);//LABEL $LOOPCOND UniqueName
+        }
+        addToString(frame, "\n");
+
+        //add from listCodeGen condition and delete it after
+        if (listCodeGen->firstElement != NULL) {
+            addToString(frame, listCodeGen->firstElement->data);//add condition
+        }
+            addToString(frame,"DEFVAR ");
+            AddLForFG(frame,IAmInFunction);
+            addToString(frame,"CONDVAR");
+            sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+            addToString(frame, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
+            addToString(frame, "\n");
+
+        addToString(frame, "POPS ");
+        AddLForFG(frame,IAmInFunction);
+        addToString(frame,"CONDVAR");
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frame, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
+        addToString(frame, "\n");
+
+        addToString(frame, "JUMPIFEQ $");
+        if(listWhileLabels->firstElement != NULL){
+            addToString(frame, listWhileLabels->firstElement->data);
+        }
+        addToString(frame, " ");
+        AddLForFG(frame,IAmInFunction);
+        addToString(frame, "CONDVAR");
+        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+        addToString(frame, TmpWhileAndIf);
+        addToString(frame, " bool@true");//JUMPIFEQ LOOPBODY UNIQUENAME true
+        addToString(frame, "\n");
+
+        DLL_DeleteFirst(0);
+        DLL_DeleteFirst(2);
+        DLL_DeleteFirst(2);
+        DLL_DeleteFirst(2);
+}
+
+void caseRcparCreateIfElseCode(int frame) {
+    inIf -= 1;
+    GetUniqueVarName();
+
+    addToString(frame, "JUMP $");
+    if(listIfLabels->firstElement != NULL){
+        addToString(frame, listIfLabels->firstElement->data);//LABEL AFTERELSE UniqueName
+    }
+    addToString(frame, "\n");
+
+    addToString(frame, "LABEL $");
+    if(listIfLabels->firstElement != NULL){
+        addToString(frame, listIfLabels->firstElement->nextElement->nextElement->data);//LABEL IFCOND UniqueName
+    }
+    addToString(frame, "\n");
+
+    // //add from listCodeGen condition and delete it after
+    if (listCodeGen->firstElement != NULL) {
+        addToString(frame, listCodeGen->firstElement->data);//add condition
+    }
+    addToString(frame,"DEFVAR ");
+    AddLForFG(frame,IAmInFunction);
+    addToString(frame,"CONDVAR");
+    sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+    addToString(frame, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
+    addToString(frame, "\n");
+
+    addToString(frame, "POPS ");
+    AddLForFG(frame,IAmInFunction);
+    addToString(frame, "CONDVAR");
+    sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+    addToString(frame, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
+    addToString(frame, "\n");
+
+    addToString(frame, "JUMPIFEQ $");
+    if(listIfLabels->firstElement != NULL){
+        addToString(frame, listIfLabels->firstElement->nextElement->data);
+    }
+    addToString(frame, " ");
+    AddLForFG(frame,IAmInFunction);
+    addToString(frame, "CONDVAR");
+    sprintf(TmpWhileAndIf, "%d", UniqueVarName);
+    addToString(frame, TmpWhileAndIf);
+    addToString(frame, " bool@true");//JUMPIFEQ STARTIF UNIQUENAME true
+    addToString(frame, "\n");
+
+    addToString(frame, "JUMP $");
+    if(listIfLabels->firstElement != NULL){
+        addToString(frame, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);//LABEL ELSE UniqueName
+    }
+    addToString(frame, "\n");
+
+    addToString(frame, "LABEL $");
+    if (listIfLabels->firstElement != NULL){
+        addToString(frame, listIfLabels->firstElement->data);//LABEL AFTERELSE UniqueName
+    }
+    
+    addToString(frame, "\n");
+
+    DLL_DeleteFirst(0);
+    DLL_DeleteFirst(1);
+    DLL_DeleteFirst(1);
+    DLL_DeleteFirst(1);
+    DLL_DeleteFirst(1);
+}
+
+void checkOperator(int frame) {
+    switch (operator) {
+        case PLUS:
+            addToString(frame, "ADDS\n");
+            break;
+        case MINUS:
+            addToString(frame, "SUBS\n");
+            break;
+        case MUL:
+            addToString(frame, "MULS\n");
+            break;
+        case LESS:
+            addToString(frame, "LTS\n");
+            break;
+        case MORE:
+            addToString(frame, "GTS\n");
+            break;
+        case NOT_EQ:
+            addToString(frame, "EQS\n");
+            addToString(frame, "NOTS\n");
+            break;
+        case SLASH:
+            //todo
+            break;
+        default:
+            break;
+    }
+
+    removeOperator();
+}
+
+
 void createCallLabel(int frame) {
     addToString(frame, "CALL ");
     addToString(frame, functionName);
@@ -1300,7 +1609,6 @@ void codeGeneration(Token *token)
         addToString(2, ".IFJcode22\nJUMP $main\n");
     }
 
-    char TmpWhileAndIf[256];
     int NumberOfDigets=0;
     char *WhileNames =NULL;//purpose->to store the name of the while labels to list
     int defined = 0;  // auxiliary variable to know if variable was defined or not
@@ -1409,7 +1717,7 @@ void codeGeneration(Token *token)
         if (token->t == VAR_ID)
         { // token is variable -> setting up correct frame
             // storing variable
-            if (IAmInFunction && !callingFromGF)
+            if ((IAmInFunction && !callingFromGF) || functionLabelCreated)
             {
                 strcat(tmp, " LF@");
                 strcat(tmp, var);
@@ -1475,8 +1783,8 @@ void codeGeneration(Token *token)
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "ADDS\n");
-                        pushZero(3);
-                        addToString(3, "GTS\n");
+                        // pushZero(3);
+                        // addToString(3, "GTS\n");
                     }
                 }
                 break;
@@ -1498,8 +1806,8 @@ void codeGeneration(Token *token)
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "SUBS\n");
-                        pushZero(3);
-                        addToString(3, "GTS\n");
+                        // pushZero(3);
+                        // addToString(3, "GTS\n");
                     }
                 }
                 break;
@@ -1524,8 +1832,8 @@ void codeGeneration(Token *token)
                     } else {
                         pushStorage(3, frame);
                         addToString(3, "MULS\n");
-                        pushZero(3);
-                        addToString(3, "GTS\n");
+                        // pushZero(3);
+                        // addToString(3, "GTS\n");
                     }
                 }
                 break;
@@ -1979,120 +2287,19 @@ void codeGeneration(Token *token)
 
 //----------ADD BY MATEJ---------------------
     if(inWhile !=0){
-        inWhile -= 1;
-        GetUniqueVarName();
-        addToString(frameStr, "JUMP $");
-        if(listWhileLabels->firstElement!=NULL){
-            addToString(frameStr, listWhileLabels->firstElement->nextElement->nextElement->data);//JUMP WHILESTART UniqueName
+        if (functionLabelCreated) {
+            caseRcparCreateWhileCode(1);
+        } else {
+            caseRcparCreateWhileCode(frameStr);
         }
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "LABEL $");
-        if(listWhileLabels->firstElement != NULL){
-            addToString(frameStr, listWhileLabels->firstElement->nextElement->data);//LABEL $LOOPCOND UniqueName
-        }
-        addToString(frameStr, "\n");
-
-        //add from listCodeGen condition and delete it after
-        if (listCodeGen->firstElement != NULL) {
-            addToString(frameStr, listCodeGen->firstElement->data);//add condition
-        }
-            addToString(frameStr,"DEFVAR ");
-            AddLForFG(frameStr,IAmInFunction);
-            addToString(frameStr,"CONDVAR");
-            sprintf(TmpWhileAndIf, "%d", UniqueVarName);
-            addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
-            addToString(frameStr, "\n");
-
-        addToString(frameStr, "POPS ");
-        AddLForFG(frameStr,IAmInFunction);
-        addToString(frameStr,"CONDVAR");
-        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
-        addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "JUMPIFEQ $");
-        if(listWhileLabels->firstElement != NULL){
-            addToString(frameStr, listWhileLabels->firstElement->data);
-        }
-        addToString(frameStr, " ");
-        AddLForFG(frameStr,IAmInFunction);
-        addToString(frameStr, "CONDVAR");
-        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
-        addToString(frameStr, TmpWhileAndIf);
-        addToString(frameStr, " bool@true");//JUMPIFEQ LOOPBODY UNIQUENAME true
-        addToString(frameStr, "\n");
-
-        DLL_DeleteFirst(0);
-        DLL_DeleteFirst(2);
-        DLL_DeleteFirst(2);
-        DLL_DeleteFirst(2);
     }
 
     if(inIf !=0 && afterElse){//jsem za else vetvi
-        inIf -= 1;
-        GetUniqueVarName();
-
-        addToString(frameStr, "JUMP $");
-        if(listIfLabels->firstElement != NULL){
-            addToString(frameStr, listIfLabels->firstElement->data);//LABEL AFTERELSE UniqueName
+        if (functionLabelCreated) {
+            caseRcparCreateIfElseCode(1);
+        } else {
+            caseRcparCreateIfElseCode(frameStr);
         }
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "LABEL $");
-        if(listIfLabels->firstElement != NULL){
-            addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//LABEL IFCOND UniqueName
-        }
-        addToString(frameStr, "\n");
-
-        // //add from listCodeGen condition and delete it after
-        if (listCodeGen->firstElement != NULL) {
-            addToString(frameStr, listCodeGen->firstElement->data);//add condition
-        }
-        addToString(frameStr,"DEFVAR ");
-        AddLForFG(frameStr,IAmInFunction);
-        addToString(frameStr,"CONDVAR");
-        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
-        addToString(frameStr, TmpWhileAndIf);// DEFVAR GF/LF@CONDVAR UniqueName
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "POPS ");
-        AddLForFG(frameStr,IAmInFunction);
-        addToString(frameStr,"CONDVAR");
-        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
-        addToString(frameStr, TmpWhileAndIf);//POPS GF/LF@CONDVAR UniqueName
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "JUMPIFEQ $");
-        if(listIfLabels->firstElement != NULL){
-            addToString(frameStr, listIfLabels->firstElement->nextElement->data);
-        }
-        addToString(frameStr, " ");
-        AddLForFG(frameStr,IAmInFunction);
-        addToString(frameStr, "CONDVAR");
-        sprintf(TmpWhileAndIf, "%d", UniqueVarName);
-        addToString(frameStr, TmpWhileAndIf);
-        addToString(frameStr, " bool@true");//JUMPIFEQ STARTIF UNIQUENAME true
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "JUMP $");
-        if(listIfLabels->firstElement != NULL){
-            addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);//LABEL ELSE UniqueName
-        }
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "LABEL $");
-        if (listIfLabels->firstElement != NULL){
-        addToString(frameStr, listIfLabels->firstElement->data);//LABEL AFTERELSE UniqueName
-        }
-        
-        addToString(frameStr, "\n");
-
-        DLL_DeleteFirst(0);
-        DLL_DeleteFirst(1);
-        DLL_DeleteFirst(1);
-        DLL_DeleteFirst(1);
-        DLL_DeleteFirst(1);
 
     }
 //-------------------------------------------
@@ -2115,9 +2322,7 @@ void codeGeneration(Token *token)
             addToString(2, inFunctionString);
             free(inFunctionString);
             inFunctionString = NULL;
-        }
-        else
-        {
+        } else {
             // not function
             if (whileIfString != NULL)
             { // not else {}
@@ -2141,6 +2346,12 @@ void codeGeneration(Token *token)
         break;
 
     case R_PAR:
+        if(Return) {
+            checkOperator(frameStr);
+        } else {
+            checkOperator(3);
+        }
+
         if ((inIf || inWhile) && whileIfString != NULL) {
             DLL_InsertFirst(0, whileIfString);
             free(whileIfString);
@@ -2182,12 +2393,18 @@ void codeGeneration(Token *token)
                 if (strstr(storage[x], "string@") == NULL) {
                     addToString(1, storage[x]);
                 } else {
-                    addToString(1, "int@1");
+                    if (!inIf && !inWhile) {
+                        addToString(1, storage[x]);
+                    } else if (!strcmp(storage[x], " string@0")) {
+                        addToString(1, "int@0"); 
+                    } else {
+                        addToString(1, "int@1"); 
+                    }
                 }
                 addToString(1, "\n");
                 if (inIf || inWhile) {
                     if (strstr(storage[x], "float@") != NULL) { //float
-                        addToString(3, "PUSHS float@0x0p+0\n");
+                        addToString(1, "PUSHS float@0x0p+0\n");
                     } else {
                         addToString(1, "PUSHS int@0\n");
                     }
@@ -2211,7 +2428,13 @@ void codeGeneration(Token *token)
                 if (strstr(storage[x], "string@") == NULL) {
                     addToString(frameStr, storage[x]);
                 } else {
-                    addToString(frameStr, "int@1");
+                    if (!inIf && !inWhile) {
+                        addToString(frameStr, storage[x]);
+                    } else if (!strcmp(storage[x], " string@0")) {
+                        addToString(frameStr, "int@0"); 
+                    } else {
+                        addToString(frameStr, "int@1"); 
+                    }
                 }
                 addToString(frameStr, "\n");
             } else {
@@ -2231,7 +2454,13 @@ void codeGeneration(Token *token)
                 if (strstr(storage[x], "string@") == NULL) {
                     addToString(3, storage[x]); // not string
                 } else {  // string -> true
-                    addToString(3, "int@1");
+                    if (!inIf && !inWhile) {
+                        addToString(3, storage[x]);
+                    } else if (!strcmp(storage[x], " string@0")) {
+                        addToString(3, "int@0"); 
+                    } else {
+                        addToString(3, "int@1"); 
+                    }
                 }
                 addToString(3, "\n");
                 if (inIf || inWhile) {
@@ -2459,6 +2688,76 @@ void codeGeneration(Token *token)
                     addToString(3, "EQS\n");
                 }
             }
+        } else if (operator == NOT_EQ) {
+            if (eqSymbolFound)
+            {
+                addToString(frameStr, "EQ");
+                threeAddress(frameStr, frame);
+                addToString(frameStr, "NOT");
+                    if (storage[0] != NULL && storage[0][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[0]);
+                    if (storage[0] != NULL && storage[0][0] == '-')
+                    {
+                        addToString(frameStr, frame);
+                    }
+                    else
+                    {
+                        addToString(frameStr, " ");
+                    }
+                    addToString(frameStr, storage[0]);
+                    addToString(frameStr, "\n");
+            }
+            else
+            {
+                if (Return) {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "EQS\n");
+                    addToString(frameStr, "NOTS\n");
+                } else {
+                    pushStorage(3, frame);
+                    addToString(3, "EQS\n");
+                    addToString(frameStr, "NOTS\n");
+                }
+            }
+        } else if (operator == LESS) {
+            if (eqSymbolFound)
+            {
+                addToString(frameStr, "LT");
+                threeAddress(frameStr, frame);
+            }
+            else
+            {
+                if (Return) {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "LTS\n");
+                } else {
+                    pushStorage(3, frame);
+                    addToString(3, "LTS\n");
+                }
+            }
+        } else if (operator == MORE) {
+            if (eqSymbolFound)
+            {
+                addToString(frameStr, "GT");
+                threeAddress(frameStr, frame);
+            }
+            else
+            {
+                if (Return) {
+                    pushStorage(frameStr, frame);
+                    addToString(frameStr, "GTS\n");
+                } else {
+                    pushStorage(3, frame);
+                    addToString(3, "GTS\n");
+                }
+            }
         }
         break;
 
@@ -2586,23 +2885,29 @@ void codeGeneration(Token *token)
         DLL_InsertFirst(2, WhileNames);
         free(WhileNames);
 
-        addToString(frameStr, "LABEL $");
-        if(listWhileLabels->firstElement != NULL){
-            addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
+        if (functionLabelCreated) {
+            caseWhileCode(1);
+        } else {
+            caseWhileCode(frameStr);
         }
-        addToString(frameStr, "\n");
 
-        addToString(frameStr, "JUMP $");
-        if(listWhileLabels->firstElement != NULL){
-            addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
-        }
-        addToString(frameStr, "\n");
+        // addToString(frameStr, "LABEL $");
+        // if(listWhileLabels->firstElement != NULL){
+        //     addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
+        // }
+        // addToString(frameStr, "\n");
 
-        addToString(frameStr, "LABEL $");
-        if(listWhileLabels->firstElement != NULL){
-            addToString(frameStr,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
-        }
-        addToString(frameStr, "\n");
+        // addToString(frameStr, "JUMP $");
+        // if(listWhileLabels->firstElement != NULL){
+        //     addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
+        // }
+        // addToString(frameStr, "\n");
+
+        // addToString(frameStr, "LABEL $");
+        // if(listWhileLabels->firstElement != NULL){
+        //     addToString(frameStr,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
+        // }
+        // addToString(frameStr, "\n");
 
         break;
     case RETURN:
@@ -2655,31 +2960,19 @@ void codeGeneration(Token *token)
         DLL_InsertFirst(1, WhileNames);
         free(WhileNames);
 
-        addToString(frameStr, "JUMP $");
-        if(listIfLabels->firstElement != NULL){
-            addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->data);//JUMP IFCOND
+        if (functionLabelCreated) {
+            caseIfCreateIfCode(1);
+        } else {
+            caseIfCreateIfCode(frameStr);
         }
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "LABEL $");
-        if(listIfLabels->firstElement!= NULL){
-            addToString(frameStr, listIfLabels->firstElement->nextElement->data);//LABEL $STARTIF
-        }
-        addToString(frameStr, "\n");
         afterElse = false;
         break;
     case ELSE:
-        addToString(frameStr, "JUMP $");
-        if(listIfLabels->firstElement != NULL){
-            addToString(frameStr, listIfLabels->firstElement->data);//JUMP AFTERELSE
+        if (functionLabelCreated) {
+            caseElseCreateElseCode(1);
+        } else {
+            caseElseCreateElseCode(frameStr);
         }
-        addToString(frameStr, "\n");
-
-        addToString(frameStr, "LABEL $");
-        if(listIfLabels->firstElement != NULL){
-            addToString(frameStr, listIfLabels->firstElement->nextElement->nextElement->nextElement->data);
-        }
-        addToString(frameStr, "\n");
         afterElse=true;
         break;
 
@@ -2691,3 +2984,5 @@ void codeGeneration(Token *token)
     free(var);
     free(tmp);
 }
+
+

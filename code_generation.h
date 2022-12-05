@@ -162,6 +162,20 @@ static enum type operator= NOT_DEFINED;
  */
 void addToString(int str, char *newStr);
 
+void caseRcparCreateWhileCode(int frame);
+
+void caseWhileCode(int frame);
+
+void caseIfCreateIfCode(int frame);
+
+void caseElseCreateElseCode(int frame);
+
+void caseRcparCreateIfElseCode(int frame);
+
+void checkOperator(int frame);
+
+static char TmpWhileAndIf[256];
+
 /**
  * @brief "Main" function in code_generation.
  *
