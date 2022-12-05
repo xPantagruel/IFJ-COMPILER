@@ -416,16 +416,15 @@ void STRVAL()
     addToString(2, "DEFVAR LF@VarType\n");
 
     // zjistit typ a zapis do VarType
-    addToString(2, "TYPE LF@VarType LF@VarWrite \n");
-    addToString(2, "JUMPIFEQ $NULL LF@VarType null\n"); // type == null
+    addToString(2, "TYPE LF@VarType LF@VarStrval \n");
+    addToString(2, "JUMPIFEQ $NULL LF@VarType nil@nil\n"); // type == null
 
-    addToString(2, "PUSHS LF@VarWrite\n"); // vypise na vystup
+    addToString(2, "PUSHS LF@VarStrval\n"); // vypise na vystup
     addToString(2, "JUMP $STRVALEND\n");
 
     // hodnota null dle tabulky 1.
     addToString(2, "LABEL $NULL\n");
-    addToString(2, "PUSHS "
-                   "\n");
+    addToString(2, "PUSHS nil@nil\n");
     addToString(2, "JUMP $STRVALEND\n");
 
     // END
