@@ -357,6 +357,12 @@ int params_n(Token *token)
         codeGeneration(token);
         dtorToken(token);
         token = getToken(); // token is set to the next one
+        //---------------------------ADD BY MATEJ TO FIX PARAMS COMMA in PARAMETRS AND NOTHING AFTER THAT ONLY R PAR
+        if(token->t == R_PAR)
+        {
+            exit(2);
+        }
+        //---------------------------ADD BY MATEJ TO FIX PARAMS COMMA in PARAMETRS AND NOTHING AFTER THAT ONLY R PAR
         return 1;
     }
     else
