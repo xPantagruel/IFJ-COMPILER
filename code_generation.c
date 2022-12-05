@@ -955,7 +955,7 @@ void threeAddress(int frameStr, char *frame)
     }
     addToString(frameStr, storage[0]);
 
-    if (storage[2] == NULL) {
+    if (storage[storageLen-1] == NULL) {
         if (storage[0] != NULL && storage[0][0] == '-')
         { // if first letter is '-' -> it is variable
             addToString(frameStr, frame);
@@ -967,7 +967,7 @@ void threeAddress(int frameStr, char *frame)
         addToString(frameStr, storage[0]);
     }
 
-    if (storage[1] != NULL && storage[1][0] == '-')
+    if (storage[storageLen-2] != NULL && storage[storageLen-2][0] == '-')
     { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
     }
@@ -975,10 +975,10 @@ void threeAddress(int frameStr, char *frame)
     {
         addToString(frameStr, " ");
     }
-    addToString(frameStr, storage[1]);
+    addToString(frameStr, storage[storageLen-2]);
 
-    if (storage[2] != NULL) {
-        if (storage[2][0] == '-')
+    if (storage[storageLen-1] != NULL) {
+        if (storage[storageLen-1][0] == '-')
         { // if first letter is '-' -> it is variable
             addToString(frameStr, frame);
         }
@@ -986,7 +986,7 @@ void threeAddress(int frameStr, char *frame)
         {
             addToString(frameStr, " ");
         }
-        addToString(frameStr, storage[2]);
+        addToString(frameStr, storage[storageLen-1]);
         addToString(frameStr, "\n");
         removeLastFromStorage();
         removeLastFromStorage();
@@ -1049,46 +1049,8 @@ void threeAddressWithoutRemove(int frameStr, char *frame)
         addToString(frameStr, " ");
     }
     addToString(frameStr, storage[0]);
-    if (storage[1] != NULL && storage[1][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
-    }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[1]);
-    if (storage[2] != NULL && storage[2][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
-    }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[2]);
-    addToString(frameStr, "\n");
-}
 
-void pushStorage(int frameStr, char *frame)
-{
-    if (storage[1] != NULL) {
-        addToString(frameStr, "PUSHS");
-        if (storage[1][0] == '-')
-        { // if first letter is '-' -> it is variable
-            addToString(frameStr, frame);
-        }
-        else
-        {
-            addToString(frameStr, " ");
-        }
-        addToString(frameStr, storage[1]);
-        addToString(frameStr, "\n");
-        removeLastFromStorage();
-    }
-
-    if (storage[0] != NULL) {
-        addToString(frameStr, "PUSHS");
+    if (storage[storageLen-1] == NULL) {
         if (storage[0] != NULL && storage[0][0] == '-')
         { // if first letter is '-' -> it is variable
             addToString(frameStr, frame);
@@ -1098,6 +1060,62 @@ void pushStorage(int frameStr, char *frame)
             addToString(frameStr, " ");
         }
         addToString(frameStr, storage[0]);
+    }
+
+    if (storage[storageLen-2] != NULL && storage[storageLen-2][0] == '-')
+    { // if first letter is '-' -> it is variable
+        addToString(frameStr, frame);
+    }
+    else
+    {
+        addToString(frameStr, " ");
+    }
+    addToString(frameStr, storage[storageLen-2]);
+
+    if (storage[storageLen-1] != NULL) {
+        if (storage[storageLen-1][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[storageLen-1]);
+        addToString(frameStr, "\n");
+    } else {
+        addToString(frameStr, "\n");
+    }
+}
+
+void pushStorage(int frameStr, char *frame)
+{
+    if (storage[storageLen-1] != NULL) {
+        addToString(frameStr, "PUSHS");
+        if (storage[storageLen-1][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[storageLen-1]);
+        addToString(frameStr, "\n");
+        removeLastFromStorage();
+    }
+
+    if (storage[storageLen-1] != NULL) {
+        addToString(frameStr, "PUSHS");
+        if (storage[storageLen-1][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[storageLen-1]);
         addToString(frameStr, "\n");
         removeLastFromStorage();
     }
@@ -1107,29 +1125,33 @@ void pushStorage(int frameStr, char *frame)
 
 void pushWithoutDeleting(int frameStr, char *frame)
 {
-    addToString(frameStr, "PUSHS");
-    if (storage[1] != NULL && storage[1][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
+    if (storage[storageLen-1] != NULL) {
+        addToString(frameStr, "PUSHS");
+        if (storage[storageLen-1][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[storageLen-1]);
+        addToString(frameStr, "\n");
     }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[1]);
-    addToString(frameStr, "\n");
 
-    addToString(frameStr, "PUSHS");
-    if (storage[0] != NULL && storage[0][0] == '-')
-    { // if first letter is '-' -> it is variable
-        addToString(frameStr, frame);
+    if (storage[storageLen-2] != NULL) {
+        addToString(frameStr, "PUSHS");
+        if (storage[storageLen-2] != NULL && storage[storageLen-2][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[storageLen-2]);
+        addToString(frameStr, "\n");
     }
-    else
-    {
-        addToString(frameStr, " ");
-    }
-    addToString(frameStr, storage[0]);
-    addToString(frameStr, "\n");
 }
 
 void randStr(char *dest, size_t length)
@@ -1608,7 +1630,7 @@ void createReturnCode(int frame, char *frameStr) {
 
 void codeGeneration(Token *token)
 {
-    //printf("%s\n", token->val);
+    //printf("---%s---\n", token->val);
     //if prolog not added
     if (allFunctionsString == NULL) {
         addToString(2, ".IFJcode22\nJUMP $main\n");
