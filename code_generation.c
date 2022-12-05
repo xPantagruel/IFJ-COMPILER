@@ -244,7 +244,11 @@ void READS()
     addToString(2, "DEFVAR LF@VarReadS\n");
     addToString(2, "READ LF@VarReadS string\n");
     addToString(2, "PUSHS LF@VarReadS\n");
-
+    //strlen kdyz nula tak pushs NULL
+    addToString(2, "STRLEN LF@LenParametr LF@VarReadS\n");
+    addToString(2, "JUMPIFNEQ END4 LF@LenParametr int@0\n");
+    addToString(2, "PUSHS nil@nil\n");
+    addToString(2, "LABEL END4\n");
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
