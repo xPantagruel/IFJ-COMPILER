@@ -363,12 +363,12 @@ void FLOATVAL()
 
     addToString(2, "INT2FLOAT LF@VarFloatval LF@VarFloatval\n"); // konvert na float
     addToString(2, "PUSHS LF@VarFloatval\n");                       
-    addToString(2, "JUMP 2END\n");
+    addToString(2, "JUMP END2\n");
 
     addToString(2, "LABEL FLOAT\n");
     addToString(2, "PUSHS LF@VarFloatval\n");
 
-    addToString(2, "LABEL 2END\n");
+    addToString(2, "LABEL END2\n");
 
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
@@ -391,12 +391,12 @@ void INTVAL()
     
     addToString(2, "FLOAT2INT LF@VarIntval LF@VarIntval\n"); // konvert na int
     addToString(2, "PUSHS LF@VarIntval\n"); 
-    addToString(2, "JUMP 1END\n");
+    addToString(2, "JUMP END1\n");
 
     addToString(2, "LABEL INT\n");
     addToString(2, "PUSHS LF@VarIntval\n");
 
-    addToString(2, "LABEL 1END\n");
+    addToString(2, "LABEL END1\n");
 
                        
     addToString(2, "POPFRAME\n");
@@ -952,6 +952,18 @@ void threeAddress(int frameStr, char *frame)
     }
     addToString(frameStr, storage[0]);
 
+    if (storage[2] == NULL) {
+        if (storage[0] != NULL && storage[0][0] == '-')
+        { // if first letter is '-' -> it is variable
+            addToString(frameStr, frame);
+        }
+        else
+        {
+            addToString(frameStr, " ");
+        }
+        addToString(frameStr, storage[0]);
+    }
+
     if (storage[1] != NULL && storage[1][0] == '-')
     { // if first letter is '-' -> it is variable
         addToString(frameStr, frame);
@@ -976,19 +988,9 @@ void threeAddress(int frameStr, char *frame)
         removeLastFromStorage();
         removeLastFromStorage();
     } else {
-        if (storage[0] != NULL && storage[0][0] == '-')
-        { // if first letter is '-' -> it is variable
-            addToString(frameStr, frame);
-        }
-        else
-        {
-            addToString(frameStr, " ");
-        }
-        addToString(frameStr, storage[0]);
         addToString(frameStr, "\n");
         removeLastFromStorage();
     }
-
     removeOperator();
 }
 
@@ -2723,7 +2725,7 @@ void codeGeneration(Token *token)
                 } else {
                     pushStorage(3, frame);
                     addToString(3, "EQS\n");
-                    addToString(frameStr, "NOTS\n");
+                    addToString(3, "NOTS\n");
                 }
             }
         } else if (operator == LESS) {

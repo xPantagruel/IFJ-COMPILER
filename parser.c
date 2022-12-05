@@ -208,7 +208,7 @@ int type(Token *token)
 
 int params(Token *token, int paramIndex)
 {
-    if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT)
+    if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT || token->t == NULL_KEYWORD)
     { // VAR_ID OR STRING OR INT/FLOAT
 
         SymFunction *function = peekCurrentlyDeclaredFunction();
@@ -221,7 +221,11 @@ int params(Token *token, int paramIndex)
         token = getToken();
         if (params_n(token) == 1)
         { // (VAR_ID OR STRING OR INT/FLOAT) <params_n>
-            if (params(token, paramIndex))
+            if (token->t == R_PAR)
+            {
+                exit(2);
+            }
+            if (params(token, ++paramIndex))
             {
                 return 1;
             }
@@ -426,7 +430,7 @@ int condition(Token *token)
                         token = getToken();
                         if (statement(token))
                         { // IF ( <expression> ) { <statement>
-                            codeGeneration(token);
+                            // codeGeneration(token);
                             dtorToken(token);
                             token = getToken();
                             if (token->t == R_CPAR)

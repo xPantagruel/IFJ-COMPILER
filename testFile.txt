@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 declare(strict_types=1);
 $x = "a";
@@ -5,3 +6,96 @@ $x = ord($x);
 $y = "";
 $y = ord($y);
 write($x, $y);
+=======
+<<<<<<< HEAD
+.IFJcode22
+JUMP $main
+
+LABEL readi
+CREATEFRAME
+PUSHFRAME
+DEFVAR LF@LenParametr
+POPS LF@LenParametr
+DEFVAR LF@VarReadI
+READ LF@VarReadI int
+PUSHS LF@VarReadI
+POPFRAME
+RETURN
+LABEL floatval
+CREATEFRAME
+PUSHFRAME
+DEFVAR LF@LenParametr
+POPS LF@LenParametr
+DEFVAR LF@VarFloatval
+POPS LF@VarFloatval
+DEFVAR LF@Type
+TYPE LF@Type LF@VarFloatval
+JUMPIFEQ FLOAT LF@Type string@float
+INT2FLOAT LF@VarFloatval LF@VarFloatval
+PUSHS LF@VarFloatval
+JUMP 2END
+LABEL FLOAT
+PUSHS LF@VarFloatval
+LABEL 2END
+POPFRAME
+RETURN
+
+LABEL write
+CREATEFRAME
+PUSHFRAME
+DEFVAR LF@VarWrite
+DEFVAR LF@VarType
+DEFVAR LF@ParamsNumber
+POPS LF@ParamsNumber
+LABEL $BEFOREPOP
+JUMPIFEQ $DEFINITIVEEND  int@0 LF@ParamsNumber
+POPS LF@VarWrite
+WRITE LF@VarWrite
+SUB LF@ParamsNumber LF@ParamsNumber int@1
+TYPE LF@VarType LF@VarWrite
+LABEL $WRITEEND
+JUMP $BEFOREPOP
+LABEL $DEFINITIVEEND
+POPFRAME
+RETURN
+
+LABEL $main
+DEFVAR GF@-in
+PUSHS int@0
+CALL readi
+POPS GF@-in
+DEFVAR GF@-f
+PUSHS  GF@-in
+PUSHS int@1
+CALL floatval
+POPS GF@-f
+JUMP $IFCOND1
+LABEL $STARTIF1
+PUSHS   string@GOOD\010
+PUSHS int@1
+CALL write
+JUMP $AFTERELSE1
+LABEL $ELSE1
+PUSHS   string@BAD\010
+PUSHS int@1
+CALL write
+JUMP $AFTERELSE1
+LABEL $IFCOND1
+PUSHS  float@0x1.8p+1
+PUSHS  float@0x0p+0
+EQS
+DEFVAR GF@CONDVAR1
+POPS GF@CONDVAR1
+JUMPIFEQ $STARTIF1 GF@CONDVAR1 bool@true
+JUMP $ELSE1
+LABEL $AFTERELSE1
+=======
+<?php
+declare(strict_types=1);
+if(4) {
+    $y = "Hello " . "c";
+    write($y);
+} else {
+}
+>>>>>>> ea7ee8fd14384ce6a40d4de792b75b106b032248
+>>>>>>> 5dc4c243e5138438831eb268b99aa0fcabd6e512
