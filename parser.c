@@ -202,7 +202,7 @@ int type(Token *token)
 
 int params(Token *token, int paramIndex)
 {
-    if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT)
+    if (token->t == STRING || token->t == VAR_ID || token->t == FLOAT || token->t == INT || token->t == NULL_KEYWORD)
     { // VAR_ID OR STRING OR INT/FLOAT
         if (currentlyChecked && currentlyChecked->function)
         {
@@ -242,6 +242,9 @@ int params(Token *token, int paramIndex)
         token = getToken();
         if (params_n(token) == 1)
         { // (VAR_ID OR STRING OR INT/FLOAT) <params_n>
+            if (token->t == R_PAR) {
+                exit(2);
+            }
             if (params(token, ++paramIndex))
             {
                 return 1;
@@ -357,12 +360,6 @@ int params_n(Token *token)
         codeGeneration(token);
         dtorToken(token);
         token = getToken(); // token is set to the next one
-        // //---------------------------ADD BY MATEJ TO FIX PARAMS COMMA in PARAMETRS AND NOTHING AFTER THAT ONLY R PAR
-        // if(token->t == R_PAR)
-        // {
-        //     exit(2);
-        // }
-        // //---------------------------ADD BY MATEJ TO FIX PARAMS COMMA in PARAMETRS AND NOTHING AFTER THAT ONLY R PAR
         return 1;
     }
     else
