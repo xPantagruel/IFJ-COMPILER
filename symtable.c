@@ -1,10 +1,9 @@
 
 #include "symtable.h"
 
-htab_t *symTable;
+SymTable *symTable;
 
-// funkcia na vytvorenie hashu pre určitý kľúč
-size_t htab_hash_function(htab_key_t str)
+size_t htab_hash_function(char *str)
 {
     uint32_t h = 0;
     const unsigned char *p;
@@ -13,592 +12,627 @@ size_t htab_hash_function(htab_key_t str)
     return h;
 }
 
-// funkcia na vytvorenie hashovacej tabuľky o veľkosti n
-htab_t *htab_init(size_t n)
+SymTable *initSymTable()
 {
-    htab_t *tab = malloc(sizeof(htab_t));
-    if (tab == NULL)
+    Frame *frame = initFrame("main");
+    SymTable *symTable = calloc(1, sizeof(SymTable));
+    if (!symTable)
     {
-        return NULL;
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
-    tab->ptr_arr = malloc(n * sizeof(htab_item_t *));
-    if (tab->ptr_arr == NULL)
+    symTable->mainFrame = frame;
+    symTable->topFrame = symTable->mainFrame;
+    symTable->currentlyDeclaredCount = 0;
+    return symTable;
+}
+
+Frame *initFrame(char *name)
+{
+    Frame *frame = calloc(1, sizeof(Frame));
+    if (!frame)
     {
-        return NULL;
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    frame->name = calloc(strlen(name) + 1, 1);
+    if (!frame->name)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    strcpy(frame->name, name);
+    frame->size = SYMTABLE_SIZE;
+    frame->items = calloc(SYMTABLE_SIZE, sizeof(SymItem));
+    return frame;
+}
+
+SymItem *initSymItem(char *key)
+{
+    SymItem *item = calloc(1, sizeof(SymItem));
+    if (!item)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    item->key = calloc(strlen(key) + 1, 1);
+    if (!item->key)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    strcpy(item->key, key);
+    return item;
+}
+
+SymFunction *initSymFunction(char *name)
+{
+    SymFunction *function = calloc(1, sizeof(SymFunction));
+    if (!function)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    function->name = calloc(strlen(name) + 1, 1);
+    if (!function->name)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    strcpy(function->name, name);
+    return function;
+}
+
+SymVariable *initSymVariable(char *name)
+{
+    SymVariable *variable = calloc(1, sizeof(SymVariable));
+    if (!variable)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    variable->name = calloc(strlen(name) + 1, 1);
+    if (!variable->name)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+    strcpy(variable->name, name);
+    return variable;
+}
+
+SymItem *addSymItem(char *key, SymFunction *function, SymVariable *variable)
+{
+    SymItem *item = initSymItem(key);
+    item->function = function;
+    item->variable = variable;
+
+    int index = htab_hash_function(key) % SYMTABLE_SIZE;
+
+    SymItem *tmp = symTable->topFrame->items[index];
+    if (!tmp)
+    {
+        symTable->topFrame->items[index] = item;
     }
     else
     {
-        tab->size = 0;
-        tab->arr_size = n;
-        for (size_t i = 0; i < n; i++)
+        while (tmp)
         {
-            tab->ptr_arr[i] = NULL;
-        }
-    }
-    return tab;
-}
-
-// funkcia na zistenie veľkosti pola
-size_t htab_bucket_count(const htab_t *t)
-{
-    return t->arr_size;
-}
-
-size_t htab_size(const htab_t *t)
-{
-    return t->size;
-}
-
-// funckia na nájdenie kľúča v tabuľke
-htab_pair_t *htab_find(htab_t *t, htab_key_t key)
-{
-    size_t index = htab_hash_function(key) % htab_bucket_count(t);
-    // hľadanie kľúča
-    if (t->ptr_arr[index] != NULL)
-    {
-        for (htab_item_t *tmp = t->ptr_arr[index]; tmp != NULL; tmp = tmp->next)
-        {
-            if (!strcmp(tmp->pair->key, key))
+            if (!tmp->next)
             {
-                return tmp->pair;
+                tmp->next = item;
+                break;
             }
-        }
-        // kľúč nenájdený
-        return NULL;
-        // kľúč nenájdený
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-void htab_free(htab_t *t)
-{
-    htab_clear(t);
-    free(t->ptr_arr);
-    free(t);
-}
-
-// funkcia na vymazanie všetkých kľúčov
-void htab_clear(htab_t *t)
-{
-    for (size_t i = 0; i < t->arr_size; i++)
-    {
-        while (t->ptr_arr[i] != NULL)
-        {
-            htab_erase(t, t->ptr_arr[i]->pair->key);
+            tmp = tmp->next;
         }
     }
+    return item;
 }
 
-// funkcia na vymazanie konkrétneho kľúča
-bool htab_erase(htab_t *t, htab_key_t key)
+SymFunction *addSymFunction(char *key)
 {
-    size_t index = htab_hash_function(key) % htab_bucket_count(t);
-    // ak existuje nejaký kľúč na indexe
-    if (t->ptr_arr[index] != NULL)
+
+    SymItem *item = getItem(key);
+
+    if (item)
     {
-        int count = 0;
-        // premenná na uchovávanie predošlej položky
-        htab_item_t *previous;
-        // prechod položkami
-        for (htab_item_t *tmp = t->ptr_arr[index]; tmp != NULL; tmp = tmp->next)
-        {
-            // ak je kľúč nájdený
-            if (!strcmp(tmp->pair->key, key))
-            {
-                // ak sa jedná o prvú položku
-                if (count == 0)
-                {
-
-                    htab_item_t *store = t->ptr_arr[index];
-                    t->ptr_arr[index] = tmp->next;
-                    if (store->pair->function)
-                    {
-                        htab_erase_function(store->pair->function, store->pair->function->paramCount);
-                    }
-                    if (store->pair->variable)
-                    {
-                        htab_erase_variable(store->pair->variable);
-                        store->pair->variable = NULL;
-                    }
-
-                    free((char *)store->pair->key);
-                    free(store->pair);
-                    free(store);
-                }
-                else
-                {
-                    // ak sa jedná o poslednú položku
-                    if (tmp->next == NULL)
-                    {
-                        previous->next = NULL;
-
-                        if (tmp->pair->function)
-                        {
-                            htab_erase_function(tmp->pair->function, tmp->pair->function->paramCount);
-                        }
-                        if (tmp->pair->variable)
-                        {
-
-                            htab_erase_variable(tmp->pair->variable);
-                            tmp->pair->variable = NULL;
-                        }
-                        free((char *)tmp->pair->key);
-                        free(tmp->pair);
-                        free(tmp);
-                        // ak sa jedná o položku v strede
-                    }
-                    else
-                    {
-                        htab_item_t *store = tmp;
-                        previous->next = tmp->next;
-
-                        if (store->pair->function)
-                        {
-                            htab_erase_function(store->pair->function, store->pair->function->paramCount);
-                        }
-                        if (store->pair->variable)
-                        {
-                            htab_erase_variable(store->pair->variable);
-                            store->pair->variable = NULL;
-                        }
-                        free((char *)store->pair->key);
-                        free(store->pair);
-                        free(store);
-                    }
-                }
-                t->size = t->size - 1;
-                return true;
-            }
-            count++;
-            previous = tmp;
-        }
-        return false;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-// funkcia na pridanie kľúča do tabuľky
-htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key, Frame *frame)
-{
-    // zistenie indexu na ktorý bude kľúč uložený
-    size_t index = htab_hash_function(key) % htab_bucket_count(t);
-
-    char *str;
-
-    // ak sa na indexe nenacháza žiaden uložený kľúč
-    if (t->ptr_arr[index] == NULL)
-    {
-        t->ptr_arr[index] = calloc(1, sizeof(htab_item_t));
-        if (t->ptr_arr[index] == NULL)
+        if (item->function)
         {
             return NULL;
         }
-        t->ptr_arr[index]->pair = calloc(1, sizeof(htab_pair_t));
-        if (t->ptr_arr[index]->pair == NULL)
-        {
-            return NULL;
-        }
-        // skopirovanie kľúča
-        str = malloc((strlen(key) + 1) * sizeof(char));
-        if (str == NULL)
-        {
-            return NULL;
-        }
-        strcpy(str, key);
-        str[strlen(key)] = '\0';
-        t->ptr_arr[index]->pair->function = NULL;
-        t->ptr_arr[index]->pair->variable = NULL;
-        t->ptr_arr[index]->pair->key = str;
-        t->size = t->size + 1;
-        return t->ptr_arr[index]->pair;
-        // ak sa na indexe náchádza uložený kľúč
+        SymFunction *function = initSymFunction(key);
+        item->function = function;
+        return item->function;
     }
     else
     {
-        for (htab_item_t *tmp = t->ptr_arr[index]; tmp != NULL; tmp = tmp->next)
-        {
-            // ak kľúč existuje v tabuľke
-            if (!strcmp(tmp->pair->key, key))
-            {
-                if (frame)
-                {
-                    if (frame == tmp->pair->variable->frame)
-                    {
-                        return tmp->pair;
-                    }
-                }
-                else
-                {
-                    return tmp->pair;
-                }
-                // ak kľúč neexistuje v tabuľke
-            }
-            else
-            {
-                if (tmp->next == NULL)
-                {
-                    tmp->next = calloc(1, sizeof(htab_item_t));
-                    if (tmp->next == NULL)
-                    {
-                        return NULL;
-                    }
-                    tmp->next->pair = calloc(1, sizeof(htab_pair_t));
-                    if (tmp->next->pair == NULL)
-                    {
-                        return NULL;
-                    }
-                    // skopírovanie kľúča
-                    str = calloc(strlen(key) + 1, sizeof(htab_key_t));
-                    if (str == NULL)
-                    {
-
-                        return NULL;
-                    }
-                    strcpy(str, key);
-                    str[strlen(key)] = '\0';
-                    tmp->next->pair->key = str;
-                    tmp->next->next = NULL;
-                    t->size = t->size + 1;
-
-                    return tmp->next->pair;
-                }
-            }
-        }
+        SymFunction *function = initSymFunction(key);
+        item = addSymItem(key, function, NULL);
+        return item->function;
     }
+}
 
+SymFunction *declareFunction(char *name)
+{
+    SymFunction *function = getFunction(name);
+    if (function)
+    {
+        FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, function->name);
+    }
+    // adds function with name to symtable
+    else
+    {
+        function = addSymFunction(name);
+    }
+}
+
+SymVariable *addSymVariable(char *key)
+{
+    SymItem *item = getItem(key);
+
+    if (item)
+    {
+        if (item->variable)
+        {
+            return item->variable;
+        }
+
+        SymVariable *variable = initSymVariable(key);
+        item->variable = variable;
+        return item->variable;
+    }
+    else
+    {
+        SymVariable *variable = initSymVariable(key);
+        item = addSymItem(key, NULL, variable);
+        return item->variable;
+    }
+}
+
+SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, bool canBeNull)
+{
+    if (function)
+    {
+        SymFunctionParam *param = calloc(1, sizeof(SymFunctionParam));
+        if (!param)
+        {
+            FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+        }
+        switch (type)
+        {
+        case INT_TYPE:
+            param->type = INT;
+            break;
+        case FLOAT_TYPE:
+            param->type = FLOAT;
+            break;
+        case STRING_TYPE:
+            param->type = STRING;
+            break;
+        default:
+            param->type = type;
+        }
+        param->name = NULL;
+        param->canBeNull = canBeNull;
+        function->params = realloc(function->params, (function->paramCount + 1) * sizeof(SymFunctionParam *));
+        function->params[function->paramCount] = param;
+        function->paramCount++;
+        return param;
+    }
+    FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     return NULL;
 }
 
-htab_pair_t *htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount)
-{
-    htab_pair_t *pair = htab_lookup_add(t, name, NULL);
-    if (pair == NULL)
-    {
-        exit(99);
-    }
-
-    if (pair->function || pair->variable)
-    {
-        return NULL;
-    }
-
-    pair->function = calloc(1, sizeof(htab_function_t));
-
-    pair->function->name = calloc(strlen(name) + 1, sizeof(char));
-    if (!pair->function->name)
-    {
-        return NULL;
-    }
-
-    strcpy(pair->function->name, name);
-    pair->function->params = params;
-    pair->function->paramCount = paramCount;
-    pair->function->returnType = returnType;
-    return pair;
-}
-
-int htab_erase_function(htab_function_t *f, int paramCount)
-{
-    for (int i = 0; i < paramCount; i++)
-    {
-        free(f->params[i]->name);
-        free(f->params[i]);
-    }
-
-    free(f->name);
-    free(f->returnType->name);
-    free(f->returnType);
-    f = NULL;
-    return 0;
-}
-
-htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, Frame *frame, enum type type)
+SymFunctionParam *checkFunctionParam(SymFunction *function, char *value, enum type type, int paramIndex)
 {
 
-    htab_pair_t *pair = htab_lookup_add(t, name, peekFrame(frameStack));
-
-    if (!pair)
+    if (!function)
     {
-        exit(99);
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "checkFunctionParam");
     }
 
-    pair->variable = calloc(1, sizeof(htab_variable_t));
-    if (!pair->variable)
+    if (function->paramCount != -1 && paramIndex >= function->paramCount)
     {
-        // ERROR(99)
-        return NULL;
+        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
     }
 
-    pair->variable->name = calloc(strlen(name) + 1, sizeof(char));
-    if (!pair->variable->name)
+    if (type == VAR_ID)
     {
-        // ERROR(99)
-        return NULL;
-    }
-
-    strcpy(pair->variable->name, name);
-    pair->variable->frame = frame;
-    pair->variable->t = type;
-    addVariableToFrame(frame, pair);
-    return pair;
-}
-
-function_param_t *htab_add_parameter(htab_function_t *function)
-{
-
-    function->params = realloc(function->params, (function->paramCount + 1) * sizeof(function_param_t));
-
-    function->params[function->paramCount] = calloc(1, sizeof(function_param_t));
-    function->paramCount++;
-
-    return function->params[function->paramCount - 1];
-}
-
-function_param_t *htab_add_return_type(htab_function_t *function)
-{
-    function->returnType = calloc(1, sizeof(function_param_t));
-    return function->returnType;
-}
-
-int htab_erase_variable(htab_variable_t *v)
-{
-
-    free(v->name);
-    free(v);
-    return 1;
-}
-
-void htab_print_variable(htab_variable_t *var)
-{
-    if (var->name)
-        printf("variable: %s\n", var->name);
-    if (var->t != NEG)
-    {
-        printf("type: %d\n", var->t);
-    }
-    if (var->frame && var->frame->name)
-        printf("frame: %s\n", var->frame->name);
-}
-void htab_print_function(htab_function_t *func)
-{
-    printf("function: %s\n", func->name);
-    if (func->paramCount > 0)
-    {
-        printf("params:\n");
-    }
-
-    for (int i = 0; i < func->paramCount; i++)
-    {
-        if (func->params[i]->name != NULL)
+        SymVariable *variable = getVariable(value);
+        if (!variable)
         {
-            printf("\t•name: %s\n", func->params[i]->name);
+            FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, value);
         }
 
-        printf("\t•type: %d\n", func->params[i]->t);
-        printf("\t•can be null?: %d\n\n", func->params[i]->canBeNull);
+        type = variable->type;
     }
-    if (func->returnType)
+    if (function->paramCount == -1)
     {
-        printf("return type: %d\n", func->returnType->t);
+        return NULL;
+    }
+
+    if (function->params[paramIndex]->canBeNull && type == NULL_KEYWORD)
+    {
+        return function->params[paramIndex];
+    }
+
+    if (function->params[paramIndex]->type == DYNAMIC && (type == FLOAT || type == INT))
+    {
+        return function->params[paramIndex];
+    }
+
+    if (function->params[paramIndex]->type == type)
+    {
+        return function->params[paramIndex];
+    }
+    FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
+}
+
+void checkFunctionParamCount(SymFunction *function, int paramCount)
+{
+    if (!function)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "checkFunctionParamCount");
+    }
+
+    if (function->paramCount != -1 && function->paramCount != paramCount)
+    {
+        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
     }
 }
 
-htab_pair_t *htab_search(htab_t *t, htab_key_t key)
+SymFunctionReturn *addSymFunctionReturn(SymFunction *function, enum type type, bool canBeNull)
 {
-    size_t index = htab_hash_function(key) % htab_bucket_count(t);
-    htab_item_t *tmp = t->ptr_arr[index];
+    if (function)
+    {
+        SymFunctionReturn *returnType = calloc(1, sizeof(SymFunctionReturn));
+        if (!returnType)
+        {
+            FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+        }
+        switch (type)
+        {
+        case INT_TYPE:
+            returnType->type = INT;
+            break;
+        case FLOAT_TYPE:
+            returnType->type = FLOAT;
+            break;
+        case STRING_TYPE:
+            returnType->type = STRING;
+            break;
+        default:
+            returnType->type = type;
+        }
+        returnType->canBeNull = canBeNull;
+        function->returnType = returnType;
+        return returnType;
+    }
+    return NULL;
+}
+
+void nameSymFunctionParam(SymFunction *function, SymFunctionParam *param, char *name)
+{
+    for (int i = 0; i < function->paramCount; i++)
+    {
+        if (function->params[i]->name)
+        {
+            if (strcmp(function->params[i]->name, name) == 0)
+            {
+                exit(8);
+            }
+        }
+    }
+
+    param->name = calloc(strlen(name) + 1, 1);
+    strcpy(param->name, name);
+}
+
+void addFunctionLocalVariables(SymFunction *function)
+{
+    if (!function)
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+    }
+
+    SymFunctionParam *param;
+    SymVariable *var;
+    for (int i = 0; i < function->paramCount; i++)
+    {
+        param = function->params[i];
+        var = addSymVariable(param->name);
+        var->type = param->type;
+    }
+}
+
+SymItem *getItem(char *key)
+{
+    int index = htab_hash_function(key) % symTable->topFrame->size;
+
+    SymItem *tmp = symTable->topFrame->items[index];
+
     while (tmp)
     {
-        if (strcmp(tmp->pair->key, key) == 0)
+        if (strcmp(tmp->key, key) == 0)
         {
-            return tmp->pair;
+            return tmp;
         }
         tmp = tmp->next;
     }
     return NULL;
 }
 
-void htab_print(htab_t *t)
+SymFunction *getFunction(char *key)
 {
-    for (int i = 0; i < SYMTABLE_SIZE; i++)
-    {
+    Frame *tmpFrame = symTable->topFrame;
 
-        htab_item_t *item = t->ptr_arr[i];
-        if (item)
+    symTable->topFrame = symTable->mainFrame;
+    SymItem *item = getItem(key);
+    if (!item || !item->function)
+    {
+        return NULL;
+    }
+    symTable->topFrame = tmpFrame;
+    return item->function;
+}
+
+SymVariable *getVariable(char *key)
+{
+    SymItem *item = getItem(key);
+    if (!item || !item->variable)
+    {
+        return NULL;
+    }
+
+    return item->variable;
+}
+
+SymFunction *checkFunctionCall(char *name)
+{
+
+    SymFunction *function = getFunction(name);
+    if (!function)
+    {
+        FREE_EXIT(3, ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED, name);
+    }
+    return function;
+}
+
+void checkReturnType(SymFunction *function, enum type type)
+{
+    SymFunctionReturn *functionReturn = function->returnType;
+
+    if (type == NULL_KEYWORD && functionReturn->canBeNull)
+    {
+        return;
+    }
+
+    if (functionReturn->type == type)
+    {
+        return;
+    }
+
+    FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
+}
+
+void freeSymFunction(SymFunction *function)
+{
+    if (function)
+    {
+        free(function->name);
+        for (int i = 0; i < function->paramCount; i++)
         {
-            printf("----------\n");
-            while (item)
-            {
-                printf("key: %s\n", item->pair->key);
-                if (item->pair->function)
-                {
-                    htab_print_function(item->pair->function);
-                }
-                if (item->pair->variable)
-                {
-                    htab_print_variable(item->pair->variable);
-                }
-                item = item->next;
-            }
-            printf("----------\n\n");
-            {
-                /* code */
-            }
+            free(function->params[i]->name);
+            free(function->params[i]);
+        }
+        if (function->returnType)
+        {
+            free(function->returnType);
         }
     }
 }
 
-void addBuiltInToSymtable()
+void freeSymVariable(SymVariable *variable)
 {
-    // reads
-    htab_pair_t *fun = htab_add_function(symTable, "reads", NULL, NULL, 0);
-    if (!fun)
+    if (variable)
     {
-        exit(99);
+        free(variable->name);
+        free(variable);
     }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->canBeNull = true;
-    fun->function->returnType->t = STRING_PARAM;
-
-    // readi
-    fun = htab_add_function(symTable, "readi", NULL, NULL, 0);
-    if (!fun)
-    {
-        exit(99);
-    }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->canBeNull = true;
-    fun->function->returnType->t = INT_PARAM;
-
-    // readf
-    fun = htab_add_function(symTable, "readf", NULL, NULL, 0);
-    if (!fun)
-    {
-        exit(99);
-    }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->canBeNull = true;
-    fun->function->returnType->t = FLOAT_PARAM;
-
-    // floatval
-    fun = htab_add_function(symTable, "floatval", NULL, NULL, 0);
-    if (!fun)
-    {
-        exit(99);
-    }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->t = FLOAT_PARAM;
-    htab_add_parameter(fun->function);
-    fun->function->params[0]->name = calloc(strlen("term") + 1, sizeof(char));
-    strcpy(fun->function->params[0]->name, "term");
-    fun->function->params[0]->t = ANY;
-    fun->function->params[0]->canBeNull = true;
-
-    // intval
-    fun = htab_add_function(symTable, "intval", NULL, NULL, 0);
-    if (!fun)
-    {
-        exit(99);
-    }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->t = INT_PARAM;
-    htab_add_parameter(fun->function);
-    fun->function->params[0]->name = calloc(strlen("term") + 1, sizeof(char));
-    strcpy(fun->function->params[0]->name, "term");
-    fun->function->params[0]->t = ANY;
-    fun->function->params[0]->canBeNull = true;
-
-    // stringval
-    fun = htab_add_function(symTable, "stringval", NULL, NULL, 0);
-    if (!fun)
-    {
-        exit(99);
-    }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->t = STRING_PARAM;
-    htab_add_parameter(fun->function);
-    fun->function->params[0]->name = calloc(strlen("term") + 1, sizeof(char));
-    strcpy(fun->function->params[0]->name, "term");
-    fun->function->params[0]->t = ANY;
-    fun->function->params[0]->canBeNull = true;
-
-    // strlen
-    fun = htab_add_function(symTable, "strlen", NULL, NULL, 0);
-    if (!fun)
-    {
-        exit(99);
-    }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->t = INT_PARAM;
-    htab_add_parameter(fun->function);
-    fun->function->params[0]->name = calloc(strlen("s") + 1, sizeof(char));
-    strcpy(fun->function->params[0]->name, "s");
-    fun->function->params[0]->t = STRING;
-
-    // substring
-    fun = htab_add_function(symTable, "substring", NULL, NULL, 0);
-    if (!fun)
-    {
-        exit(99);
-    }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->t = STRING_PARAM;
-    fun->function->returnType->canBeNull = true;
-    htab_add_parameter(fun->function);
-    fun->function->params[0]->name = calloc(strlen("s") + 1, sizeof(char));
-    strcpy(fun->function->params[0]->name, "s");
-    fun->function->params[0]->t = STRING;
-    htab_add_parameter(fun->function);
-    fun->function->params[1]->name = calloc(strlen("i") + 1, sizeof(char));
-    strcpy(fun->function->params[0]->name, "i");
-    fun->function->params[1]->t = INT;
-    htab_add_parameter(fun->function);
-    fun->function->params[2]->name = calloc(strlen("j") + 1, sizeof(char));
-    strcpy(fun->function->params[0]->name, "j");
-    fun->function->params[2]->t = INT;
-
-    // ord
-    fun = htab_add_function(symTable, "ord", NULL, NULL, 0);
-    if (!fun)
-    {
-        exit(99);
-    }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->t = INT_PARAM;
-    htab_add_parameter(fun->function);
-    fun->function->params[0]->name = calloc(strlen("c") + 1, sizeof(char));
-    strcpy(fun->function->params[0]->name, "c");
-    fun->function->params[0]->t = STRING;
-
-    // chr
-    fun = htab_add_function(symTable, "chr", NULL, NULL, 0);
-    if (!fun)
-    {
-        exit(99);
-    }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->t = STRING_PARAM;
-    htab_add_parameter(fun->function);
-    fun->function->params[0]->name = calloc(strlen("i") + 1, sizeof(char));
-    strcpy(fun->function->params[0]->name, "i");
-    fun->function->params[0]->t = INT;
-
-    // write
-    fun = htab_add_function(symTable, "write", NULL, NULL, 0);
-    if (!fun)
-    {
-        exit(99);
-    }
-    htab_add_return_type(fun->function);
-    fun->function->returnType->t = VOID;
-    htab_add_parameter(fun->function);
 }
 
-// TODO ZMENIT htab_pair STRUKTURU ABY VYHOVOVALA
-// TODO komentare
+void freeSymItem(SymItem *item)
+{
+    if (item)
+    {
+        freeSymFunction(item->function);
+        item->function = NULL;
+        freeSymVariable(item->variable);
+        item->variable = NULL;
+        free(item);
+    }
+}
+
+void freeFrame(Frame *frame)
+{
+    if (frame)
+    {
+        for (int i = 0; i < frame->size; i++)
+        {
+            SymItem *item = frame->items[i];
+            while (item)
+            {
+                SymItem *tmp = item->next;
+                freeSymItem(item);
+                item = tmp;
+            }
+            frame->items[i] = NULL;
+        }
+
+        free(frame->name);
+        free(frame);
+        symTable->topFrame = symTable->mainFrame;
+    }
+}
+
+void freeSymTable()
+{
+    if (symTable->mainFrame == symTable->topFrame)
+    {
+        freeFrame(symTable->mainFrame);
+    }
+    else
+    {
+        freeFrame(symTable->topFrame);
+        freeFrame(symTable->mainFrame);
+    }
+    free(symTable);
+}
+
+void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, DeclaredType objectType)
+{
+
+    CurrentlyDeclaredObject *object = calloc(1, sizeof(CurrentlyDeclaredObject));
+    object->objectType = objectType;
+    if (objectType == DECLARED_FUNCTION)
+    {
+        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount + 1) * sizeof(CurrentlyDeclaredObject *));
+        symTable->currentlyDeclared[symTable->currentlyDeclaredCount] = object;
+        object->function = function;
+    }
+    else if (objectType == DECLARED_VARIABLE)
+    {
+        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount + 1) * sizeof(CurrentlyDeclaredObject *));
+        symTable->currentlyDeclared[symTable->currentlyDeclaredCount] = object;
+        object->variable = variable;
+    }
+    else
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "pushCurrentlyDeclared");
+    }
+
+    symTable->currentlyDeclaredCount++;
+}
+
+CurrentlyDeclaredObject *peekCurrentlyDeclared()
+{
+    if (symTable->currentlyDeclaredCount > 0)
+    {
+        return symTable->currentlyDeclared[symTable->currentlyDeclaredCount - 1];
+    }
+
+    FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "peekCurrentlyDeclared\n");
+}
+
+SymFunction *peekCurrentlyDeclaredFunction()
+{
+    CurrentlyDeclaredObject *currentlyDeclared = peekCurrentlyDeclared();
+    if (!currentlyDeclared || (currentlyDeclared->objectType != DECLARED_FUNCTION))
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "peekCurrentlyDeclaredFunction\n");
+    }
+    // adds param to function with its type
+    return currentlyDeclared->function;
+}
+
+SymVariable *peekCurrentlyDeclaredVariable()
+{
+    CurrentlyDeclaredObject *currentlyDeclared = peekCurrentlyDeclared();
+    if (!currentlyDeclared || (currentlyDeclared->objectType != DECLARED_VARIABLE))
+    {
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "peekCurrentlyDeclaredVariable\n");
+    }
+    // adds param to function with its type
+    return currentlyDeclared->variable;
+}
+
+void popCurrentlyDeclared()
+{
+    if (symTable->currentlyDeclaredCount)
+    {
+        symTable->currentlyDeclared = realloc(symTable->currentlyDeclared, (symTable->currentlyDeclaredCount - 1) * sizeof(CurrentlyDeclaredObject));
+    }
+    symTable->currentlyDeclaredCount--;
+}
+
+void printSymFunction(SymFunction *function)
+{
+    printf("-----\n");
+    printf("function: %s\n", function->name);
+    if (function->returnType)
+    {
+        printf("type: %d\n", function->returnType->type);
+
+        printf("canReturnNull: %d\n", function->returnType->canBeNull);
+    }
+
+    if (function->paramCount > 0)
+    {
+        printf("params:\n");
+    }
+
+    for (int i = 0; i < function->paramCount; i++)
+    {
+        if (function->params[i]->name)
+        {
+            printf("\t[%d]: %s\n", i, function->params[i]->name);
+        }
+
+        printf("\ttype: %d\n", function->params[i]->type);
+        printf("\tcanBeNull?: %d\n", function->params[i]->canBeNull);
+        printf("\n");
+    }
+
+    printf("-----\n");
+}
+
+void printSymVariable(SymVariable *variable)
+{
+    printf("-----\n");
+    printf("variable: %s\n", variable->name);
+    printf("type: %d\n", variable->type);
+    printf("-----\n");
+}
+
+void printSymTable()
+{
+    printf("--CURRENTLY DECLARED--\n");
+    printf("number of declared: %d\n", symTable->currentlyDeclaredCount);
+    for (int i = 0; i < symTable->currentlyDeclaredCount; i++)
+    {
+        CurrentlyDeclaredObject *object = symTable->currentlyDeclared[i];
+        if (object->objectType == DECLARED_FUNCTION)
+        {
+            printSymFunction(object->function);
+        }
+        else if (object->objectType == DECLARED_VARIABLE)
+        {
+            printSymVariable(object->variable);
+        }
+        else
+        {
+            printf("none\n");
+        }
+    }
+
+    printf("--MAIN FRAME--\n");
+    for (int i = 0; i < symTable->mainFrame->size; i++)
+    {
+        SymItem *tmp = symTable->mainFrame->items[i];
+        while (tmp)
+        {
+            if (tmp->function)
+                printSymFunction(tmp->function);
+            if (tmp->variable)
+                printSymVariable(tmp->variable);
+            tmp = tmp->next;
+        }
+    }
+    if (symTable->topFrame != symTable->mainFrame)
+    {
+        printf("--TOP FRAME--\n");
+        for (int i = 0; i < symTable->topFrame->size; i++)
+        {
+            SymItem *tmp = symTable->topFrame->items[i];
+            while (tmp)
+            {
+                if (tmp->function)
+                    printSymFunction(tmp->function);
+                if (tmp->variable)
+                    printSymVariable(tmp->variable);
+                tmp = tmp->next;
+            }
+        }
+    }
+}

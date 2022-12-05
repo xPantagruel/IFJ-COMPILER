@@ -1,20 +1,27 @@
 #include "bottomUp.h"
 
-int precedenceTable[11][11] = {
+int precedenceTable[12][12] = {
     //*/   +-.  CMP  EQ   (    )    I    F    S    $
-    {'>', '>', '>', '>', '>', '<', '>', '<', '<', '<', '>'}, // * /
-    {'<', '>', '>', '>', '>', '<', '>', '<', '<', '<', '>'},
-    {'<', '>', '>', '>', '>', '<', '>', '<', '<', '<', '>'}, // + - .
-    {'<', '<', '<', '>', '>', '<', '>', '<', '<', '<', '>'}, // CMP
-    {'<', '<', '<', '<', '>', '<', '>', '<', '<', '<', '>'}, // EQ
-    {'<', '<', '<', '<', '<', '<', '=', '<', '<', '<', -1},  // (
-    {'>', '>', '>', '>', '>', -1, '<', -1, -1, -1, '>'},     // )
-    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, '>'},
-    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, '>'},  // IDENTIFIER
-    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, '>'},  // IDENTIFIER
-    {'<', '<', '<', '<', '<', '<', -1, '<', '<', '<', 0}, //$
+    {'>', '>', '>', '>', '>', '<', '>', '<', '<', '<', '<', '>'}, // * /
+    {'<', '>', '>', '>', '>', '<', '>', '<', '<', '<', '<', '>'},
+    {'<', '>', '>', '>', '>', '<', '>', '<', '<', '<', '<', '>'}, // + - .
+    {'<', '<', '<', '>', '>', '<', '>', '<', '<', '<', '<', '>'}, // CMP
+    {'<', '<', '<', '<', '>', '<', '>', '<', '<', '<', '<', '>'}, // EQ
+    {'<', '<', '<', '<', '<', '<', '=', '<', '<', '<', '<', -1},  // (
+    {'>', '>', '>', '>', '>', -1, '<', -1, -1, -1, -1, '>'},      // )
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, -1, '>'},
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, -1, '>'}, // IDENTIFIER
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, -1, '>'},
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, -1, '>'},   // IDENTIFIER
+    {'<', '<', '<', '<', '<', '<', -1, '<', '<', '<', '<', 0}, //$
 
 };
+
+void changeTermValue(Term *t, char *value)
+{
+    t->value = realloc(t->value, strlen(value) + 1);
+    strcpy(t->value, value);
+}
 
 void printBottomUp(Stack *s, Expression *e, int current)
 {
@@ -102,8 +109,29 @@ int convertTokenToTermType(int type)
     case NOT_EQ:
         return EQUALS;
         break;
+    case NULL_KEYWORD:
+        return I_NULL;
     default:
         return TOP_BOTTOM;
+    }
+}
+
+int convertTermToTokenType(enum termType type, enum type originalType)
+{
+    switch (type)
+    {
+    case I_INT:
+        return INT;
+        break;
+    case I_FLOAT:
+        return FLOAT;
+        break;
+    case I_STRING:
+        return STRING;
+    case I_NULL:
+        return NULL_KEYWORD;
+    default:
+        return originalType;
     }
 }
 
@@ -123,7 +151,7 @@ Term *initTerm(char *value, int type, Token *originalToken)
     return t;
 }
 
-bool reduce(Stack *stack)
+int loadTermsToExpression(Term *expression, Stack *stack)
 {
     Term *terms[3] = {NULL};
     int termCount = 0;
@@ -148,56 +176,55 @@ bool reduce(Stack *stack)
         }
         termCount++;
     }
-    if (ruleDecider(terms, termCount))
-    {
-        Term *term;
-        StackNode *stackNode;
+    for (int i = 0; i < termCount; i++)
+        expression->childTerms[i] = terms[i];
 
-        term = initTerm(termCount == 1 ? terms[0]->value : NULL, EXPRESSION, NULL);
+    return termCount;
+}
+
+void changeTokenValue(Token *token, char *newValue)
+{
+    if (newValue && (strcmp(token->val, newValue) != 0))
+    {
+        token->val = realloc(token->val, strlen(newValue) + 1);
+        strcpy(token->val, newValue);
+    }
+}
+
+bool reduce(Stack *stack)
+{
+
+    Term *term;
+    term = initTerm(NULL, EXPRESSION, NULL);
+
+    int termCount = loadTermsToExpression(term, stack);
+    if (ruleDecider(term->childTerms, termCount))
+    {
+        StackNode *stackNode;
         stackNode = initNode(term);
-        for (int i = 0; i < termCount; i++)
-            term->childTerms[i] = terms[i];
+
         if (termCount == 3)
         {
-            if (term->childTerms[0]->type == L_BRACKET)
+
+            term->type = convertTypesInReduce(term->childTerms[0], term->childTerms[1], term->childTerms[2]);
+            for (int i = 0; i < 3; i++)
             {
-                term->type = term->childTerms[1]->type;
-            }
-            else if (term->childTerms[0]->type == I_FLOAT || term->childTerms[2]->type == I_FLOAT)
-            {
-                term->childTerms[0]->type = I_FLOAT;
-                term->childTerms[2]->type = I_FLOAT;
-                term->type = I_FLOAT;
-            }
-            else if (term->childTerms[0]->type == I_INT || term->childTerms[2]->type == I_INT)
-            {
-                if (term->childTerms[1]->value && term->childTerms[1]->value[0] == '/')
+
+                if (term->childTerms[i]->value)
                 {
-                    term->type = I_FLOAT;
-                }
-                else
-                {
-                    term->type = I_INT;
-                }
-            }
-            else if (term->childTerms[0]->type == I_STRING && term->childTerms[2]->type == I_STRING)
-            {
-                term->type = I_STRING;
-            }
-            for (int i = 0; i < termCount; i++)
-            {
-                if (term->childTerms[i]->originalToken && term->childTerms[i]->value && term->childTerms[i]->type != L_BRACKET && term->childTerms[i]->type != R_BRACKET)
-                {
-                    if (term->childTerms[i]->type == I_FLOAT)
+                    if (term->childTerms[i]->originalToken->t != VAR_ID)
                     {
-                        term->childTerms[i]->originalToken->t = FLOAT;
+                        term->childTerms[i]->originalToken->t = convertTermToTokenType(term->childTerms[i]->type, term->childTerms[i]->originalToken->t);
+                        changeTokenValue(term->childTerms[i]->originalToken, term->childTerms[i]->value);
                     }
+
                     codeGeneration(term->childTerms[i]->originalToken);
                 }
             }
         }
         else
         {
+            changeTermValue(term, term->childTerms[0]->value);
             term->originalToken = term->childTerms[0]->originalToken;
             term->type = term->childTerms[0]->type;
         }
@@ -212,6 +239,156 @@ bool reduce(Stack *stack)
     }
 }
 
+int convertTypesInReduce(Term *t1, Term *operator, Term * t2)
+{
+
+    if (t1->type == L_BRACKET && t2->type == R_BRACKET)
+    {
+        return convertBrackets(operator);
+    }
+
+    switch (operator->type)
+    {
+    case PLUS_MINUS:
+        return convertPlusMinusMul(t1, t2);
+    case MULT_DIV:
+        if (operator->value[0] == '/')
+        {
+            return convertDiv(t1, t2);
+        }
+        else
+        {
+            return convertPlusMinusMul(t1, t2);
+        }
+    case CONCAT:
+        return convertDot(t1, t2);
+    case COMPARE:
+    case EQUALS:
+        return convertCompareEquals(t1, t2);
+    default:
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "convertTypesInReduce");
+        break;
+    }
+}
+
+int convertPlusMinusMul(Term *t1, Term *t2)
+{
+    if (t1->type == I_STRING || t2->type == I_STRING)
+    {
+        FREE_EXIT(7, ERROR_7_INCOMPATIBLE_TYPE, "");
+    }
+    else if (t1->type == I_FLOAT || t2->type == I_FLOAT)
+    {
+        if (t1->type == I_NULL)
+        {
+            changeTermValue(t1, "0.0");
+        }
+        if (t2->type == I_NULL)
+        {
+            changeTermValue(t2, "0.0");
+        }
+        t1->type = I_FLOAT;
+        t2->type = I_FLOAT;
+        return FLOAT;
+    }
+    else
+    {
+        if (t1->type == I_NULL)
+        {
+            changeTermValue(t1, "0");
+        }
+        if (t2->type == I_NULL)
+        {
+            changeTermValue(t2, "0");
+        }
+        t1->type = I_INT;
+        t2->type = I_INT;
+        return I_INT;
+    }
+}
+
+int convertDiv(Term *t1, Term *t2)
+{
+    if (t1->type == I_STRING || t2->type == I_STRING)
+    {
+        FREE_EXIT(7, ERROR_7_INCOMPATIBLE_TYPE, "");
+    }
+
+    if (t1->type == I_NULL)
+    {
+        changeTermValue(t1, "0.0");
+    }
+    if (t2->type == I_NULL)
+    {
+        changeTermValue(t2, "0.0");
+    }
+    t1->type = I_FLOAT;
+    t2->type = I_FLOAT;
+    return I_FLOAT;
+}
+
+int convertDot(Term *t1, Term *t2)
+{
+    if (!(t1->type == I_STRING || t1->type == I_NULL) || !(t1->type == I_STRING || t1->type == I_NULL))
+    {
+        FREE_EXIT(7, ERROR_7_INCOMPATIBLE_TYPE, "");
+    }
+    if (t1->type == I_NULL)
+    {
+        changeTermValue(t1, "");
+    }
+    if (t1->type == I_NULL)
+    {
+        changeTermValue(t1, "");
+    }
+    t1->type = I_STRING;
+    t2->type = I_STRING;
+    return I_STRING;
+}
+
+int convertCompareEquals(Term *t1, Term *t2)
+{
+    if (t1->type == I_STRING || t2->type == I_STRING)
+    {
+        if (!(t1->type == I_STRING || t1->type == I_NULL) || !(t1->type == I_STRING || t1->type == I_NULL))
+        {
+            FREE_EXIT(7, ERROR_7_INCOMPATIBLE_TYPE, "");
+        }
+    }
+    else if (t1->type == I_FLOAT || t2->type == I_FLOAT)
+    {
+        if (t1->type == I_NULL)
+        {
+            changeTermValue(t1, "0.0");
+        }
+        if (t2->type == I_NULL)
+        {
+            changeTermValue(t2, "0.0");
+        }
+        t1->type = I_FLOAT;
+        t2->type = I_FLOAT;
+    }
+    else if (t1->type == I_INT || t2->type == I_INT)
+    {
+        if (t1->type == I_NULL)
+        {
+            changeTermValue(t1, "0");
+        }
+        if (t2->type == I_NULL)
+        {
+            changeTermValue(t2, "0");
+        }
+        t1->type = I_INT;
+        t2->type = I_INT;
+    }
+    return BOOL;
+}
+
+int convertBrackets(Term *t)
+{
+    return t->type;
+}
+
 bool ruleDecider(Term *terms[3], int termCount)
 {
     if (termCount == 1)
@@ -220,6 +397,11 @@ bool ruleDecider(Term *terms[3], int termCount)
     }
     else if (termCount == 3)
     {
+        if (terms[0]->type == BOOL || terms[2]->type == BOOL)
+        {
+            FREE_EXIT(7, ERROR_7_INCOMPATIBLE_TYPE, "");
+        }
+
         return (ruleMultDiv(terms[0], terms[1], terms[2]) ||
                 rulePlusMinus(terms[0], terms[1], terms[2]) ||
                 ruleConcat(terms[0], terms[1], terms[2]) ||
@@ -235,7 +417,7 @@ bool ruleDecider(Term *terms[3], int termCount)
 
 bool ruleIdentifier(Term *t)
 {
-    if (t->type != I_FLOAT && t->type != I_INT && t->type != I_STRING)
+    if (t->type != I_FLOAT && t->type != I_INT && t->type != I_STRING && t->type != I_NULL)
     {
         return false;
     }
@@ -244,6 +426,7 @@ bool ruleIdentifier(Term *t)
 
 bool rulePlusMinus(Term *t1, Term *operator, Term * t2)
 {
+
     if (operator->type != PLUS_MINUS)
     {
         return false;
@@ -254,6 +437,7 @@ bool rulePlusMinus(Term *t1, Term *operator, Term * t2)
     case I_INT:
     case I_FLOAT:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -266,6 +450,7 @@ bool rulePlusMinus(Term *t1, Term *operator, Term * t2)
     case I_INT:
     case I_FLOAT:
     case EXPRESSION:
+    case I_NULL:
 
         break;
 
@@ -288,6 +473,7 @@ bool ruleConcat(Term *t1, Term *operator, Term * t2)
     {
 
     case I_STRING:
+    case I_NULL:
         break;
 
     default:
@@ -298,6 +484,7 @@ bool ruleConcat(Term *t1, Term *operator, Term * t2)
     switch (t2->type)
     {
     case I_STRING:
+    case I_NULL:
         break;
 
     default:
@@ -320,6 +507,7 @@ bool ruleMultDiv(Term *t1, Term *operator, Term * t2)
     case I_INT:
     case I_FLOAT:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -332,6 +520,7 @@ bool ruleMultDiv(Term *t1, Term *operator, Term * t2)
     case I_INT:
     case I_FLOAT:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -355,6 +544,7 @@ bool ruleBracket(Term *leftBracket, Term *t1, Term *rightBracket)
     case I_FLOAT:
     case I_STRING:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -378,6 +568,7 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2)
     case I_FLOAT:
     case I_STRING:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -391,6 +582,7 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2)
     case I_FLOAT:
     case I_STRING:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -414,6 +606,7 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
     case I_FLOAT:
     case I_STRING:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -427,6 +620,7 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
     case I_FLOAT:
     case I_STRING:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -446,7 +640,6 @@ bool freeAndReturn(bool success, Stack *stack)
 bool bottomUp(Expression *exp, int *resultType)
 {
 
-    *resultType = 0;
     int currentExpPos = 0;
 
     Term *startTerm = initTerm("$", TOP_BOTTOM, NULL);
@@ -462,23 +655,18 @@ bool bottomUp(Expression *exp, int *resultType)
 
     while (currentExpPos < exp->arrayLen)
     {
-
         Term *newTerm;
         StackNode *newStackNode;
         int expType;
         if (exp->tokenArray[currentExpPos]->t == VAR_ID)
         {
-            // SEMANTIC CHECK
-            htab_pair_t *pair = htab_search(symTable, exp->tokenArray[currentExpPos]->val);
-            if (pair && pair->variable)
+            SymVariable *variable = getVariable(exp->tokenArray[currentExpPos]->val);
+            if (!variable)
             {
-                expType = convertTokenToTermType(pair->variable->t);
+                FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, exp->tokenArray[currentExpPos]->val)
             }
-            else
-            {
 
-                FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, exp->tokenArray[currentExpPos]->val);
-            }
+            expType = convertTokenToTermType(variable->type);
         }
         else
         {
@@ -514,7 +702,10 @@ bool bottomUp(Expression *exp, int *resultType)
             break;
 
         case '>':
-            reduce(stack);
+            if (!reduce(stack))
+            {
+                FREE_EXIT(2, ERROR_2_SYNTACTIC, "in expression");
+            }
 
             break; // TODO throw error when false
 
@@ -524,24 +715,28 @@ bool bottomUp(Expression *exp, int *resultType)
             push(stack, newStackNode);
             currentExpPos++;
             break;
+
         case 0:
-            switch (stack->top->term->type)
+            if (resultType)
             {
-            case I_INT:
+                switch (stack->top->term->type)
+                {
+                case I_INT:
+                    *resultType = INT;
+                    break;
+                case I_FLOAT:
 
-                *resultType = INT;
-                break;
-            case I_FLOAT:
+                    *resultType = FLOAT;
+                    break;
+                case I_STRING:
+                    *resultType = STRING;
+                    break;
 
-                *resultType = FLOAT;
-                break;
-            case I_STRING:
-                *resultType = STRING;
-                break;
-
-            default:
-                break;
+                default:
+                    break;
+                }
             }
+
             return freeAndReturn(true, stack);
 
         default:

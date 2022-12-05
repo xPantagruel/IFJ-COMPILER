@@ -135,20 +135,21 @@ void addCharToToken(int c, Token *token)
         //     backslashset = 1;
         // }
 
-        if (c == 't' && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2')
+        if (c == 't' && token->valLen >= 4 && token->val[token->valLen - 4] == '\\' && token->val[token->valLen - 3] == '0' && token->val[token->valLen - 2] == '9' && token->val[token->valLen - 1] == '2')
         { // {\,t} -> {\t}
-            //changeLastChar('\t', token);
-            token->val[token->valLen-3] = '0';
-            token->val[token->valLen-2] = '0';
-            token->val[token->valLen-1] = '9';
+            // changeLastChar('\t', token);
+            token->val[token->valLen - 3] = '0';
+            token->val[token->valLen - 2] = '0';
+            token->val[token->valLen - 1] = '9';
         }
         // else if (c == '"' && token->val[strlen(token->val) - 1] == '\\')
         // { // {\,"} -> {"}
         //     changeLastChar('"', token);
         // }
         // else
-        else {
-            //backslashset = 0;
+        else
+        {
+            // backslashset = 0;
             token->val = strncat(token->val, tmp, 1);
         }
     }
@@ -490,25 +491,28 @@ Token *getToken()
                     {
 
                     case '"':
-                        if (token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2')
+                        if (token->valLen >= 4 && token->val[token->valLen - 4] == '\\' && token->val[token->valLen - 3] == '0' && token->val[token->valLen - 2] == '9' && token->val[token->valLen - 1] == '2')
                         { // char " in string
                             changeLastChar('"', token);
-                            //addCharToToken(c, token);
+                            // addCharToToken(c, token);
                         }
                         else
                         { // end of string
-                            if (token->val == NULL) {
+                            if (token->val == NULL)
+                            {
                                 addCharToToken('n', token);
                                 addCharToToken('u', token);
                                 addCharToToken('l', token);
                                 addCharToToken('l', token);
                                 addTypeToToken(NULL_KEYWORD, token);
                                 addRowToToken(row, token);
-                            } else {
+                            }
+                            else
+                            {
                                 addTypeToToken(STRING, token);
                                 addRowToToken(row, token);
                             }
-                            
+
                             actualState = START;
                             tokenFound = 1;
                         }
@@ -526,10 +530,13 @@ Token *getToken()
                     default: // other chars
                         if ((0 <= c && c <= 32) || c == 35 || c == 92)
                         {
-                            if (c == 92 && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2' && backslashset == 0) {
+                            if (c == 92 && token->valLen >= 4 && token->val[token->valLen - 4] == '\\' && token->val[token->valLen - 3] == '0' && token->val[token->valLen - 2] == '9' && token->val[token->valLen - 1] == '2' && backslashset == 0)
+                            {
                                 backslashset = 1;
                                 break;
-                            } else {
+                            }
+                            else
+                            {
                                 backslashset = 0;
                             }
 
@@ -550,7 +557,8 @@ Token *getToken()
                 // end of case 0
                 default: // is number
                     // check hex. escape seq.
-                    if (token->val != NULL && strlen(token->val) != 0) {
+                    if (token->val != NULL && strlen(token->val) != 0)
+                    {
                         if (token->val[strlen(token->val) - 1] == 'x' && token->val[strlen(token->val) - 2] == '\\')
                         { // "\xNN"
 
@@ -570,7 +578,9 @@ Token *getToken()
                         {
                             addCharToToken(c, token);
                         }
-                    } else {
+                    }
+                    else
+                    {
                         addCharToToken(c, token);
                     }
                     break;
@@ -589,11 +599,14 @@ Token *getToken()
                 }
                 else
                 {
-                    if (c == 'n' && token->valLen >= 4 && token->val[token->valLen-4] == '\\' && token->val[token->valLen-3] == '0' && token->val[token->valLen-2] == '9' && token->val[token->valLen-1] == '2') {
-                            token->val[token->valLen-1] = '0';
-                            token->val[token->valLen-2] = '1';
-                            token->val[token->valLen-3] = '0';
-                    } else {
+                    if (c == 'n' && token->valLen >= 4 && token->val[token->valLen - 4] == '\\' && token->val[token->valLen - 3] == '0' && token->val[token->valLen - 2] == '9' && token->val[token->valLen - 1] == '2')
+                    {
+                        token->val[token->valLen - 1] = '0';
+                        token->val[token->valLen - 2] = '1';
+                        token->val[token->valLen - 3] = '0';
+                    }
+                    else
+                    {
                         addCharToToken(c, token);
                     }
                 }
@@ -940,10 +953,13 @@ Token *getToken()
                     // { // must be e before -
                     //     error(1, token);
                     // }
-                    if (token->val[strlen(token->val) - 1] == 'e') {
+                    if (token->val[strlen(token->val) - 1] == 'e')
+                    {
                         actualState = NUM_NEEDED_S;
                         addCharToToken(c, token);
-                    } else {
+                    }
+                    else
+                    {
                         actualState = START;
                         addRowToToken(row, token);
                         addTypeToToken(t, token);
@@ -1136,8 +1152,6 @@ Token *getToken()
             // end of switch by actualState
         }
     }
-
-    //printf("%s-SCANNER\n", token->val);
     return token;
 }
 /*** End of scanner.c ***/

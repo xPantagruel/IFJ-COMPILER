@@ -57,7 +57,8 @@ enum type
     NOT_EQ,           // !==
     STRING,           // "string \x1F"
     COLON,            // :
-    ANY
+    DYNAMIC,
+    BOOL
 }; // end of enum type
 
 /** states of FSM */

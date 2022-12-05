@@ -6,100 +6,321 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "frames.h"
 #include "scanner.h"
+#include "parser.h"
 
 #define SYMTABLE_SIZE 100
 
-enum VarType
+typedef enum
 {
-    NOTDEF_PARAM = -1,
-    FLOAT_PARAM = 26,
-    INT_PARAM = 25,
-    STRING_PARAM = 34,
-};
+    DECLARED_FUNCTION,
+    DECLARED_VARIABLE
+} DeclaredType;
 
-// Tabulka:
-typedef struct htab htab_t; // typedef podle zadání
+typedef struct symTable SymTable;
+extern SymTable *symTable;
 
-// Typy:
-typedef const char *htab_key_t; // typ klíče
-typedef int htab_value_t;       // typ hodnoty
-typedef struct frame Frame;
-typedef struct function_param function_param_t;
-typedef struct htab_function htab_function_t;
-typedef struct htab_variable htab_variable_t;
-
-extern htab_t *symTable;
-// Dvojice dat v tabulce:
-typedef struct htab_pair
+typedef struct symFunctionReturn
 {
-    htab_key_t key; // klíč
-    htab_function_t *function;
-    htab_variable_t *variable;
-} htab_pair_t; // typedef podle zadání
-
-// definícia štruktúry pre položku v poli
-typedef struct htab_item
-{
-    htab_pair_t *pair;
-    struct htab_item *next;
-} htab_item_t;
-
-typedef struct function_param
-{
-    enum type t;
-    char *name;
+    enum type type;
     bool canBeNull;
-} function_param_t;
-
-typedef struct htab_function
+} SymFunctionReturn;
+typedef struct symFunctionParam
 {
-    function_param_t **params;
+    char *name;
+    enum type type;
+    bool canBeNull;
+} SymFunctionParam;
+typedef struct symVariable
+{
+    char *name;
+    enum type type;
+} SymVariable;
+
+typedef struct symFunction
+{
+    SymFunctionParam **params;
     char *name;
     int paramCount;
-    function_param_t *returnType;
-} htab_function_t;
+    SymFunctionReturn *returnType;
+} SymFunction;
 
-typedef struct htab_variable
+typedef struct symItem SymItem;
+
+typedef struct symItem
 {
+    char *key;
+    SymFunction *function;
+    SymVariable *variable;
+    SymItem *next;
+} SymItem;
+
+typedef struct currentlyDeclaredObject
+{
+    DeclaredType objectType;
+    union
+    {
+        SymFunction *function;
+        SymVariable *variable;
+    };
+} CurrentlyDeclaredObject;
+
+typedef struct frame
+{
+    int size;
+    SymItem **items;
     char *name;
-    Frame *frame;
-    enum type t;
-    bool canBeNull;
-} htab_variable_t;
-
-// definícia štruktúry pre položku v poli
-struct htab
+    bool returnFound;
+} Frame;
+typedef struct symTable
 {
-    size_t size;
-    size_t arr_size;
-    htab_item_t **ptr_arr;
-};
+    Frame *topFrame;
+    Frame *mainFrame;
+    CurrentlyDeclaredObject **currentlyDeclared;
+    int currentlyDeclaredCount;
+} SymTable;
 
-// Rozptylovací (hash) funkce (stejná pro všechny tabulky v programu)
-// Pokud si v programu definujete stejnou funkci, použije se ta vaše.
-size_t htab_hash_function(htab_key_t str);
+/**
+ * @brief Initializes symTable including main frame
+ *
+ * @return pointer to initialized symTable
+ */
+SymTable *initSymTable();
 
-// Funkce pro práci s tabulkou:
-htab_t *htab_init(size_t n);               // konstruktor tabulky
-size_t htab_size(const htab_t *t);         // počet záznamů v tabulce
-size_t htab_bucket_count(const htab_t *t); // velikost pole
+/**
+ * @brief Initilazizes a new frame and attaches it to symTable
+ *
+ * @param name name of the frame
+ * @param symTable to attach frame to
+ * @return pointer to initialized symTable
+ */
+Frame *initFrame(char *name);
 
-htab_pair_t *htab_find(htab_t *t, htab_key_t key); // hledání
-htab_pair_t *htab_lookup_add(htab_t *t, htab_key_t key, Frame *frame);
-htab_pair_t *htab_add_function(htab_t *t, htab_key_t name, function_param_t *returnType, function_param_t **params, int paramCount);
-function_param_t *htab_add_parameter(htab_function_t *function);
-function_param_t *htab_add_return_type(htab_function_t *function);
-htab_pair_t *htab_add_variable(htab_t *t, htab_key_t name, Frame *frame, enum type type);
-htab_pair_t *htab_search(htab_t *t, htab_key_t key);
-int htab_erase_function(htab_function_t *f, int paramCount);
-int htab_erase_variable(htab_variable_t *v);
+/**
+ * @brief Initilazizes a new symItem
+ *
+ * @param key item key
+ * @return pointer to initialized symItem
+ */
+SymItem *initSymItem(char *key);
 
-bool htab_erase(htab_t *t, htab_key_t key); // ruší zadaný záznam
-void htab_print(htab_t *t);
-void htab_clear(htab_t *t); // ruší všechny záznamy
-void htab_free(htab_t *t);  // destruktor tabulky
+/**
+ * @brief Initilazizes a new function
+ *
+ * @param name function name
+ * @return pointer to initialized function
+ */
+SymFunction *initSymFunction(char *name);
 
-void addBuiltInToSymtable();
+/**
+ * @brief Initilazizes a new variable
+ *
+ * @param name function name
+ * @return pointer to initialized variable
+ */
+SymVariable *initSymVariable(char *name);
+
+/**
+ * @brief Adds symItem to top frame inside symTable
+ *
+ * @param key item key
+ * @param variable pointer to variable to attach to the item
+ * @param function pointer to function to attach to the item
+ * @return pointer to added symItem
+ */
+SymItem *addSymItem(char *key, SymFunction *function, SymVariable *variable);
+
+/**
+ * @brief Adds function to top frame inside symTable
+ *
+ * @param key function name
+ * @return pointer to added function or NULL if the item already exists
+ */
+SymFunction *addSymFunction(char *key);
+
+/**
+ * @brief Declares function
+ *
+ * @param name function name
+ *
+ * @throw 3 if function is already declared
+ *
+ * @return pointer to added function
+ */
+SymFunction *declareFunction(char *name);
+
+/**
+ * @brief Adds variable to top frame inside symTable, if the variable already exists returns it
+ *
+ * @param key function name
+ * @return pointer to added/existing variable
+ */
+SymVariable *addSymVariable(char *key);
+
+/**
+ * @brief Add new param with its type to an existing function
+ *
+ * @param function to add param to
+ * @param type of the param
+ * @param canBeNull indicates if null can be passed as param
+ * @return added param
+ */
+SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, bool canBeNull);
+
+/**
+ * @brief Checks if param has correct type
+ *
+ * @param function to check param against
+ * @param type of the param
+ * @param paramIndex index of param inside function call
+ * @return checked param
+ */
+SymFunctionParam *checkFunctionParam(SymFunction *function, char *value, enum type type, int paramIndex);
+
+/**
+ * @brief Checks if function call has correct number of params
+ *
+ * @param function to check param count against
+ * @param paramCount number of params inside function call
+ */
+void checkFunctionParamCount(SymFunction *function, int paramCount);
+
+/**
+ * @brief Add new param with its type to an existing function
+ *
+ * @param function to add return to
+ * @param type of the return
+ * @param canBeNull indicates if null can be returned
+ * @return added return
+ */
+SymFunctionReturn *addSymFunctionReturn(SymFunction *function, enum type type, bool canBeNull);
+
+/**
+ * @brief names function param
+ *
+ * @param param to name
+ * @param name what to name param
+ * @return pointer to initialized function
+ */
+void nameSymFunctionParam(SymFunction *function, SymFunctionParam *param, char *name);
+
+/**
+ * @brief creates varibles from function params and attaches them to symtable
+ *
+ * @param function to create variables in
+ */
+void addFunctionLocalVariables(SymFunction *function);
+
+/**
+ * @brief Searches top frame inside symtable for item with key
+ *
+ * @param key searched key
+ * @return pointer to item or null if item doesn't exits
+ */
+SymItem *getItem(char *key);
+
+/**
+ * @brief Searches top frame inside symtable for function with key
+ *
+ * @param key searched key
+ * @return pointer to function or null if item doesn't exits
+ */
+SymFunction *getFunction(char *key);
+
+/**
+ * @brief Searches top frame inside symtable for variable with key
+ *
+ * @param key searched key
+ * @return pointer to variable or null if item doesn't exits
+ */
+SymVariable *getVariable(char *key);
+
+/**
+ * @brief checks if function if correctly called
+ *
+ * @throw 3 if function doesn't exist
+ */
+SymFunction *checkFunctionCall(char *name);
+
+/**
+ * @brief checks if function returs correct type
+ *
+ * @throw 2 when types doesn't match
+ */
+void checkReturnType(SymFunction *function, enum type type);
+
+/**
+ * @brief frees allocated resources of the function
+ *
+ * @param function to free
+ */
+void freeSymFunction(SymFunction *function);
+
+/**
+ * @brief frees allocated resources of the variable
+ *
+ * @param variable to free
+ */
+void freeSymVariable(SymVariable *variable);
+
+/**
+ * @brief frees allocated resources of the item
+ *
+ * @param item to free
+ */
+void freeSymItem(SymItem *item);
+
+/**
+ * @brief frees allocated resources of the frame
+ *
+ * @param frame to free
+ */
+void freeFrame(Frame *frame);
+
+/**
+ * @brief frees allocated resources of symTable
+ *
+ */
+void freeSymTable();
+
+/**
+ * @brief pushes variable or function to currentlyDeclared array in symTable
+ *
+ * @param object var or function to push
+ */
+void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, DeclaredType objectType);
+
+/**
+ * @brief peeks variable or function from currentlyDeclared array in symTable
+ *
+ * @return var or function on top of currentlyDeclared stack
+ */
+CurrentlyDeclaredObject *peekCurrentlyDeclared();
+
+/**
+ * @brief peeks function from currentlyDeclared array in symTable
+ *
+ * @return function on top of currentlyDeclared stack or null when top not function
+ */
+SymFunction *peekCurrentlyDeclaredFunction();
+
+/**
+ * @brief peeks variable from currentlyDeclared array in symTable
+ *
+ * @return function on top of currentlyDeclared stack or null when top not variable
+ */
+SymVariable *peekCurrentlyDeclaredVariable();
+
+/**
+ * @brief pops variable or function from currentlyDeclared array in symTable
+ *
+ */
+void popCurrentlyDeclared();
+
+void printSymVariable(SymVariable *variable);
+
+void printSymFunction(SymFunction *function);
+
+void printSymTable();
+
 #endif

@@ -1,4 +1,13 @@
 <<<<<<< HEAD
+<?php
+declare(strict_types=1);
+$x = "a";
+$x = ord($x);
+$y = "";
+$y = ord($y);
+write($x, $y);
+=======
+<<<<<<< HEAD
 .IFJcode22
 JUMP $main
 
@@ -89,3 +98,4 @@ if(4) {
 } else {
 }
 >>>>>>> ea7ee8fd14384ce6a40d4de792b75b106b032248
+>>>>>>> 5dc4c243e5138438831eb268b99aa0fcabd6e512

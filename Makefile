@@ -7,7 +7,7 @@ run: parser
 	./parser
 
 copy:
-	sshpass -p ${pass} scp -r /home/xpetri25/School/IFJ/IFJ xpetri25@merlin.fit.vutbr.cz:/homes/eva/xp/xpetri25/ifj
+	sshpass -p ${pass} rsync -a  /home/xpetri25/School/IFJ/IFJ xpetri25@merlin.fit.vutbr.cz:/homes/eva/xp/xpetri25/ifj --exclude='tests' --exclude='.git'
 
 test: 
 	python3 test.py ./parser
@@ -15,8 +15,8 @@ test:
 memcheck: parser
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./parser < testFile.txt
 
-parser: parser.o scanner.o bottomUp.o stack.o symtable.o frames.o code_generation.o
-	$(CC) $(CFLAGS) parser.o scanner.o bottomUp.o stack.o symtable.o frames.o code_generation.o -o parser
+parser: parser.o scanner.o bottomUp.o stack.o symtable.o code_generation.o builtInFunctions.o
+	$(CC) $(CFLAGS) parser.o scanner.o bottomUp.o stack.o symtable.o code_generation.o builtInFunctions.o -o parser
 
 parser.o: parser.c
 	$(CC) $(CFLAGS) -c parser.c -o parser.o
@@ -33,8 +33,9 @@ scanner.o: scanner.c
 symtable.o: symtable.c
 	$(CC) $(CFLAGS) -c symtable.c -o symtable.o
 
-frames.o: frames.c
-	$(CC) $(CFLAGS) -c frames.c -o frames.o
+builtInFunctions.o: builtInFunctions.c
+	$(CC) $(CFLAGS) -c builtInFunctions.c -o builtInFunctions.o
+
 
 code_generation.o: code_generation.c
 	$(CC) $(CFLAGS) -c code_generation.c -o code_generation.o
