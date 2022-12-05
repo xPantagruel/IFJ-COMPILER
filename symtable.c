@@ -122,6 +122,7 @@ SymItem *addSymItem(char *key, SymFunction *function, SymVariable *variable)
 
 SymFunction *addSymFunction(char *key)
 {
+
     SymItem *item = getItem(key);
 
     if (item)
@@ -153,7 +154,6 @@ SymFunction *declareFunction(char *name)
     else
     {
         function = addSymFunction(name);
-        pushCurrentlyDeclared(function, NULL, DECLARED_FUNCTION);
     }
 }
 
@@ -201,7 +201,7 @@ SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, boo
             param->type = STRING;
             break;
         default:
-            break;
+            param->type = type;
         }
         param->name = NULL;
         param->canBeNull = canBeNull;
@@ -216,12 +216,13 @@ SymFunctionParam *addSymFunctionParam(SymFunction *function, enum type type, boo
 
 SymFunctionParam *checkFunctionParam(SymFunction *function, char *value, enum type type, int paramIndex)
 {
+
     if (!function)
     {
         FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "checkFunctionParam");
     }
 
-    if (paramIndex >= function->paramCount)
+    if (function->paramCount != -1 && paramIndex >= function->paramCount)
     {
         FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
     }
@@ -236,12 +237,28 @@ SymFunctionParam *checkFunctionParam(SymFunction *function, char *value, enum ty
 
         type = variable->type;
     }
-
-    if (function->params[paramIndex]->type != type)
+    printf("TYPE: %d\n", type);
+    if (function->paramCount == -1)
     {
-        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
+        return NULL;
     }
-    return function->params[paramIndex];
+
+    if (function->params[paramIndex]->canBeNull && type == NULL_KEYWORD)
+    {
+        return function->params[paramIndex];
+    }
+
+    if (function->params[paramIndex]->type == DYNAMIC && (type == FLOAT || type == INT))
+    {
+        return function->params[paramIndex];
+    }
+
+    if (function->params[paramIndex]->type == type)
+    {
+        return function->params[paramIndex];
+    }
+    printf("FUCK\n");
+    FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
 }
 
 void checkFunctionParamCount(SymFunction *function, int paramCount)
@@ -251,7 +268,7 @@ void checkFunctionParamCount(SymFunction *function, int paramCount)
         FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "checkFunctionParamCount");
     }
 
-    if (function->paramCount != paramCount)
+    if (function->paramCount != -1 && function->paramCount != paramCount)
     {
         FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
     }
@@ -277,11 +294,8 @@ SymFunctionReturn *addSymFunctionReturn(SymFunction *function, enum type type, b
         case STRING_TYPE:
             returnType->type = STRING;
             break;
-        case VOID:
-            returnType->type = VOID;
-            break;
         default:
-            break;
+            returnType->type = type;
         }
         returnType->canBeNull = canBeNull;
         function->returnType = returnType;
@@ -343,19 +357,22 @@ SymItem *getItem(char *key)
 
 SymFunction *getFunction(char *key)
 {
+    Frame *tmpFrame = symTable->topFrame;
+
+    symTable->topFrame = symTable->mainFrame;
     SymItem *item = getItem(key);
-    if (!item)
+    if (!item || !item->function)
     {
         return NULL;
     }
-
+    symTable->topFrame = tmpFrame;
     return item->function;
 }
 
 SymVariable *getVariable(char *key)
 {
     SymItem *item = getItem(key);
-    if (!item)
+    if (!item || !item->variable)
     {
         return NULL;
     }
@@ -365,6 +382,7 @@ SymVariable *getVariable(char *key)
 
 SymFunction *checkFunctionCall(char *name)
 {
+
     SymFunction *function = getFunction(name);
     if (!function)
     {
@@ -466,6 +484,7 @@ void freeSymTable()
 
 void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, DeclaredType objectType)
 {
+
     CurrentlyDeclaredObject *object = calloc(1, sizeof(CurrentlyDeclaredObject));
     object->objectType = objectType;
     if (objectType == DECLARED_FUNCTION)
@@ -482,7 +501,7 @@ void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, Declare
     }
     else
     {
-        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
+        FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "pushCurrentlyDeclared");
     }
 
     symTable->currentlyDeclaredCount++;
@@ -490,7 +509,7 @@ void pushCurrentlyDeclared(SymFunction *function, SymVariable *variable, Declare
 
 CurrentlyDeclaredObject *peekCurrentlyDeclared()
 {
-    if (symTable->currentlyDeclaredCount)
+    if (symTable->currentlyDeclaredCount > 0)
     {
         return symTable->currentlyDeclared[symTable->currentlyDeclaredCount - 1];
     }
@@ -571,6 +590,7 @@ void printSymVariable(SymVariable *variable)
 void printSymTable()
 {
     printf("--CURRENTLY DECLARED--\n");
+    printf("number of declared: %d\n", symTable->currentlyDeclaredCount);
     for (int i = 0; i < symTable->currentlyDeclaredCount; i++)
     {
         CurrentlyDeclaredObject *object = symTable->currentlyDeclared[i];

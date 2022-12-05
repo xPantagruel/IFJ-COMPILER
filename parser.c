@@ -15,6 +15,7 @@
 #include "parser.h"
 #include "symtable.h"
 #include "code_generation.h"
+#include "builtInFunctions.h"
 
 Expression *initExpression()
 {
@@ -86,6 +87,7 @@ bool function_declaration(Token *token)
     }
 
     // add return type to function
+
     SymFunction *function = peekCurrentlyDeclaredFunction();
     addSymFunctionReturn(function, token->t, token->val[0] == '?');
     // added return type to the function
@@ -114,7 +116,7 @@ bool function_declaration(Token *token)
     {                 // FUNCTION <function_call> : <type> { <statement>
         return false; // invalid statement
     }
-    // //codeGeneration(token);
+    // //// codeGeneration(token);
     dtorToken(token);
     token = getToken();
     if (token->t != R_CPAR)
@@ -128,6 +130,12 @@ bool function_declaration(Token *token)
     {
         FREE_EXIT(99, ERROR_99_INTERNAL_ERROR, "");
     }
+
+    if (function->returnType->type != VOID && !topFrame->returnFound)
+    {
+        FREE_EXIT(4, ERROR_4_FUNCTION_INCORRECT_CALL, function->name);
+    }
+
     freeFrame(topFrame);
     // pop currently declared function
     popCurrentlyDeclared();
@@ -156,7 +164,7 @@ bool prog(Token *token)
         {                 //<prog> -> <statement>
             return false; // invalid statement
         }
-        // //codeGeneration(token);
+        // //// codeGeneration(token);
         dtorToken(token);
         token = getToken();
         if (prog(token))
@@ -226,7 +234,6 @@ int params(Token *token, int paramIndex)
         { // epsilon
             ungetc(')', stdin);
             checkFunctionParamCount(function, paramIndex);
-            popCurrentlyDeclared();
 
             return 1;
         }
@@ -287,9 +294,9 @@ int params(Token *token, int paramIndex)
     }
     else
     { // epsilon
+
         SymFunction *function = peekCurrentlyDeclaredFunction();
         checkFunctionParamCount(function, 0);
-        popCurrentlyDeclared();
         ungetc(')', stdin);
         return 2;
     }
@@ -314,7 +321,7 @@ int params_n(Token *token)
     }
 }
 
-int expression(Token *token)
+int expression(Token *token, enum type *returnType)
 {
     Expression *exp = initExpression();
     int count = 0;
@@ -345,25 +352,25 @@ int expression(Token *token)
         ungetc(')', stdin);
     }
 
-    /* if (exp->arrayLen == 1)
+    if (exp->arrayLen == 1)
     {
         if (exp->tokenArray[0]->val == NULL)
         {
             exp->tokenArray[0]->t = INT;
             addCharToToken('0', exp->tokenArray[0]);
-            //codeGeneration(exp->tokenArray[0]);
+            // codeGeneration(exp->tokenArray[0]);
         }
         else
         {
-            //codeGeneration(exp->tokenArray[0]);
-            if (currentSymbol && currentSymbol->variable)
+            // codeGeneration(exp->tokenArray[0]);
+            if (returnType)
             {
-                currentSymbol->variable->t = exp->tokenArray[0]->t;
+                *returnType = exp->tokenArray[0]->t;
             }
         }
 
         return 1;
-    } */
+    }
 
     if (exp->arrayLen != 0)
     {
@@ -373,13 +380,8 @@ int expression(Token *token)
             printf("%s exp\n", exp->tokenArray[i]->val);
         } */
 
-        int resultType;
-        if (bottomUp(exp, &resultType))
+        if (bottomUp(exp, returnType))
         {
-            /* if (currentSymbol && currentSymbol->variable)
-            {
-                currentSymbol->variable->t = resultType;
-            } */
 
             dtorExpression(exp);
             return 1;
@@ -408,7 +410,7 @@ int condition(Token *token)
         { // IF (
             // codeGeneration(token); // todo mozno tu dtor
             token = getToken();
-            if (expression(token))
+            if (expression(token, NULL))
             { // IF ( <expression>
                 // dtorToken(token);
                 token = getToken();
@@ -429,7 +431,7 @@ int condition(Token *token)
                             token = getToken();
                             if (token->t == R_CPAR)
                             { // IF ( <expression> ) { <statement> }
-                                // //codeGeneration(token);
+                                // //// codeGeneration(token);
                                 dtorToken(token);
                                 token = getToken();
                                 if (token->t == ELSE)
@@ -516,10 +518,12 @@ int function_call(Token *token, bool isDeclaration)
         if (isDeclaration)
         {
             // declares function with its name
-            declareFunction(token->val);
+            SymFunction *function = declareFunction(token->val);
+            pushCurrentlyDeclared(function, NULL, DECLARED_FUNCTION);
         }
         else
         {
+
             // checks if function exists
             SymFunction *function = checkFunctionCall(token->val);
             pushCurrentlyDeclared(function, NULL, DECLARED_FUNCTION);
@@ -543,6 +547,11 @@ int function_call(Token *token, bool isDeclaration)
 
                 if (token->t == R_PAR)
                 { // ID ( <params> )
+                    if (!isDeclaration)
+                    {
+                        popCurrentlyDeclared();
+                    }
+
                     return 1;
                 }
                 else
@@ -578,7 +587,7 @@ int while_rule(Token *token)
             // codeGeneration(token);
             dtorToken(token);
             token = getToken();
-            if (expression(token) == 1)
+            if (expression(token, NULL) == 1)
             { // while ( <expression>
                 // dtorToken(token);
                 token = getToken();
@@ -595,7 +604,7 @@ int while_rule(Token *token)
                         token = getToken();
                         if (statement(token))
                         { // while ( <expression> ) { <statement>
-                            // //codeGeneration(token);
+                            // //// codeGeneration(token);
                             dtorToken(token);
                             token = getToken();
                             if (token->t == R_CPAR)
@@ -655,16 +664,24 @@ int var_rule(Token *token)
     if (token->t == VAR_ID || token->t == STRING || token->t == INT || token->t == FLOAT || token->t == NULL_KEYWORD)
     { // <var_rule> (VAR_ID/STRING/INT/FLOAT/NULL)
 
+        if (token->t == VAR_ID)
+        {
+            SymVariable *assignedVariable = getVariable(token->val);
+            if (!assignedVariable)
+            {
+                // assigned variable doesn't exist
+                FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, token->val);
+            }
+        }
+
         return 2;
     }
     else if (token->t == ID)
     { // <var_rule> (<function_call> (ID))
-        SymFunction *function = getFunction(token->val);
+
         if (function_call(token, false) == 1)
         { // <var_rule> (<function_call>)
 
-            SymVariable *variable = peekCurrentlyDeclaredVariable();
-            variable->type = function->returnType->type;
             return 1;
         }
         else
@@ -674,7 +691,7 @@ int var_rule(Token *token)
     }
     else
     {
-        return 2;
+        return 0;
     }
 }
 
@@ -716,11 +733,11 @@ int statement(Token *token)
             // codeGeneration(token);
             dtorToken(token);
             token = getToken();
-
+            char *tmpString = calloc(strlen(token->val) + 1, 1);
+            strcpy(tmpString, token->val);
             if (token->t == VAR_ID)
             { // VAR_ID = VAR_ID
-                char *tmpString = calloc(strlen(token->val) + 1, 1);
-                strcpy(tmpString, token->val);
+
                 // if token == var_id -> can be <expression>
                 // storing previous token
                 Token *tmp = tokenInit();
@@ -768,8 +785,14 @@ int statement(Token *token)
                 else
                 {
                     pushTokenToStdin(token);
-                    if (expression(tmp) == 1)
+                    int returnType;
+                    if (expression(tmp, &returnType) == 1)
                     { // VAR_ID = <expression>
+
+                        // add expression result as variable type
+                        variable->type = returnType;
+                        popCurrentlyDeclared();
+                        free(tmpString);
                         token = getToken();
                         if (token->t == SEMICOL)
                         { // VAR_ID = <expression> ;
@@ -787,18 +810,25 @@ int statement(Token *token)
                         }
                         else
                         {
+                            free(tmpString);
                             return 0;
                         }
                     }
                     else
                     {
+                        free(tmpString);
                         return 0;
                     }
                 }
             }
             else if (var_rule(token) == 1)
             { // VAR_ID = <var_rule>
+
+                SymFunction *function = getFunction(tmpString);
+                variable->type = function->returnType->type;
+                // pop after var = function_call
                 popCurrentlyDeclared();
+                free(tmpString);
                 // codeGeneration(token);
                 dtorToken(token);
                 token = getToken();
@@ -823,8 +853,14 @@ int statement(Token *token)
             }
             else if (var_rule(token) == 2)
             {
-                if (expression(token) == 1)
+                int returnType;
+                if (expression(token, &returnType) == 1)
                 { // VAR_ID = <expression>
+
+                    // add expression result as variable type
+                    variable->type = returnType;
+                    popCurrentlyDeclared();
+                    free(tmpString);
                     // dtorToken(token);
                     token = getToken();
                     if (token->t == SEMICOL)
@@ -875,8 +911,21 @@ int statement(Token *token)
             {
                 // gets function which is currently being declared
                 SymFunction *function = peekCurrentlyDeclaredFunction();
+                if (symTable->topFrame->returnFound)
+                {
+                    FREE_EXIT(6, ERROR_6_FUNCTION_INCORRECT_RETURN, function->name);
+                }
+
                 // check if return type of that function is void
                 checkReturnType(function, VOID);
+                symTable->topFrame->returnFound = true;
+            }
+            else
+            {
+                if (symTable->topFrame->returnFound)
+                {
+                    FREE_EXIT(6, ERROR_6_FUNCTION_INCORRECT_RETURN, "");
+                }
             }
 
             // codeGeneration(token);
@@ -885,54 +934,39 @@ int statement(Token *token)
 
         else if (var_rule(token) == 1)
         { // RETURN <var_rule>
-
-            // if token == var_id -> can be <expression>
-            // storing previous token
-            Token *tmp = tokenInit();
-            addRowToToken(token->row, tmp);
-            addTypeToToken(token->t, tmp);
-            for (unsigned long i = 0; i < strlen(token->val); i++)
-            {
-                addCharToToken(token->val[i], tmp);
-            }
-            // codeGeneration(token);
-            dtorToken(token);
-            token = getToken();
-            if (token->t == SEMICOL)
-            { // RETURN <var_rule>;
-                // codeGeneration(token); // added
-                dtorToken(tmp);
-                return 1;
-            }
-            else
-            {
-                pushTokenToStdin(token);
-                if (expression(tmp) == 1)
-                { // RETURN <expression> in case that first token of expression is VAR_ID
-                    token = getToken();
-                    if (token->t == SEMICOL)
-                    {
-                        // codeGeneration(token); // added
-                        return 1;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-                else
-                {
-                    return 0;
-                }
-            }
+            return 0;
         }
         else if (var_rule(token) == 2)
         {
-            // //codeGeneration(token);
+            // //// codeGeneration(token);
             //  dtorToken(token);
             // token = getToken();
-            if (expression(token) == 1)
+            int returnType;
+            if (expression(token, &returnType) == 1)
             { // RETURN <expression>
+
+                if (symTable->topFrame != symTable->mainFrame)
+                {
+                    SymFunction *function = peekCurrentlyDeclaredFunction();
+
+                    // check if function hasn't been returned already
+                    if (symTable->topFrame->returnFound)
+                    {
+                        FREE_EXIT(6, ERROR_6_FUNCTION_INCORRECT_RETURN, function->name);
+                    }
+
+                    // check if return type of that function is void
+                    checkReturnType(function, returnType);
+                    symTable->topFrame->returnFound = true;
+                }
+                else
+                {
+                    if (symTable->topFrame->returnFound)
+                    {
+                        FREE_EXIT(6, ERROR_6_FUNCTION_INCORRECT_RETURN, "");
+                    }
+                }
+
                 // dtorToken(token); //todo tu mozno leak
                 token = getToken();
                 if (token->t == SEMICOL)
@@ -959,7 +993,7 @@ int statement(Token *token)
     { // <condtion> (IF)
         if (condition(token) == 1)
         { // <condition>
-            // //codeGeneration(token);
+            // //// codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
@@ -980,7 +1014,7 @@ int statement(Token *token)
     { //<while> (WHILE)
         if (while_rule(token) == 1)
         { // <while>
-            // //codeGeneration(token);
+            // //// codeGeneration(token);
             dtorToken(token);
             token = getToken();
             if (statement(token))
@@ -1069,8 +1103,7 @@ int statement(Token *token)
 int main()
 {
     symTable = initSymTable();
-    printSymTable();
-    // addBuiltInToSymtable();
+    addAllBuiltInFunctions();
     //  Example how parser can be called.
     DLL_Init(0);
     DLL_Init(1);
@@ -1079,7 +1112,6 @@ int main()
     Token *token = getToken();
     if (prog(token))
     {
-        printSymTable();
         // codeGeneration(token);
         dtorToken(token);
 

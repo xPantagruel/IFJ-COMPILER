@@ -1,18 +1,19 @@
 #include "bottomUp.h"
 
-int precedenceTable[11][11] = {
+int precedenceTable[12][12] = {
     //*/   +-.  CMP  EQ   (    )    I    F    S    $
-    {'>', '>', '>', '>', '>', '<', '>', '<', '<', '<', '>'}, // * /
-    {'<', '>', '>', '>', '>', '<', '>', '<', '<', '<', '>'},
-    {'<', '>', '>', '>', '>', '<', '>', '<', '<', '<', '>'}, // + - .
-    {'<', '<', '<', '>', '>', '<', '>', '<', '<', '<', '>'}, // CMP
-    {'<', '<', '<', '<', '>', '<', '>', '<', '<', '<', '>'}, // EQ
-    {'<', '<', '<', '<', '<', '<', '=', '<', '<', '<', -1},  // (
-    {'>', '>', '>', '>', '>', -1, '<', -1, -1, -1, '>'},     // )
-    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, '>'},
-    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, '>'},  // IDENTIFIER
-    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, '>'},  // IDENTIFIER
-    {'<', '<', '<', '<', '<', '<', -1, '<', '<', '<', 0}, //$
+    {'>', '>', '>', '>', '>', '<', '>', '<', '<', '<', '<', '>'}, // * /
+    {'<', '>', '>', '>', '>', '<', '>', '<', '<', '<', '<', '>'},
+    {'<', '>', '>', '>', '>', '<', '>', '<', '<', '<', '<', '>'}, // + - .
+    {'<', '<', '<', '>', '>', '<', '>', '<', '<', '<', '<', '>'}, // CMP
+    {'<', '<', '<', '<', '>', '<', '>', '<', '<', '<', '<', '>'}, // EQ
+    {'<', '<', '<', '<', '<', '<', '=', '<', '<', '<', '<', -1},  // (
+    {'>', '>', '>', '>', '>', -1, '<', -1, -1, -1, -1, '>'},      // )
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, -1, '>'},
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, -1, '>'}, // IDENTIFIER
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, -1, '>'},
+    {'>', '>', '>', '>', '>', -1, '>', -1, -1, -1, -1, '>'},   // IDENTIFIER
+    {'<', '<', '<', '<', '<', '<', -1, '<', '<', '<', '<', 0}, //$
 
 };
 
@@ -102,6 +103,8 @@ int convertTokenToTermType(int type)
     case NOT_EQ:
         return EQUALS;
         break;
+    case NULL_KEYWORD:
+        return I_NULL;
     default:
         return TOP_BOTTOM;
     }
@@ -192,7 +195,8 @@ bool reduce(Stack *stack)
                     {
                         term->childTerms[i]->originalToken->t = FLOAT;
                     }
-                    codeGeneration(term->childTerms[i]->originalToken);
+                    printf("TOKEN: %s\n", term->childTerms[i]->originalToken->val);
+                    // codeGeneration(term->childTerms[i]->originalToken);
                 }
             }
         }
@@ -378,6 +382,7 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2)
     case I_FLOAT:
     case I_STRING:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -391,6 +396,7 @@ bool ruleCompare(Term *t1, Term *operator, Term * t2)
     case I_FLOAT:
     case I_STRING:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -414,6 +420,7 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
     case I_FLOAT:
     case I_STRING:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -427,6 +434,7 @@ bool ruleEquals(Term *t1, Term *operator, Term * t2)
     case I_FLOAT:
     case I_STRING:
     case EXPRESSION:
+    case I_NULL:
         break;
 
     default:
@@ -446,7 +454,6 @@ bool freeAndReturn(bool success, Stack *stack)
 bool bottomUp(Expression *exp, int *resultType)
 {
 
-    *resultType = 0;
     int currentExpPos = 0;
 
     Term *startTerm = initTerm("$", TOP_BOTTOM, NULL);
@@ -462,12 +469,19 @@ bool bottomUp(Expression *exp, int *resultType)
 
     while (currentExpPos < exp->arrayLen)
     {
-
+        printBottomUp(stack, exp, currentExpPos);
         Term *newTerm;
         StackNode *newStackNode;
         int expType;
         if (exp->tokenArray[currentExpPos]->t == VAR_ID)
         {
+            SymVariable *variable = getVariable(exp->tokenArray[currentExpPos]->val);
+            if (!variable)
+            {
+                FREE_EXIT(5, ERROR_5_VARIABLE_NOT_DEFINED, exp->tokenArray[currentExpPos]->val)
+            }
+
+            expType = convertTokenToTermType(variable->type);
         }
         else
         {
@@ -513,24 +527,28 @@ bool bottomUp(Expression *exp, int *resultType)
             push(stack, newStackNode);
             currentExpPos++;
             break;
+
         case 0:
-            switch (stack->top->term->type)
+            if (resultType)
             {
-            case I_INT:
+                switch (stack->top->term->type)
+                {
+                case I_INT:
+                    *resultType = INT;
+                    break;
+                case I_FLOAT:
 
-                *resultType = INT;
-                break;
-            case I_FLOAT:
+                    *resultType = FLOAT;
+                    break;
+                case I_STRING:
+                    *resultType = STRING;
+                    break;
 
-                *resultType = FLOAT;
-                break;
-            case I_STRING:
-                *resultType = STRING;
-                break;
-
-            default:
-                break;
+                default:
+                    break;
+                }
             }
+
             return freeAndReturn(true, stack);
 
         default:

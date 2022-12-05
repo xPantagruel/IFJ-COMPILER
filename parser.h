@@ -19,7 +19,7 @@
 #define ERROR_3_FUNCTION_NOT_DEFINED_REDEFINED "Function %s not defined or can't be redefined\n"
 #define ERROR_4_FUNCTION_INCORRECT_CALL "Wrong type or number of arguments or return type in %s\n"
 #define ERROR_5_VARIABLE_NOT_DEFINED "Variable %s not defined\n"
-#define ERROR_6_FUNCTION_INCORRECT_RETURN
+#define ERROR_6_FUNCTION_INCORRECT_RETURN "Function %s does have incorrect number of returns\n"
 #define ERROR_7_INCOMPATIBLE_TYPE
 #define ERROR_8_OTHER_SEMANTIC
 #define ERROR_99_INTERNAL_ERROR "Internal error %s"
@@ -37,6 +37,7 @@
     exit(code);
 
 #include "scanner.h"
+#include "builtInFunctions.h"
 #include <stdbool.h>
 
 typedef struct Exp
@@ -139,7 +140,7 @@ bool function_declaration(Token *token);
  * @return int 1 syntax is ok
                0 error in syntax
  */
-int expression(Token *token);
+int expression(Token *token, enum type *returnType);
 
 /**
  * @brief Implementation of rule <condition> -> IF ( <expression> ) { <statement> } ELSE { <statement> }.

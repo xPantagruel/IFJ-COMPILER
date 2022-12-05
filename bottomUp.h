@@ -23,6 +23,7 @@ enum termType
     I_INT,
     I_FLOAT,
     I_STRING,
+    I_NULL,
     TOP_BOTTOM,
     EXPRESSION,
 };
