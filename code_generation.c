@@ -234,7 +234,7 @@ void DLL_InsertFirst(int num, char *data)
 
 
 /**
- *Builtin function for reading string input from stdin
+ *@brief Builtin function for reading string input from stdin
  */
 void READS()
 {
@@ -255,7 +255,7 @@ void READS()
 }
 
 /**
- *Builtin function for reading int input from stdin
+ *@brief Builtin function for reading int input from stdin
  */
 void READI()
 {
@@ -273,7 +273,7 @@ void READI()
 }
 
 /**
- *Builtin function for reading float input from stdin
+ *@brief Builtin function for reading float input from stdin
  */
 void READF()
 {
@@ -291,7 +291,7 @@ void READF()
 }
 
 /**
- *Builtin function for printing params on stdout
+ *@brief Builtin function for printing params on stdout
  */
 void WRITE()
 {
@@ -316,7 +316,7 @@ void WRITE()
 }
 
 /**
- *Builtin function for converting parameter to float
+ *@brief Builtin function for converting parameter to float
  */
 void FLOATVAL()
 {
@@ -341,7 +341,7 @@ void FLOATVAL()
 }
 
 /**
- *Builtin function for converting parameter to int
+ *@brief Builtin function for converting parameter to int
  */
 void INTVAL()
 {
@@ -366,7 +366,7 @@ void INTVAL()
 }
 
 /**
- *Builtin function for converting parameter to string
+ *@brief Builtin function for converting parameter to string
  */
 void STRVAL()
 {
@@ -391,7 +391,7 @@ void STRVAL()
 }
 
 /**
- *Builtin function return length of parameter
+ *@brief Builtin function return length of parameter
  */
 void STRLEN()
 {
@@ -410,7 +410,7 @@ void STRLEN()
 }
 
 /**
- *Builtin function for getting substring of parameter
+ *@brief Builtin function for getting substring of parameter
  */
 void SUBSTRING()
 {
@@ -479,7 +479,7 @@ void SUBSTRING()
 }
 
 /**
- *Builtin function returns the ordinal (ASCII) value of the first character in the string  
+ *@brief Builtin function returns the ordinal (ASCII) value of the first character in the string  
  */
 void ORD()
 {
@@ -502,8 +502,8 @@ void ORD()
 }
 
 /**
- *Builtin function Returns a single character string with the character whose
- *The ASCII code is specified by the parameter 𝑖.
+ *@brief Builtin function Returns a single character string with the character whose
+ *       The ASCII code is specified by the parameter 𝑖.
  */
 void CHR()
 {
@@ -523,7 +523,7 @@ void CHR()
 }
 
 /**
- *Function add in UniqueName + 1 its for purpose of not having same name of LABEL
+ *@brief Function add in UniqueName + 1 its for purpose of not having same name of LABEL
  */
 void GetUniqueName()
 {
@@ -531,7 +531,7 @@ void GetUniqueName()
 }
 
 /**
- *Function add in UniqueVarName + 1 its for purpose of not having same name of variable
+ *@brief Function add in UniqueVarName + 1 its for purpose of not having same name of variable
  */
 void GetUniqueVarName()
 {
@@ -539,7 +539,7 @@ void GetUniqueVarName()
 }
 
 /**
- *Function to get numer of digets in number for purpose of malloc
+ *@brief Function to get numer of digets of UniqueName for purpose of malloc
  */
 int GetNumberOfDigets(){
     int n = UniqueName;
