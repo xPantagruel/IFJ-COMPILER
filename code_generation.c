@@ -1520,7 +1520,7 @@ void codeGeneration(Token *token)
             strcpy(var, " float@");
             strcat(var, token->val);
         } else if (token->t == NULL_KEYWORD) {
-            strcpy(var, " int@0");
+            strcpy(var, " nil@nil");
         } else
         {
             strcpy(var, token->val);
