@@ -11,20 +11,6 @@
  */
 #include "code_generation.h"
 
-//TODO
-// -add pops in functions 
-// -while nejdriv prijde token R_CPAR a pak teprve WHILE coz je problem pri generovani kodu WHILE zveda InWHile a podle ni se vykonava instrukce v R_CPAR
-// -//  COMMA,        // ,     --DONE CHECK IF ITS RIGH by tests
-
-/**
- * Provede inicializaci seznamu list před jeho prvním použitím (tzn. žádná
- * z následujících funkcí nebude volána nad neinicializovaným seznamem).
- * Tato inicializace se nikdy nebude provádět nad již inicializovaným seznamem,
- * a proto tuto možnost neošetřujte.
- * Vždy předpokládejte, že neinicializované proměnné mají nedefinovanou hodnotu.
- *
- * @param list Ukazatel na strukturu dvousměrně vázaného seznamu
- */
 void DLL_Init(int num)
 {
     if (num == 0)
@@ -62,13 +48,6 @@ void DLL_Init(int num)
     }
 }
 
-/**
- * Zruší první prvek seznamu list.
- * Pokud byl první prvek aktivní, aktivita se ztrácí.
- * Pokud byl seznam list prázdný, nic se neděje.
- *
- * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
- */
 void DLL_DeleteFirst( int num) {
     if (num == 0)
     {	
@@ -517,7 +496,6 @@ void AddLForFG(int frameStr,int IAmInFunction){
     }
 }
 
-
 void addToString(int str, char *newStr)
 {
     if (newStr != NULL)
@@ -652,7 +630,6 @@ void storeBuildInParams(char *val)
 
     strcpy(buildInFunctionsParams[functionCallParamsCounter], val);
 }
-
 
 void writeAndFreeBuildInParams(int frame, char *frameStr) {
 
@@ -2125,25 +2102,22 @@ void codeGeneration(Token *token)
         break;
 
     case R_CPAR:
-
-//----------ADD BY MATEJ---------------------
-    if(inWhile !=0){
-        if (functionLabelCreated) {
-            caseRcparCreateWhileCode(1);
-        } else {
-            caseRcparCreateWhileCode(frameStr);
-        }
-    }
-
-    if(inIf !=0 && afterElse){//jsem za else vetvi
-        if (functionLabelCreated) {
-            caseRcparCreateIfElseCode(1);
-        } else {
-            caseRcparCreateIfElseCode(frameStr);
+        if(inWhile !=0){
+            if (functionLabelCreated) {
+                caseRcparCreateWhileCode(1);
+            } else {
+                caseRcparCreateWhileCode(frameStr);
+            }
         }
 
-    }
-//-------------------------------------------
+        if(inIf !=0 && afterElse){//jsem za else vetvi
+            if (functionLabelCreated) {
+                caseRcparCreateIfElseCode(1);
+            } else {
+                caseRcparCreateIfElseCode(frameStr);
+            }
+
+        }
 
         checkStorage();
         if (cparCounter)
@@ -2279,7 +2253,7 @@ void codeGeneration(Token *token)
                 }
                 addToString(frameStr, "\n");
             } else {
-                addToString(3, "PUSHS"); //todo tu mozno chyba pri pushovani jedneho parametru 
+                addToString(3, "PUSHS");
                 if (storage[x][0] == '-')
                 {
                     if (callingFromGF && IAmInFunctionCall) {
@@ -2731,24 +2705,6 @@ void codeGeneration(Token *token)
         } else {
             caseWhileCode(frameStr);
         }
-
-        // addToString(frameStr, "LABEL $");
-        // if(listWhileLabels->firstElement != NULL){
-        //     addToString(frameStr,listWhileLabels->firstElement->nextElement->nextElement->data);//LABEL $WHILESTARTNUM
-        // }
-        // addToString(frameStr, "\n");
-
-        // addToString(frameStr, "JUMP $");
-        // if(listWhileLabels->firstElement != NULL){
-        //     addToString(frameStr,listWhileLabels->firstElement->nextElement->data);//JUMP LOOPCONDNUM
-        // }
-        // addToString(frameStr, "\n");
-
-        // addToString(frameStr, "LABEL $");
-        // if(listWhileLabels->firstElement != NULL){
-        //     addToString(frameStr,listWhileLabels->firstElement->data);//LABEL $LOOPBODYNUM
-        // }
-        // addToString(frameStr, "\n");
 
         break;
     case RETURN:

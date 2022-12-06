@@ -175,10 +175,19 @@ void DLL_Dispose(int num);
 */
 void DLL_InsertFirst(int num, char *data);
 
+/**
+ *@brief Function to get numer of digets of UniqueName for purpose of malloc
+ */
 int GetNumberOfDigets();
 
+/**
+ *@brief Function add in UniqueVarName + 1 its for purpose of not having same name of variable
+ */
 void GetUniqueVarName();
 
+/**
+ *@brief Function add in UniqueName + 1 its for purpose of not having same name of LABEL
+ */
 void GetUniqueName();
 
 /** 
@@ -390,6 +399,63 @@ void randStr(char *dest, size_t length);
  * @param frame  GF/TF/LF
  */
 void divIdiv(int frameStr, char *frame);
+
+/**
+ *@brief Builtin function for reading string input from stdin
+ */
+void READS();
+
+/**
+ *@brief Builtin function for reading int input from stdin
+ */
+void READI();
+
+/**
+ *@brief Builtin function for reading float input from stdin
+ */
+void READF();
+
+/**
+ *@brief Builtin function for printing params on stdout
+ */
+void WRITE();
+
+/**
+ *@brief Builtin function for converting parameter to float
+ */
+void FLOATVAL();
+
+/**
+ *@brief Builtin function for converting parameter to int
+ */
+void INTVAL();
+
+/**
+ *@brief Builtin function for converting parameter to string
+ */
+void STRVAL();
+
+/**
+ *@brief Builtin function return length of parameter
+ */
+void STRLEN();
+
+/**
+ *@brief Builtin function for getting substring of parameter
+ */
+void SUBSTRING();
+
+/**
+ *@brief Builtin function returns the ordinal (ASCII) value of the first character in the string  
+ */
+void ORD();
+
+/**
+ *@brief Builtin function Returns a single character string with the character whose
+ *       The ASCII code is specified by the parameter 𝑖.
+ */
+void CHR();
+
 
 #endif
 
