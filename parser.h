@@ -23,6 +23,7 @@
 #define ERROR_7_INCOMPATIBLE_TYPE "Incompatible types in expression %s\n"
 #define ERROR_8_OTHER_SEMANTIC
 #define ERROR_99_INTERNAL_ERROR "Internal error %s\n"
+
 /**
  * @brief Frees global resources, prints status message, exits with code
  *

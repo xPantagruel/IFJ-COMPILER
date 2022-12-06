@@ -18,55 +18,33 @@
 #include <string.h>
 #include "scanner.h"
 
-/** Prvek dvousměrně vázaného seznamu. */
+/** Element of doubly linked list */
 typedef struct DLLElement
 {
-    /** Užitečná data. */
+    /** stored data */
     char *data;
-    /** Ukazatel na předcházející prvek seznamu. */
+    /** pointer to previous element */
     struct DLLElement *previousElement;
-    /** Ukazatel na následující prvek seznamu. */
+    /** pointer to next element */
     struct DLLElement *nextElement;
 } * DLLElementPtr;
 
-/** Dvousměrně vázaný seznam. */
+/** Doubly linked list */
 typedef struct
 {
-    /** Ukazatel na první prvek seznamu. */
+    /** Pointer to first element */
     DLLElementPtr firstElement;
-    /** Ukazatel na aktuální prvek seznamu. */
+    /** Pointer to active element */
     DLLElementPtr activeElement;
-    /** Ukazatel na posledni prvek seznamu. */
+    /** Pointer to last element */
     DLLElementPtr lastElement;
 } DLList;
 
+/** auxiliary variable to know if we are after case ELSE */
 static bool afterElse=false;
 
+/** temporary variable used for storing the first element of a list */
 static DLLElementPtr listTmp = NULL;
-
-void AddLForFG(int frameStr, int IAmInFunction);
-
-void DLL_DeleteFirst(int num);
-
-void DLL_Init(int num);
-
-void DLL_Dispose(int num);
-
-void DLL_InsertFirst(int num, char *data);
-
-int GetNumberOfDigets();
-
-void GetUniqueVarName();
-
-void GetUniqueName();
-
-void setFloatIntOperatorVariable();
-
-void pushZero(int frame);
-
-void createCallLabel(int frame);
-
-void createReturnCode(int frame, char *frameStr);
 
 /** stored while cond and normal condition */
 static DLList *listCodeGen = NULL;
@@ -89,21 +67,29 @@ static int UniqueVarName = 0;
 /** float = 0, int = 1*/
 static int floatIntOperator = 0;
 
+/** auxiliary variable for storing previous type of token */
 static enum type previousTokenType = NOT_DEFINED;
 
 /** bool if in if body*/
 static bool Return = 0;
 
+/** if we created return code this variable will be 1 otherwise 0 */
 static int returnedToStack = 0;
 
-/** int if in if body*/
+/** inIf == 1 if we are in IF */
 static int inIf = 0;
 
+/** variable to know if declarated or build in function was called */
 static int buildInCalled = 0;
 
+/** counter of params in function call */
 static int functionCallParamsCounter = 0;
 
+/** auxiliary variable to know if we are in function declaration and function label was created */
 static int functionLabelCreated = 0;
+
+/** temporary variable to store if and while labels */
+static char TmpWhileAndIf[512];
 
 /** int if in While body*/
 static int inWhile = 0;
@@ -129,6 +115,7 @@ static int IAmInFunctionDeclaration = 0;
 /** Auxiliary variable to know if we are in function */
 static int IAmInFunction = 0;
 
+/** auxiliary variable to know if we are calling function from global frame (because sometimes LF is set but we are still in GF - LF set after ID) */
 static int callingFromGF = 0;
 
 /** Counter of { and } */
@@ -146,10 +133,80 @@ static int eqSymbolFound = 0;
 /** Storage for expressions (var1 = var2 + 2) */
 static char **storage = NULL;
 
+/** storage for build in functions params */
 static char **buildInFunctionsParams = NULL;
 
 /** Actual operator in expression */
 static enum type operator= NOT_DEFINED;
+
+/**
+* @brief Function which adds LF or GF to final string.
+*
+* @param frameStr number of string to which LF or GF will be added
+* @param IAmInFunction to know if we are in function declaration
+*/
+void AddLForFG(int frameStr, int IAmInFunction);
+
+/**
+* @brief Deleting first element in linked list.
+*
+* @param num id of doubly linked list from which we want to delete element
+*/
+void DLL_DeleteFirst(int num);
+
+/**
+* @brief Init of doubly linked list.
+*
+* @param num id of doubly linked list which we want to initializate.
+*/
+void DLL_Init(int num);
+
+/**
+* @brief Clearing of doubly linked list.
+*
+* @param num id of doubly linked list which we want to clear.
+*/
+void DLL_Dispose(int num);
+
+/**
+* @brief Inserting the first element in linked list.
+*
+* @param num id of doubly linked list to which we want to insert element
+*/
+void DLL_InsertFirst(int num, char *data);
+
+int GetNumberOfDigets();
+
+void GetUniqueVarName();
+
+void GetUniqueName();
+
+/** 
+* @brief Setting floatIntOperator variable to know if we want float or int.
+*/
+void setFloatIntOperatorVariable();
+
+/** 
+* @brief Function which append pushing zero to string.
+*
+* @param frame id of string where PUSH int@0 will be added
+*/
+void pushZero(int frame);
+
+/**
+* @brief Function which append calling label to string.
+*
+* @param frame id of string where call label will be created
+*/
+void createCallLabel(int frame);
+
+/**
+ * @brief Function for creating assembly return code.
+ *
+ * @param frame number of string to which params will be appended
+ * @param frameStr LF/GF
+ */
+void createReturnCode(int frame, char *frameStr);
 
 /**
  * @brief Function which append newStr to str.
@@ -162,19 +219,47 @@ static enum type operator= NOT_DEFINED;
  */
 void addToString(int str, char *newStr);
 
+/**
+ * @brief Function for creating assembly while code after R_CPAR.
+ *
+ * @param frame number of string to which params will be appended
+ */
 void caseRcparCreateWhileCode(int frame);
 
+/**
+ * @brief Function for creating assembly while code after WHILE.
+ *
+ * @param frame number of string to which params will be appended
+ */
 void caseWhileCode(int frame);
 
+/**
+ * @brief Function for creating assembly if code after IF.
+ *
+ * @param frame number of string to which params will be appended
+ */
 void caseIfCreateIfCode(int frame);
 
+/**
+ * @brief Function for creating assembly else code after ELSE.
+ *
+ * @param frame number of string to which params will be appended
+ */
 void caseElseCreateElseCode(int frame);
 
+/**
+ * @brief Function for creating assembly if/else code after R_CPAR.
+ *
+ * @param frame number of string to which params will be appended
+ */
 void caseRcparCreateIfElseCode(int frame);
 
+/**
+ * @brief Function for appending operator to string.
+ *
+ * @param frame number of string to which operator will be appended
+ */
 void checkOperator(int frame);
-
-static char TmpWhileAndIf[256];
 
 /**
  * @brief "Main" function in code_generation.
@@ -183,7 +268,10 @@ static char TmpWhileAndIf[256];
  */
 void codeGeneration(Token *token);
 
-void returnConcatString();
+/**
+ * @brief Function for creating assembly return code when concatenating strings.
+ */
+void returnConcat();
 
 /**
  * @brief Function which we use to store values to storage.
@@ -192,8 +280,19 @@ void returnConcatString();
  */
 void store(char *val);
 
+/**
+ * @brief Function which we use to store build in functions params to storage.
+ *
+ * @param val value which will be stored to build-in params storage.
+ */
 void storeBuildInParams(char *val);
 
+/**
+ * @brief Function which append assembly code for pushing params from build in functions.
+ *
+ * @param frame number of string to which params will be appended
+ * @param frameStr LF/GF
+ */
 void writeAndFreeBuildInParams(int frame, char *frameStr);
 
 /**
