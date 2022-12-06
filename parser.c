@@ -225,7 +225,7 @@ int params(Token *token, int paramIndex)
             {
                 exit(2);
             }
-            if (params(token, ++paramIndex))
+            if (params(token, paramIndex))
             {
                 return 1;
             }
