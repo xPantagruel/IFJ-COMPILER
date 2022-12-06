@@ -753,13 +753,13 @@ int statement(Token *token)
                     addCharToToken(token->val[i], tmp);
                 }
 
-                codeGeneration(token);
+                //codeGeneration(token);
                 dtorToken(token);
                 token = getToken();
 
                 if (token->t == SEMICOL)
                 { // VAR_ID = VAR_ID;
-
+                    codeGeneration(tmp);
                     // check if variable being assigned exists
                     SymVariable *assignedVariable = getVariable(tmpString);
                     if (!assignedVariable)
