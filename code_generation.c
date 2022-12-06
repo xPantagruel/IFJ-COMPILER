@@ -231,9 +231,11 @@ void DLL_InsertFirst(int num, char *data)
         }
     }
 }
-// todo zkontrolovat v zadani špatného formátu a navratove hodnoty
-// function reads() : ?string
-//todo je tu spravny argument 0? (ak nie tak zmenit aj inde)
+
+
+/**
+ *Builtin function for reading string input from stdin
+ */
 void READS()
 {
     addToString(2, "LABEL reads \n");
@@ -244,7 +246,6 @@ void READS()
     addToString(2, "DEFVAR LF@VarReadS\n");
     addToString(2, "READ LF@VarReadS string\n");
     addToString(2, "PUSHS LF@VarReadS\n");
-    //strlen kdyz nula tak pushs NULL
     addToString(2, "STRLEN LF@LenParametr LF@VarReadS\n");
     addToString(2, "JUMPIFNEQ END4 LF@LenParametr int@0\n");
     addToString(2, "PUSHS nil@nil\n");
@@ -253,8 +254,9 @@ void READS()
     addToString(2, "RETURN\n");
 }
 
-// todo zkontrolovat v zadani špatného formátu a navratove hodnoty
-// function readi() : ?int
+/**
+ *Builtin function for reading int input from stdin
+ */
 void READI()
 {
     addToString(2, "LABEL readi \n");
@@ -270,8 +272,9 @@ void READI()
     addToString(2, "RETURN\n");
 }
 
-// todo zkontrolovat v zadani špatného formátu a navratove hodnoty
-// function readf() : ?float
+/**
+ *Builtin function for reading float input from stdin
+ */
 void READF()
 {
     addToString(2, "LABEL readf\n");
@@ -287,10 +290,9 @@ void READF()
     addToString(2, "RETURN\n");
 }
 
-// todo WRITE - zkontrolovat v zadani zda WRITE vypisuje spravne "%a" nebo to ma byt '%a'
-// todo function write ( term1 , term2 , …, term𝑛 ) : void
-// todo osetrit zda kdyz dostanu bool tak co dal
-// todo vypise write variable ???
+/**
+ *Builtin function for printing params on stdout
+ */
 void WRITE()
 {
     addToString(2, "LABEL write \n");
@@ -299,58 +301,23 @@ void WRITE()
     addToString(2, "DEFVAR LF@VarWrite\n");
     addToString(2, "DEFVAR LF@VarType\n");
     addToString(2, "DEFVAR LF@ParamsNumber\n");
-
-    addToString(2, "POPS LF@ParamsNumber\n");//pocet parametru
-
+    addToString(2, "POPS LF@ParamsNumber\n");
     addToString(2, "LABEL $BEFOREPOP\n");
-    
     addToString(2, "JUMPIFEQ $DEFINITIVEEND  int@0 LF@ParamsNumber\n");
-
     addToString(2, "POPS LF@VarWrite\n");
     addToString(2, "WRITE LF@VarWrite\n");
     addToString(2, "SUB LF@ParamsNumber LF@ParamsNumber int@1\n");
-    // zjistit typ a zapis do VarType
     addToString(2, "TYPE LF@VarType LF@VarWrite \n");
-
-    // // skoc podle hodnoty VarType
-    // addToString(2, "JUMPIFEQ $INT LF@VarType string@int\n");       // type == int
-    // addToString(2, "JUMPIFEQ $FLOAT LF@VarType string@float\n");   // type == float
-    // addToString(2, "JUMPIFEQ $STRING LF@VarType string@string\n"); // type == string
-    // addToString(2, "JUMPIFEQ $NULL LF@VarType string@null\n");     // type == NULL
-
-    // // int
-    // addToString(2, "LABEL $INT\n");
-    // addToString(2, "WRITE LF@VarWrite ”%d”\n");
-    // addToString(2, "JUMP $END\n");
-
-    // // float
-    // addToString(2, "LABEL $FLOAT \n");
-    // addToString(2, "WRITE LF@VarWrite ”%a”\n");
-    // addToString(2, "JUMP $END\n");
-
-    // // string
-    // addToString(2, "LABEL $STRING\n");
-    // addToString(2, "WRITE LF@VarWrite\n");
-    // addToString(2, "JUMP $END\n");
-
-    // // hodnota null dle tabulky 1.
-    // addToString(2, "LABEL $NULL\n");
-    // addToString(2, "WRITE "
-    //                "\n");
-    // addToString(2, "JUMP $END\n");
-
-    // END
     addToString(2, "LABEL $WRITEEND\n");
     addToString(2, "JUMP $BEFOREPOP\n");
-
     addToString(2, "LABEL $DEFINITIVEEND\n");
-
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
 
-// function floatval(term) : float
-// todo zkontrolovat zda je dobre convert a vypi
+/**
+ *Builtin function for converting parameter to float
+ */
 void FLOATVAL()
 {
     addToString(2, "LABEL floatval \n");
@@ -360,26 +327,22 @@ void FLOATVAL()
     addToString(2, "POPS LF@LenParametr\n");
     addToString(2, "DEFVAR LF@VarFloatval\n");
     addToString(2, "POPS LF@VarFloatval\n");
-    //typova kontrola 
     addToString(2, "DEFVAR LF@Type\n");
     addToString(2, "TYPE LF@Type LF@VarFloatval\n");
     addToString(2, "JUMPIFEQ FLOAT LF@Type string@float\n");
-
-    addToString(2, "INT2FLOAT LF@VarFloatval LF@VarFloatval\n"); // konvert na float
+    addToString(2, "INT2FLOAT LF@VarFloatval LF@VarFloatval\n"); 
     addToString(2, "PUSHS LF@VarFloatval\n");                       
     addToString(2, "JUMP END2\n");
-
     addToString(2, "LABEL FLOAT\n");
     addToString(2, "PUSHS LF@VarFloatval\n");
-
     addToString(2, "LABEL END2\n");
-
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
 
-// function intval(term) : int
-// todo zkontrolovat zda je dobre convert a vypi
+/**
+ *Builtin function for converting parameter to int
+ */
 void INTVAL()
 {
     addToString(2, "LABEL intval \n");
@@ -392,22 +355,19 @@ void INTVAL()
     addToString(2, "DEFVAR LF@Type\n");
     addToString(2, "TYPE LF@Type LF@VarIntval\n");
     addToString(2, "JUMPIFEQ INT LF@Type string@int\n");
-    
-    addToString(2, "FLOAT2INT LF@VarIntval LF@VarIntval\n"); // konvert na int
+    addToString(2, "FLOAT2INT LF@VarIntval LF@VarIntval\n");
     addToString(2, "PUSHS LF@VarIntval\n"); 
     addToString(2, "JUMP END1\n");
-
     addToString(2, "LABEL INT\n");
     addToString(2, "PUSHS LF@VarIntval\n");
-
     addToString(2, "LABEL END1\n");
-
-                       
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
 
-// function strval(term) : string –
+/**
+ *Builtin function for converting parameter to string
+ */
 void STRVAL()
 {
     addToString(2, "LABEL strval \n");
@@ -418,27 +378,21 @@ void STRVAL()
     addToString(2, "DEFVAR LF@VarStrval\n");
     addToString(2, "POPS LF@VarStrval\n");
     addToString(2, "DEFVAR LF@VarType\n");
-
-    // zjistit typ a zapis do VarType
     addToString(2, "TYPE LF@VarType LF@VarStrval \n");
-    addToString(2, "JUMPIFEQ $NULL LF@VarType nil@nil\n"); // type == null
-
-    addToString(2, "PUSHS LF@VarStrval\n"); // vypise na vystup
+    addToString(2, "JUMPIFEQ $NULL LF@VarType nil@nil\n");
+    addToString(2, "PUSHS LF@VarStrval\n");
     addToString(2, "JUMP $STRVALEND\n");
-
-    // hodnota null dle tabulky 1.
     addToString(2, "LABEL $NULL\n");
     addToString(2, "PUSHS nil@nil\n");
     addToString(2, "JUMP $STRVALEND\n");
-
-    // END
     addToString(2, "LABEL $STRVALEND\n");
-
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
 
-// function strlen(string $𝑠) : int
+/**
+ *Builtin function return length of parameter
+ */
 void STRLEN()
 {
     addToString(2, "LABEL strlen \n");
@@ -455,14 +409,15 @@ void STRLEN()
     addToString(2, "RETURN\n");
 }
 
-//• function substring(string $𝑠, int $𝑖, int $𝑗) : ?string –
+/**
+ *Builtin function for getting substring of parameter
+ */
 void SUBSTRING()
 {
     addToString(2, "LABEL substring\n");
     addToString(2, "CREATEFRAME\n");
     addToString(2, "PUSHFRAME\n");
     addToString(2, "DEFVAR LF@ParamsLength\n");
-
     addToString(2, "DEFVAR LF@i\n");
     addToString(2, "DEFVAR LF@j\n");
     addToString(2, "DEFVAR LF@string\n");
@@ -471,84 +426,61 @@ void SUBSTRING()
     addToString(2, "DEFVAR LF@TMP\n");
     addToString(2, "DEFVAR LF@BOOL\n");
     addToString(2, "DEFVAR LF@StrLength\n");
-    
-
     addToString(2, "POPS LF@ParamsLength\n");
     addToString(2, "POPS LF@string\n");
     addToString(2, "POPS LF@i\n");
     addToString(2, "POPS LF@j\n");
-
     addToString(2, "STRLEN LF@StrLength LF@string\n");
-
-
     addToString(2, "JUMP CONDLABEL\n");
-
-    // addToString(2, "JUMP CONDSUB\n");
-
     addToString(2, "LABEL STARTS\n");
     addToString(2, "GETCHAR LF@TMP LF@string LF@i\n");
     addToString(2, "CONCAT LF@NewString LF@NewString LF@TMP\n");
     addToString(2, "ADD LF@i LF@i int@1\n");
-
-    //condition
     addToString(2, "LABEL CONDSUB\n");
     addToString(2, "JUMPIFNEQ STARTS LF@i LF@j\n");
     addToString(2, "PUSHS LF@NewString\n");
     addToString(2, "JUMP DEFINITIVEND\n");
-
-
     addToString(2, "LABEL CONDLABEL\n");
     //$𝑖 < 0
     addToString(2, "LT LF@BOOL LF@i int@0 \n");
-
     addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
     addToString(2, "PUSHS nil@nil\n");
     addToString(2, "JUMP DEFINITIVEND\n");
-
-                   
     //• $𝑗 < 0
     addToString(2, "LT LF@BOOL LF@j int@0\n");
-    
     addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
     addToString(2, "PUSHS nil@nil\n");
     addToString(2, "JUMP DEFINITIVEND\n");
-
     //• $𝑖 > $j
     addToString(2, "GT LF@BOOL LF@i LF@j\n");
-
     addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
     addToString(2, "PUSHS nil@nil\n");
     addToString(2, "JUMP DEFINITIVEND\n");
-    
     //$𝑖 ≥ strlen($𝑠)
     addToString(2, "GT LF@BOOL LF@i LF@StrLength\n");
     addToString(2, "JUMPIFEQ FALSESTRI LF@BOOL bool@true\n");
     //i==strlen
     addToString(2, "EQ LF@BOOL LF@i LF@StrLength\n");
     addToString(2, "JUMPIFEQ FALSESTRI LF@BOOL bool@true\n");
-
     addToString(2, "JUMP CONDSUB\n");
-
     addToString(2, "LABEL FALSESTRI\n");
     addToString(2, "PUSHS nil@nil\n");
     addToString(2, "JUMP DEFINITIVEND\n");
-
     //$𝑗 > strlen($𝑠)
     addToString(2, "GT LF@BOOL LF@j LF@StrLength\n");
-    
     addToString(2, "JUMPIFEQ CONDSUB LF@BOOL bool@false\n");
     addToString(2, "PUSHS nil@nil\n");
     addToString(2, "JUMP DEFINITIVEND\n");
-
     addToString(2, "JUMP CONDSUB\n");
-
     //end
     addToString(2, "LABEL DEFINITIVEND\n");
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");    
 }
 
-// function ord(string $c) : int –
+/**
+ *Builtin function returns the ordinal (ASCII) value of the first character in the string  
+ */
 void ORD()
 {
     addToString(2, "LABEL ord \n");
@@ -561,21 +493,18 @@ void ORD()
     addToString(2, "DEFVAR LF@Length\n");
     addToString(2, "STRLEN LF@Length LF@VarOrd\n");
     addToString(2, "DEFVAR LF@Ord\n");
-
-    addToString(2, "JUMPIFEQ $ORDEND LF@Length int@0\n"); // string je prazdny
-
-    addToString(2, "STRI2INT LF@Ord LF@VarOrd int@0\n"); // ziskani prvniho znaku
-    // addToString(2, "WRITE LF@Ord\n");                   // vypise na vystup
-
-    // END
+    addToString(2, "JUMPIFEQ $ORDEND LF@Length int@0\n"); 
+    addToString(2, "STRI2INT LF@Ord LF@VarOrd int@0\n");
     addToString(2, "LABEL $ORDEND\n");
     addToString(2,"PUSHS LF@Ord\n");
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
 
-// function chr(int $i) : string –
-// todo doresit
+/**
+ *Builtin function Returns a single character string with the character whose
+ *The ASCII code is specified by the parameter 𝑖.
+ */
 void CHR()
 {
     addToString(2, "LABEL chr \n");
@@ -586,80 +515,32 @@ void CHR()
     addToString(2, "DEFVAR LF@Condition\n");
     addToString(2, "DEFVAR LF@VarChr\n");
     addToString(2, "POPS LF@VarChr\n");
-
-    // //vetsi nez 255
-    // addToString(2, "GT LF@Condition LF@VarChr int@255\n");
-    // addToString(2, "JUMPIFEQ END LF@Condition bool@true\n");
-
-    // //mensi nez 0
-    // addToString(2, "LT LF@Condition LF@VarChr int@0\n");
-    // addToString(2, "JUMPIFEQ END LF@Condition bool@true\n");
-
     addToString(2, "DEFVAR LF@Result\n");
     addToString(2, "INT2CHAR LF@Result LF@VarChr\n");
     addToString(2, "PUSHS LF@Result\n");
-    // addToString(2, "JUMP DEFINITIVEEND\n");
-
-    // addToString(2, "LABEL END\n");
-    // addToString(2, "DPRINT int@58\n");
-
-    // addToString(2, "LABEL DEFINITIVEEND\n");
-
     addToString(2, "POPFRAME\n");
     addToString(2, "RETURN\n");
 }
 
-// MARTIN
-//  NOT_DEFINED,  // initial type    --
-//  VAR_ID,       // $variable       --      TODO check return == 1 and we have to push var to stack
-//  SLASH,        // / (divide)      --
-//  EOF_T,        // EOF             --
-//  L_PAR,        // (               --
-//  R_PAR,        // )               --      
-//  L_CPAR,       // {               --
-//  R_CPAR,       // }               --
-//  SEMICOL,      // ;               --
-//  PLUS,         // +               --
-//  MINUS,        // -               --
-//  DOT,          // .               --
-//  MUL,          // *               --
-//  EQ,           // =               --
-//  INT,          // 123e-1          --
-//  FLOAT,        // 1.32e+32        --
-//  THREE_EQ,     // ===             --
-//  LESS,         // <               --
-//  MORE,         // >               --
-//  LESS_EQ,      // <=              --
-//  MORE_EQ,      // >=              --
-//  NOT_EQ,       // !==             --
-//  STRING,       // "string \x1F"   --
-
-// MATEJ
-//  FUNCTION,     // function        --DONE NOT TESTED
-//  ID,           // write, reads..  --DONE NOT TESTED
-//  COMMA,        // ,               --DONE CHECK IF ITS RIGHT  
-//  COLON         // :               --DONE NOT TESTED ->only empty case nothing to be done here
-//  IF,           // if              --DONE NOT TESTED
-//  ELSE,         // else            --DONE NOT TESTED
-//  INT_TYPE,     // int             --DONE NOT TESTED ->only empty case nothing to be done here
-//  NULL_KEYWORD, // null            --DONE NOT TESTED added CASE next to VAR_ID
-//  RETURN,       // return
-//  STRING_TYPE,  // string          --DONE NOT TESTED ->only empty case nothing to be done here
-//  FLOAT_TYPE,   // float           --DONE NOT TESTED ->only empty case nothing to be done here
-//  VOID,         // void            --DONE NOT TESTED ->only empty case nothing to be done here
-//  WHILE,        // while           --DONE NOT TESTED
-
-// function add in UniqueName +1 its for purpose of not having same name of function and variable
+/**
+ *Function add in UniqueName + 1 its for purpose of not having same name of LABEL
+ */
 void GetUniqueName()
 {
     UniqueName+=1;
 }
 
+/**
+ *Function add in UniqueVarName + 1 its for purpose of not having same name of variable
+ */
 void GetUniqueVarName()
 {
     UniqueVarName+=1;
 }
 
+/**
+ *Function to get numer of digets in number for purpose of malloc
+ */
 int GetNumberOfDigets(){
     int n = UniqueName;
     int count = 0;
@@ -667,10 +548,12 @@ int GetNumberOfDigets(){
     n /= 10;
     ++count;
   } while (n != 0);
-
   return count;
 }
 
+/**
+ *Function to recognize if we are in function or not and print specific LF@ or GF@
+ */
 void AddLForFG(int frameStr,int IAmInFunction){
     if ((IAmInFunction && !cparCounter) || functionLabelCreated)
     {
