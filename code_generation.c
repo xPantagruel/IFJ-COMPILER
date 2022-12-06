@@ -232,10 +232,6 @@ void DLL_InsertFirst(int num, char *data)
     }
 }
 
-
-/**
- *@brief Builtin function for reading string input from stdin
- */
 void READS()
 {
     addToString(2, "LABEL reads \n");
@@ -254,9 +250,6 @@ void READS()
     addToString(2, "RETURN\n");
 }
 
-/**
- *@brief Builtin function for reading int input from stdin
- */
 void READI()
 {
     addToString(2, "LABEL readi \n");
@@ -272,9 +265,6 @@ void READI()
     addToString(2, "RETURN\n");
 }
 
-/**
- *@brief Builtin function for reading float input from stdin
- */
 void READF()
 {
     addToString(2, "LABEL readf\n");
@@ -290,9 +280,6 @@ void READF()
     addToString(2, "RETURN\n");
 }
 
-/**
- *@brief Builtin function for printing params on stdout
- */
 void WRITE()
 {
     addToString(2, "LABEL write \n");
@@ -315,9 +302,6 @@ void WRITE()
     addToString(2, "RETURN\n");
 }
 
-/**
- *@brief Builtin function for converting parameter to float
- */
 void FLOATVAL()
 {
     addToString(2, "LABEL floatval \n");
@@ -340,9 +324,6 @@ void FLOATVAL()
     addToString(2, "RETURN\n");
 }
 
-/**
- *@brief Builtin function for converting parameter to int
- */
 void INTVAL()
 {
     addToString(2, "LABEL intval \n");
@@ -365,9 +346,6 @@ void INTVAL()
     addToString(2, "RETURN\n");
 }
 
-/**
- *@brief Builtin function for converting parameter to string
- */
 void STRVAL()
 {
     addToString(2, "LABEL strval \n");
@@ -390,9 +368,6 @@ void STRVAL()
     addToString(2, "RETURN\n");
 }
 
-/**
- *@brief Builtin function return length of parameter
- */
 void STRLEN()
 {
     addToString(2, "LABEL strlen \n");
@@ -409,9 +384,6 @@ void STRLEN()
     addToString(2, "RETURN\n");
 }
 
-/**
- *@brief Builtin function for getting substring of parameter
- */
 void SUBSTRING()
 {
     addToString(2, "LABEL substring\n");
@@ -478,9 +450,6 @@ void SUBSTRING()
     addToString(2, "RETURN\n");    
 }
 
-/**
- *@brief Builtin function returns the ordinal (ASCII) value of the first character in the string  
- */
 void ORD()
 {
     addToString(2, "LABEL ord \n");
@@ -501,10 +470,6 @@ void ORD()
     addToString(2, "RETURN\n");
 }
 
-/**
- *@brief Builtin function Returns a single character string with the character whose
- *       The ASCII code is specified by the parameter 𝑖.
- */
 void CHR()
 {
     addToString(2, "LABEL chr \n");
@@ -522,25 +487,16 @@ void CHR()
     addToString(2, "RETURN\n");
 }
 
-/**
- *@brief Function add in UniqueName + 1 its for purpose of not having same name of LABEL
- */
 void GetUniqueName()
 {
     UniqueName+=1;
 }
 
-/**
- *@brief Function add in UniqueVarName + 1 its for purpose of not having same name of variable
- */
 void GetUniqueVarName()
 {
     UniqueVarName+=1;
 }
 
-/**
- *@brief Function to get numer of digets of UniqueName for purpose of malloc
- */
 int GetNumberOfDigets(){
     int n = UniqueName;
     int count = 0;
@@ -551,9 +507,6 @@ int GetNumberOfDigets(){
   return count;
 }
 
-/**
- *Function to recognize if we are in function or not and print specific LF@ or GF@
- */
 void AddLForFG(int frameStr,int IAmInFunction){
     if ((IAmInFunction && !cparCounter) || functionLabelCreated)
     {
